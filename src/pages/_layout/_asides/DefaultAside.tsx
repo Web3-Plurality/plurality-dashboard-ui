@@ -7,9 +7,12 @@ import User from '../../../layout/User/User';
 import {
 	componentPagesMenu,
 	dashboardPagesMenu,
+	customizedDashboardPagesMenu,
 	demoPagesMenu,
+	customizedDemoPagesMenu,
 	gettingStartedPagesMenu,
 	pageLayoutTypesPagesMenu,
+	customizedPageLayoutTypesPagesMenu,
 } from '../../../menu';
 import ThemeContext from '../../../contexts/themeContext';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
@@ -39,11 +42,11 @@ const DefaultAside = () => {
 			<AsideBody>
 				{!doc && (
 					<>
-						<Navigation menu={dashboardPagesMenu} id='aside-dashboard' />
+						<Navigation menu={customizedDashboardPagesMenu} id='aside-dashboard' />
 						<NavigationLine />
-						<Navigation menu={demoPagesMenu} id='aside-demo-pages' />
+						<Navigation menu={customizedDemoPagesMenu} id='aside-demo-pages' />
 						<NavigationLine />
-						<Navigation menu={pageLayoutTypesPagesMenu} id='aside-menu' />
+						<Navigation menu={customizedPageLayoutTypesPagesMenu} id='aside-menu' />
 					</>
 				)}
 

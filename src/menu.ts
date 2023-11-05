@@ -1044,3 +1044,27 @@ export const productsExampleMenu = {
 	companyC: { id: 'companyC', text: 'Company C', path: '/', subMenu: null },
 	companyD: { id: 'companyD', text: 'Company D', path: '/', subMenu: null },
 };
+
+
+// The Pages that we are actually using
+
+export const customizedDashboardPagesMenu = {
+	summary: {
+		id: 'dashboard',
+		text: 'Dashboard',
+		path: 'summary',
+		icon: 'sticky_note_2',
+		subMenu: null,
+	},
+}
+
+export const customizedDemoPagesMenu = {
+	sales: {
+		id: 'socials',
+		text: 'Social Medias',
+		path: 'sales/grid',
+		icon: 'CalendarViewMonth',
+		},
+}
+
+export const customizedPageLayoutTypesPagesMenu = {}

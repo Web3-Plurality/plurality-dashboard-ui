@@ -280,7 +280,7 @@ const SummaryPage = () => {
 
 	return (
 		<PageWrapper ref={ref} title='React Admin Dashboard Template'>
-			<SubHeader>
+			{/* <SubHeader>
 				<SubHeaderLeft>
 					<span className='fw-bold'>React Admin Dashboard Template</span>
 					<SubheaderSeparator />
@@ -306,7 +306,7 @@ const SummaryPage = () => {
 						Support
 					</Button>
 				</SubHeaderRight>
-			</SubHeader>
+			</SubHeader> */}
 			<Page>
 				<div id='intro' className='scroll-margin'>
 					<div className={classNames('row', 'h-fluid-min-100', classes.intro)}>
@@ -325,7 +325,7 @@ const SummaryPage = () => {
 							)}>
 							<div>
 								<h1 className='display-1 mb-4'>
-									Welcome to <Logo height={70} />
+									Welcome to <Logo height={70} /> Plurality
 								</h1>
 								<p className='display-6 mb-4'>
 									Everything is thought to make it easy.

@@ -123,7 +123,7 @@ const ProductsGridPage = () => {
 
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.productsGrid.text}>
-			<SubHeader>
+			{/* <SubHeader>
 				<SubHeaderLeft>
 					<Breadcrumb
 						list={[
@@ -149,9 +149,9 @@ const ProductsGridPage = () => {
 						Add New
 					</Button>
 				</SubHeaderRight>
-			</SubHeader>
+			</SubHeader> */}
 			<Page>
-				<div className='display-4 fw-bold py-3'>All Products</div>
+				<div className='display-4 fw-bold py-3'>All Social Medias</div>
 				<div className='row'>
 					{data.map((item) => (
 						<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
