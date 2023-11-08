@@ -2,6 +2,7 @@ import React, { lazy } from 'react';
 import { RouteProps } from 'react-router-dom';
 import {
 	componentPagesMenu,
+	customizedDashboardPagesMenu,
 	dashboardPagesMenu,
 	demoPagesMenu,
 	gettingStartedPagesMenu,
@@ -202,7 +203,7 @@ const presentation: RouteProps[] = [
 		element: <LANDING.DASHBOARD_BOOKING />,
 	},
 	{
-		path: dashboardPagesMenu.summary.path,
+		path: customizedDashboardPagesMenu.summary.path,
 		element: <LANDING.SUMMARY />,
 	},
 

@@ -34,7 +34,7 @@ export const dashboardPagesMenu = {
 	dashboard: {
 		id: 'dashboard',
 		text: 'Dashboard',
-		path: '/',
+		path: 'dashboard',
 		icon: 'Dashboard',
 		subMenu: null,
 	},
@@ -1052,7 +1052,7 @@ export const customizedDashboardPagesMenu = {
 	summary: {
 		id: 'dashboard',
 		text: 'Dashboard',
-		path: 'summary',
+		path: '/',
 		icon: 'sticky_note_2',
 		subMenu: null,
 	},
