@@ -47,6 +47,24 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
 
+	const isDisabled = (name: string) => {
+		return (name === "Facebook" || name === "Twitter") ? false : true
+	}
+
+	const buttonTheme = (name: string) => {
+		if (name === "Facebook" || name === "Twitter") {
+			return `w-100 mb-4 shadow-3d-up-hover shadow-3d-${
+				darkModeStatus ? 'light' : 'dark'
+			}`
+		} else {
+			return `w-100 mb-4`
+		}
+	}
+
+	const buttonText = (name: string) => {
+		return (name === "Facebook" || name === "Twitter") ? 'Connect' : 'Coming soon'
+	}
+
 	const dummyOptions: ApexOptions = {
 		colors: [color],
 		chart: {
@@ -85,15 +103,15 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 				<CardLabel>
 					<CardTitle tag='div' className='h5'>
 						{name}{' '}
-						{price && (
+						{/* {price && (
 							<Badge color='success' isLight className='ms-2'>
 								{priceFormat(price)}
 							</Badge>
-						)}
+						)} */}
 					</CardTitle>
-					<CardSubTitle tag='div' className='h6'>
+					{/* <CardSubTitle tag='div' className='h6'>
 						{category}
-					</CardSubTitle>
+					</CardSubTitle> */}
 				</CardLabel>
 				<CardActions>
 					<Dropdown>
@@ -144,7 +162,7 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 					height={128}
 					className='mx-auto d-block img-fluid mb-3'
 				/>
-				<div className='row align-items-center'>
+				{/* <div className='row align-items-center'>
 					<div className='col'>Monthly sales</div>
 					<div className='col-auto'>
 						<Chart
@@ -155,18 +173,18 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 							width={dummyOptions.chart?.width}
 						/>
 					</div>
-				</div>
+				</div> */}
 			</CardBody>
 			<CardFooter className='shadow-3d-container'>
 				<Button
 					color='dark'
-					className={`w-100 mb-4 shadow-3d-up-hover shadow-3d-${
-						darkModeStatus ? 'light' : 'dark'
-					}`}
+					className={buttonTheme(name)}
 					size='lg'
 					tag='a'
-					to={`../${demoPagesMenu.sales.subMenu.productID.path}/${id}`}>
-					View Product
+					to={`../${demoPagesMenu.sales.subMenu.productID.path}/${id}`}
+					isDisable={isDisabled(name)}
+					>
+					{buttonText(name)}
 				</Button>
 			</CardFooter>
 		</Card>

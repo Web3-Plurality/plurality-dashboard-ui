@@ -30,7 +30,7 @@ const LoginHeader: FC<ILoginHeaderProps> = ({ isNewUser }) => {
 	}
 	return (
 		<>
-			<div className='text-center h1 fw-bold mt-5'>Welcome,</div>
+			<div className='text-center h1 fw-bold mt-5'>Reputation connect</div>
 			<div className='text-center h4 text-muted mb-5'>Sign in to continue!</div>
 		</>
 	);
@@ -137,7 +137,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										<Logo width={200} />
 									</Link>
 								</div>
-								<div
+								{/* <div
 									className={classNames('rounded-3', {
 										'bg-l10-dark': !darkModeStatus,
 										'bg-dark': darkModeStatus,
@@ -170,11 +170,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											</Button>
 										</div>
 									</div>
-								</div>
+								</div> */}
 
 								<LoginHeader isNewUser={singUpStatus} />
 
-								<Alert isLight icon='Lock' isDismissible>
+								{/* <Alert isLight icon='Lock' isDismissible>
 									<div className='row'>
 										<div className='col-12'>
 											<strong>Username:</strong> {USERS.JOHN.username}
@@ -183,7 +183,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											<strong>Password:</strong> {USERS.JOHN.password}
 										</div>
 									</div>
-								</Alert>
+								</Alert> */}
 								<form className='row g-4'>
 									{singUpStatus ? (
 										<>
@@ -233,7 +233,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										</>
 									) : (
 										<>
-											<div className='col-12'>
+											{/* <div className='col-12'>
 												<FormGroup
 													id='loginUsername'
 													isFloating
@@ -282,6 +282,32 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														onBlur={formik.handleBlur}
 													/>
 												</FormGroup>
+											</div> */}
+											<div className='col-12 mt-3'>
+												<Button
+													isOutline
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='CustomFacebook'
+													onClick={handleOnClick}>
+													Connect Facebook
+												</Button>
+											</div>
+											<div className='col-12'>
+												<Button
+													isOutline
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='CustomTwitter'
+													onClick={handleOnClick}>
+													Connect Twitter
+												</Button>
 											</div>
 											<div className='col-12'>
 												{!signInPassword ? (
@@ -303,16 +329,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														Login
 													</Button>
 												)}
-											</div>
+											</div> 
 										</>
 									)}
 
 									{/* BEGIN :: Social Login */}
 									{!signInPassword && (
 										<>
-											<div className='col-12 mt-3 text-center text-muted'>
-												OR
-											</div>
 											<div className='col-12 mt-3'>
 												<Button
 													isOutline
@@ -321,10 +344,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-light': !darkModeStatus,
 														'border-dark': darkModeStatus,
 													})}
-													icon='CustomApple'
+													icon='CustomMetamask'
 													onClick={handleOnClick}>
-													Sign in with Apple
+													Continue with MetaMask
 												</Button>
+											</div>
+											<div className='col-12 mt-3 text-center text-muted'>
+												OR
 											</div>
 											<div className='col-12'>
 												<Button

@@ -16,3 +16,5 @@ export { default as CustomSwift } from './CustomSwift';
 export { default as CustomTurkey } from './CustomTurkey';
 export { default as CustomUsa } from './CustomUsa';
 export { default as CustomYarn } from './CustomYarn';
+export { default as CustomMetamask } from './CustomMetamask';
+export { default as CustomTwitter } from './CustomTwitter';

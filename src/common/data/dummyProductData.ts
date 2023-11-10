@@ -10,6 +10,14 @@ import SquiglyGlobe from '../../assets/img/abstract/squigly-globe.png';
 import Dodecagon from '../../assets/img/abstract/dodecagon.png';
 import BeveledCube from '../../assets/img/abstract/beveled-cube.png';
 import Cylinder from '../../assets/img/abstract/cylinder.png';
+import Facebook from '../../assets/img/abstract/facebook.png';
+import Twitter from '../../assets/img/abstract/twitter.png';
+import Linkedin from '../../assets/img/abstract/linkedin.png';
+import Github from '../../assets/img/abstract/github.png';
+import Stackoverflow from '../../assets/img/abstract/stackoverflow.png';
+import Reddit from '../../assets/img/abstract/reddit.png';
+import Pinterest from '../../assets/img/abstract/pinterest.png';
+import Medium from '../../assets/img/abstract/medium.png';
 
 const data: {
 	id: number;
@@ -25,8 +33,8 @@ const data: {
 }[] = [
 	{
 		id: 1,
-		image: BeveledCone,
-		name: 'Beveled Cone',
+		image: Facebook,
+		name: 'Facebook',
 		category: '3D Shapes',
 		series: [
 			{
@@ -41,8 +49,8 @@ const data: {
 	},
 	{
 		id: 2,
-		image: CloudBall,
-		name: 'Cloud Ball',
+		image: Twitter,
+		name: 'Twitter',
 		category: '3D Shapes',
 		series: [
 			{
@@ -57,8 +65,8 @@ const data: {
 	},
 	{
 		id: 3,
-		image: Quadrilateral,
-		name: 'Quadrilateral',
+		image: Linkedin,
+		name: 'Linkedin',
 		category: '3D Shapes',
 		series: [
 			{
@@ -73,8 +81,8 @@ const data: {
 	},
 	{
 		id: 4,
-		image: HardSharpDonut,
-		name: 'Bendy Rectangle',
+		image: Github,
+		name: 'Github',
 		category: '3D Shapes',
 		series: [
 			{
@@ -89,8 +97,8 @@ const data: {
 	},
 	{
 		id: 5,
-		image: BendyRectangle,
-		name: 'Bendy Rectangle',
+		image: Stackoverflow,
+		name: 'Stackoverflow',
 		category: '3D Shapes',
 		series: [
 			{
@@ -105,8 +113,8 @@ const data: {
 	},
 	{
 		id: 6,
-		image: Infinity,
-		name: 'Bendy Rectangle',
+		image: Reddit,
+		name: 'Reddit',
 		category: '3D Shapes',
 		series: [
 			{
@@ -121,8 +129,8 @@ const data: {
 	},
 	{
 		id: 7,
-		image: Octahedron,
-		name: 'Octahedron',
+		image: Pinterest,
+		name: 'Pinterest',
 		category: '3D Shapes',
 		series: [
 			{
@@ -137,8 +145,8 @@ const data: {
 	},
 	{
 		id: 8,
-		image: Triangle,
-		name: 'Triangle',
+		image: Medium,
+		name: 'Medium',
 		category: '3D Shapes',
 		series: [
 			{
@@ -151,69 +159,69 @@ const data: {
 		store: 'Company B',
 		file: 'Figma',
 	},
-	{
-		id: 9,
-		image: SquiglyGlobe,
-		name: 'SquiglyGlobe',
-		category: '3D Shapes',
-		series: [
-			{
-				data: [18, 32, 26, 15, 34],
-			},
-		],
-		color: String(process.env.REACT_APP_SUCCESS_COLOR),
-		stock: 219,
-		price: 16,
-		store: 'Company C',
-		file: 'Figma',
-	},
-	{
-		id: 10,
-		image: Dodecagon,
-		name: 'Dodecagon',
-		category: '3D Shapes',
-		series: [
-			{
-				data: [18, 32, 26, 15, 34],
-			},
-		],
-		color: String(process.env.REACT_APP_SUCCESS_COLOR),
-		stock: 219,
-		price: 16,
-		store: 'Company A',
-		file: 'Figma',
-	},
-	{
-		id: 11,
-		image: BeveledCube,
-		name: 'Beveled Cube',
-		category: '3D Shapes',
-		series: [
-			{
-				data: [18, 32, 26, 15, 34],
-			},
-		],
-		color: String(process.env.REACT_APP_SUCCESS_COLOR),
-		stock: 219,
-		price: 16,
-		store: 'Company A',
-		file: 'Figma',
-	},
-	{
-		id: 12,
-		image: Cylinder,
-		name: 'Cylinder',
-		category: '3D Shapes',
-		series: [
-			{
-				data: [18, 32, 26, 15, 34],
-			},
-		],
-		color: String(process.env.REACT_APP_SUCCESS_COLOR),
-		stock: 219,
-		price: 16,
-		store: 'Company B',
-		file: 'Figma',
-	},
+	// {
+	// 	id: 9,
+	// 	image: SquiglyGlobe,
+	// 	name: 'SquiglyGlobe',
+	// 	category: '3D Shapes',
+	// 	series: [
+	// 		{
+	// 			data: [18, 32, 26, 15, 34],
+	// 		},
+	// 	],
+	// 	color: String(process.env.REACT_APP_SUCCESS_COLOR),
+	// 	stock: 219,
+	// 	price: 16,
+	// 	store: 'Company C',
+	// 	file: 'Figma',
+	// },
+	// {
+	// 	id: 10,
+	// 	image: Dodecagon,
+	// 	name: 'Dodecagon',
+	// 	category: '3D Shapes',
+	// 	series: [
+	// 		{
+	// 			data: [18, 32, 26, 15, 34],
+	// 		},
+	// 	],
+	// 	color: String(process.env.REACT_APP_SUCCESS_COLOR),
+	// 	stock: 219,
+	// 	price: 16,
+	// 	store: 'Company A',
+	// 	file: 'Figma',
+	// },
+	// {
+	// 	id: 11,
+	// 	image: BeveledCube,
+	// 	name: 'Beveled Cube',
+	// 	category: '3D Shapes',
+	// 	series: [
+	// 		{
+	// 			data: [18, 32, 26, 15, 34],
+	// 		},
+	// 	],
+	// 	color: String(process.env.REACT_APP_SUCCESS_COLOR),
+	// 	stock: 219,
+	// 	price: 16,
+	// 	store: 'Company A',
+	// 	file: 'Figma',
+	// },
+	// {
+	// 	id: 12,
+	// 	image: Cylinder,
+	// 	name: 'Cylinder',
+	// 	category: '3D Shapes',
+	// 	series: [
+	// 		{
+	// 			data: [18, 32, 26, 15, 34],
+	// 		},
+	// 	],
+	// 	color: String(process.env.REACT_APP_SUCCESS_COLOR),
+	// 	stock: 219,
+	// 	price: 16,
+	// 	store: 'Company B',
+	// 	file: 'Figma',
+	// },
 ];
 export default data;
