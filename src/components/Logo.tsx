@@ -10,7 +10,7 @@ const Logo: FC<ILogoProps> = ({ width, height }) => {
 		<svg
 			width={height !== 854 && !!height ? height * (2155 / 854) : width}
 			height={width !== 2155 && !!width ? width * (854 / 2155) : height}
-			viewBox='0 0 2155 854'
+			viewBox='0 0 650 854'
 			fill='none'
 			xmlns='http://www.w3.org/2000/svg'>
 			<rect x='300' width='256' height='256' rx='64' fill='#46BCAA' />

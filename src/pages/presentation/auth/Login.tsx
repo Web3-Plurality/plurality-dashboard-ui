@@ -49,6 +49,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const [signInPassword, setSignInPassword] = useState<boolean>(false);
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
+	const [signInStatus, setSignInStatus] = useState<boolean>(false);
 
 	const navigate = useNavigate();
 	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
@@ -113,6 +114,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}, 1000);
 	};
 
+	// TODO delete it and use real state change
+	const mockConnect = () => {
+		setSignInStatus(true);
+	}
+
 	return (
 		<PageWrapper
 			isProtected={false}
@@ -137,152 +143,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										<Logo width={200} />
 									</Link>
 								</div>
-								{/* <div
-									className={classNames('rounded-3', {
-										'bg-l10-dark': !darkModeStatus,
-										'bg-dark': darkModeStatus,
-									})}>
-									<div className='row row-cols-2 g-3 pb-3 px-3 mt-0'>
-										<div className='col'>
-											<Button
-												color={darkModeStatus ? 'light' : 'dark'}
-												isLight={singUpStatus}
-												className='rounded-1 w-100'
-												size='lg'
-												onClick={() => {
-													setSignInPassword(false);
-													setSingUpStatus(!singUpStatus);
-												}}>
-												Login
-											</Button>
-										</div>
-										<div className='col'>
-											<Button
-												color={darkModeStatus ? 'light' : 'dark'}
-												isLight={!singUpStatus}
-												className='rounded-1 w-100'
-												size='lg'
-												onClick={() => {
-													setSignInPassword(false);
-													setSingUpStatus(!singUpStatus);
-												}}>
-												Sign Up
-											</Button>
-										</div>
-									</div>
-								</div> */}
 
 								<LoginHeader isNewUser={singUpStatus} />
 
-								{/* <Alert isLight icon='Lock' isDismissible>
-									<div className='row'>
-										<div className='col-12'>
-											<strong>Username:</strong> {USERS.JOHN.username}
-										</div>
-										<div className='col-12'>
-											<strong>Password:</strong> {USERS.JOHN.password}
-										</div>
-									</div>
-								</Alert> */}
 								<form className='row g-4'>
-									{singUpStatus ? (
+									{signInStatus ? (
 										<>
-											<div className='col-12'>
-												<FormGroup
-													id='signup-email'
-													isFloating
-													label='Your email'>
-													<Input type='email' autoComplete='email' />
-												</FormGroup>
-											</div>
-											<div className='col-12'>
-												<FormGroup
-													id='signup-name'
-													isFloating
-													label='Your name'>
-													<Input autoComplete='given-name' />
-												</FormGroup>
-											</div>
-											<div className='col-12'>
-												<FormGroup
-													id='signup-surname'
-													isFloating
-													label='Your surname'>
-													<Input autoComplete='family-name' />
-												</FormGroup>
-											</div>
-											<div className='col-12'>
-												<FormGroup
-													id='signup-password'
-													isFloating
-													label='Password'>
-													<Input
-														type='password'
-														autoComplete='password'
-													/>
-												</FormGroup>
-											</div>
-											<div className='col-12'>
-												<Button
-													color='info'
-													className='w-100 py-3'
-													onClick={handleOnClick}>
-													Sign Up
-												</Button>
-											</div>
-										</>
-									) : (
-										<>
-											{/* <div className='col-12'>
-												<FormGroup
-													id='loginUsername'
-													isFloating
-													label='Your email or username'
-													className={classNames({
-														'd-none': signInPassword,
-													})}>
-													<Input
-														autoComplete='username'
-														value={formik.values.loginUsername}
-														isTouched={formik.touched.loginUsername}
-														invalidFeedback={
-															formik.errors.loginUsername
-														}
-														isValid={formik.isValid}
-														onChange={formik.handleChange}
-														onBlur={formik.handleBlur}
-														onFocus={() => {
-															formik.setErrors({});
-														}}
-													/>
-												</FormGroup>
-												{signInPassword && (
-													<div className='text-center h4 mb-3 fw-bold'>
-														Hi, {formik.values.loginUsername}.
-													</div>
-												)}
-												<FormGroup
-													id='loginPassword'
-													isFloating
-													label='Password'
-													className={classNames({
-														'd-none': !signInPassword,
-													})}>
-													<Input
-														type='password'
-														autoComplete='current-password'
-														value={formik.values.loginPassword}
-														isTouched={formik.touched.loginPassword}
-														invalidFeedback={
-															formik.errors.loginPassword
-														}
-														validFeedback='Looks good!'
-														isValid={formik.isValid}
-														onChange={formik.handleChange}
-														onBlur={formik.handleBlur}
-													/>
-												</FormGroup>
-											</div> */}
 											<div className='col-12 mt-3'>
 												<Button
 													isOutline
@@ -331,10 +197,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												)}
 											</div> 
 										</>
-									)}
-
-									{/* BEGIN :: Social Login */}
-									{!signInPassword && (
+									) : (
 										<>
 											<div className='col-12 mt-3'>
 												<Button
@@ -365,9 +228,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													Continue with Google
 												</Button>
 											</div>
+											<div className='col-12'>
+												<Button
+													color='warning'
+													className='w-100 py-3'
+													onClick={mockConnect}>
+													go forward
+												</Button>
+											</div> 
 										</>
 									)}
-									{/* END :: Social Login */}
 								</form>
 							</CardBody>
 						</Card>
