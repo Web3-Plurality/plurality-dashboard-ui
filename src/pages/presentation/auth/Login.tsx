@@ -6,15 +6,15 @@ import { useFormik } from 'formik';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
-import FormGroup from '../../../components/bootstrap/forms/FormGroup';
-import Input from '../../../components/bootstrap/forms/Input';
 import Button from '../../../components/bootstrap/Button';
 import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
 import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
 import Spinner from '../../../components/bootstrap/Spinner';
-import Alert from '../../../components/bootstrap/Alert';
+import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
+import { MetaMaskContext, MetamaskActions } from '../../../hooks';
+import { defaultSnapOrigin } from '../../../config';
 
 interface ILoginHeaderProps {
 	isNewUser?: boolean;
@@ -42,6 +42,7 @@ LoginHeader.defaultProps = {
 interface ILoginProps {
 	isSignUp?: boolean;
 }
+
 const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { setUser } = useContext(AuthContext);
 
@@ -119,6 +120,27 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		setSignInStatus(true);
 	}
 
+	// metamask hooks
+	const [state, dispatch] = useContext(MetaMaskContext);
+	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
+	? state.isFlask
+	: state.snapsDetected;
+
+	const handleConnectClick = async () => {
+		try {
+		  await connectSnap();
+		  const installedSnap = await getSnap();
+		  dispatch({
+			type: MetamaskActions.SetInstalled,
+			payload: installedSnap,
+		  });
+		  console.log(state.installedSnap)
+		} catch (e) {
+		  console.error(e);
+		  dispatch({ type: MetamaskActions.SetError, payload: e });
+		}
+	  };
+
 	return (
 		<PageWrapper
 			isProtected={false}
@@ -147,7 +169,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								<LoginHeader isNewUser={singUpStatus} />
 
 								<form className='row g-4'>
-									{signInStatus ? (
+									{state.installedSnap ? (
 										<>
 											<div className='col-12 mt-3'>
 												<Button
@@ -208,7 +230,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-dark': darkModeStatus,
 													})}
 													icon='CustomMetamask'
-													onClick={handleOnClick}>
+													onClick={handleConnectClick}>
 													Continue with MetaMask
 												</Button>
 											</div>
