@@ -17,21 +17,21 @@ const signal = 1;
 export const init = async () => {
 
   // FOR INFURA
-  network = process.env.GATSBY_ETHEREUM_NETWORK!;
+  network = process.env.REACT_APP_ETHEREUM_NETWORK!;
   console.log("Network is: " + network);
   const web3 = new Web3(
     new Web3.providers.HttpProvider(
-      `https://${network}.infura.io/v3/${process.env.GATSBY_INFURA_API_KEY}`
+      `https://${network}.infura.io/v3/${process.env.REACT_APP_INFURA_API_KEY}`
     )
   );
   // Creating a signing account from a private key
   signer = web3.eth.accounts.privateKeyToAccount(
-    process.env.GATSBY_SIGNER_PRIVATE_KEY!
+    process.env.REACT_APP_SIGNER_PRIVATE_KEY!
   );
   web3.eth.accounts.wallet.add(signer);
   console.log(SemaphoreIdentity.abi);
   const abi: any = SemaphoreIdentity.abi;
-  semaphoreIdentityContract = new web3.eth.Contract(abi,process.env.GATSBY_SEMAPHORE_IDENTITY_CONTRACT); //contract address at sepolia
+  semaphoreIdentityContract = new web3.eth.Contract(abi,process.env.REACT_APP_SEMAPHORE_IDENTITY_CONTRACT); //contract address at sepolia
   console.log(semaphoreIdentityContract);
   isInitialized = true;
 };
@@ -44,7 +44,7 @@ export const createGroup = async (groupId: string) => {
       await init();
     }
     console.log("Checking if the group id already exists on chain");
-    const doesGroupExist = await semaphoreIdentityContract.methods.groups(groupId).call({ from: process.env.GATSBY_SEMAPHORE_IDENTITY_CONTRACT });
+    const doesGroupExist = await semaphoreIdentityContract.methods.groups(groupId).call({ from: process.env.REACT_APP_SEMAPHORE_IDENTITY_CONTRACT });
     console.log("Does Group Exist?");
     console.log(doesGroupExist);
     if (doesGroupExist[0] === "0x0000000000000000000000000000000000000000")

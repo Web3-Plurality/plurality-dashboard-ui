@@ -33,6 +33,7 @@ interface ICommonGridProductItemProps {
 	price: number;
 	editAction: any;
 	deleteAction: any;
+	connectAction: any;
 }
 const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 	id,
@@ -44,6 +45,7 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 	price,
 	editAction,
 	deleteAction,
+	connectAction,
 }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
 
@@ -181,8 +183,9 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 					className={buttonTheme(name)}
 					size='lg'
 					tag='a'
-					to={`../${demoPagesMenu.sales.subMenu.productID.path}/${id}`}
+					// to={`../${demoPagesMenu.sales.subMenu.productID.path}/${id}`}
 					isDisable={isDisabled(name)}
+					onClick={() => connectAction()}
 					>
 					{buttonText(name)}
 				</Button>

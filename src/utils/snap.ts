@@ -127,7 +127,7 @@ export const getZkProof = async (profileType: string, groupId: string) : Promise
   //TODO: The following code block should be executed in snap 
   const identity = new Identity(identityString!.toString());
   const semaphoreEthers = new SemaphoreEthers("sepolia", {
-    address: process.env.GATSBY_SEMAPHORE_IDENTITY_CONTRACT,
+    address: process.env.REACT_APP_SEMAPHORE_IDENTITY_CONTRACT,
     startBlock: 4269200
   });
 

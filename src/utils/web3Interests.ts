@@ -14,21 +14,21 @@ let isInitialized = false;
 export const init = async () => {
 
   // FOR INFURA
-  network = process.env.GATSBY_ETHEREUM_NETWORK!;
+  network = process.env.REACT_APP_ETHEREUM_NETWORK!;
   console.log("Network is: " + network);
   const web3 = new Web3(
     new Web3.providers.HttpProvider(
-      `https://${network}.infura.io/v3/${process.env.GATSBY_INFURA_API_KEY}`
+      `https://${network}.infura.io/v3/${process.env.REACT_APP_INFURA_API_KEY}`
     )
   );
   // Creating a signing account from a private key
   signer = web3.eth.accounts.privateKeyToAccount(
-    process.env.GATSBY_SIGNER_PRIVATE_KEY!
+    process.env.REACT_APP_SIGNER_PRIVATE_KEY!
   );
   web3.eth.accounts.wallet.add(signer);
   console.log(Interests);
   const abi: any = Interests;
-  interestsContract = new web3.eth.Contract(abi,process.env.GATSBY_INTERESTS_CONTRACT); //contract address at sepolia
+  interestsContract = new web3.eth.Contract(abi,process.env.REACT_APP_INTERESTS_CONTRACT); //contract address at sepolia
   console.log(interestsContract);
   isInitialized = true;
 };

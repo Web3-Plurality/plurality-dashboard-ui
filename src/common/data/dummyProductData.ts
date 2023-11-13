@@ -18,6 +18,11 @@ import Stackoverflow from '../../assets/img/abstract/stackoverflow.png';
 import Reddit from '../../assets/img/abstract/reddit.png';
 import Pinterest from '../../assets/img/abstract/pinterest.png';
 import Medium from '../../assets/img/abstract/medium.png';
+import { getTwitterID } from '../../utils/oauth';
+
+const loginTwitter = async () => {
+    await getTwitterID();
+  };
 
 const data: {
 	id: number;
@@ -30,6 +35,7 @@ const data: {
 	price: number;
 	store: string;
 	file: string;
+	login?: any;
 }[] = [
 	{
 		id: 1,
@@ -62,6 +68,7 @@ const data: {
 		price: 12,
 		store: 'Company A',
 		file: 'Figma',
+		login: loginTwitter,
 	},
 	{
 		id: 3,

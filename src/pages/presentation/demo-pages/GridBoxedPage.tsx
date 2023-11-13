@@ -165,6 +165,7 @@ const GridBoxedPage = () => {
 									handleEdit(item.id);
 								}}
 								deleteAction={() => handleRemove(item.id)}
+								connectAction={() => item.login()}
 							/>
 						</div>
 					))}
