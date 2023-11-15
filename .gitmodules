@@ -1,0 +1,6 @@
+[submodule "plurality-backend-api"]
+	path = plurality-backend-api
+	url = https://github.com/Web3-Plurality/plurality-backend-api
+[submodule "plurality-metamask-snap"]
+	path = plurality-metamask-snap
+	url = https://github.com/Web3-Plurality/plurality-metamask-snap
