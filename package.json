@@ -108,7 +108,9 @@
 		"use-clipboard-copy": "^0.2.0",
 		"wagmi": "^1.4.2",
 		"web-vitals": "^3.4.0",
-		"web3": "^1.10.2"
+		"web3": "^1.10.2",
+		"facebook-sdk": "^0.3.3",
+		"react-facebook-login": "^4.1.1"
 	},
 	"devDependencies": {
 		"@metamask/eslint-config": "^10.0.0",
