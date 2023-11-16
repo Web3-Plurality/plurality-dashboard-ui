@@ -2,11 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
-import SubHeader, {
-	SubHeaderLeft,
-	SubHeaderRight,
-	SubheaderSeparator,
-} from '../../../layout/SubHeader/SubHeader';
 import Button from '../../../components/bootstrap/Button';
 import CommonGridProductItem from '../../_common/CommonGridProductItem';
 import tableData from '../../../common/data/dummyProductData';
@@ -26,7 +21,6 @@ import Input from '../../../components/bootstrap/forms/Input';
 import PlaceholderImage from '../../../components/extras/PlaceholderImage';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import { demoPagesMenu } from '../../../menu';
-import Breadcrumb from '../../../components/bootstrap/Breadcrumb';
 
 interface IValues {
 	name: string;
@@ -121,38 +115,14 @@ const ProductsGridPage = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [editItem]);
 
+	const responseFacebook = async (response: any) => {
+		console.log(response);
+	  };
+
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.productsGrid.text}>
-			{/* <SubHeader>
-				<SubHeaderLeft>
-					<Breadcrumb
-						list={[
-							{ title: demoPagesMenu.sales.text, to: demoPagesMenu.sales.path },
-							{
-								title: demoPagesMenu.sales.subMenu.productsGrid.text,
-								to: demoPagesMenu.sales.subMenu.productsGrid.path,
-							},
-						]}
-					/>
-					<SubheaderSeparator />
-					<span className='text-muted'>{data.length} items</span>
-				</SubHeaderLeft>
-				<SubHeaderRight>
-					<Button
-						color='dark'
-						isLight
-						icon='Add'
-						onClick={() => {
-							setEditItem(null);
-							setEditPanel(true);
-						}}>
-						Add New
-					</Button>
-				</SubHeaderRight>
-			</SubHeader> */}
 			<Page>
-				<div className='display-4 fw-bold py-3'>All Social Medias</div>
-				<div className='row'>
+			<div className='row'>
 					{data.map((item) => (
 						<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
 							<CommonGridProductItem
@@ -169,6 +139,8 @@ const ProductsGridPage = () => {
 								}}
 								deleteAction={() => handleRemove(item.id)}
 								connectAction={() => item.login()}
+								customization={item.customization}
+								button={(item.button)}
 							/>
 						</div>
 					))}

@@ -19,10 +19,30 @@ import Reddit from '../../assets/img/abstract/reddit.png';
 import Pinterest from '../../assets/img/abstract/pinterest.png';
 import Medium from '../../assets/img/abstract/medium.png';
 import { getTwitterID } from '../../utils/oauth';
+import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 
 const loginTwitter = async () => {
     await getTwitterID();
   };
+
+  const responseFacebook = async (response: any) => {
+  };
+
+const facebookLoginButton = () => {
+	return (
+		<FacebookLogin
+		appId="696970245672784"
+		autoLoad={false}
+		fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
+		callback={responseFacebook}
+		scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
+		render={renderProps => (
+		  <button onClick={renderProps.onClick} 
+		  >Connect</button>
+		)}
+	  />
+	)	
+}
 
 const data: {
 	id: number;
@@ -36,6 +56,8 @@ const data: {
 	store: string;
 	file: string;
 	login?: any;
+	customization?: boolean;
+	button?: any;
 }[] = [
 	{
 		id: 1,
@@ -52,6 +74,8 @@ const data: {
 		price: 14.5,
 		store: 'Company A',
 		file: 'Figma',
+		customization: true,
+		button: facebookLoginButton,
 	},
 	{
 		id: 2,
@@ -69,6 +93,7 @@ const data: {
 		store: 'Company A',
 		file: 'Figma',
 		login: loginTwitter,
+		customization: false,
 	},
 	{
 		id: 3,

@@ -34,6 +34,8 @@ interface ICommonGridProductItemProps {
 	editAction: any;
 	deleteAction: any;
 	connectAction: any;
+	customization?: boolean;
+	button?: any;
 }
 const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 	id,
@@ -46,6 +48,8 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 	editAction,
 	deleteAction,
 	connectAction,
+	customization,
+	button
 }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
 
@@ -105,15 +109,7 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 				<CardLabel>
 					<CardTitle tag='div' className='h5'>
 						{name}{' '}
-						{/* {price && (
-							<Badge color='success' isLight className='ms-2'>
-								{priceFormat(price)}
-							</Badge>
-						)} */}
 					</CardTitle>
-					{/* <CardSubTitle tag='div' className='h6'>
-						{category}
-					</CardSubTitle> */}
 				</CardLabel>
 				<CardActions>
 					<Dropdown>
@@ -164,31 +160,18 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 					height={128}
 					className='mx-auto d-block img-fluid mb-3'
 				/>
-				{/* <div className='row align-items-center'>
-					<div className='col'>Monthly sales</div>
-					<div className='col-auto'>
-						<Chart
-							series={series}
-							options={dummyOptions}
-							type={dummyOptions.chart?.type}
-							height={dummyOptions.chart?.height}
-							width={dummyOptions.chart?.width}
-						/>
-					</div>
-				</div> */}
 			</CardBody>
 			<CardFooter className='shadow-3d-container'>
-				<Button
+				{!customization ? (<Button
 					color='dark'
 					className={buttonTheme(name)}
 					size='lg'
 					tag='a'
-					// to={`../${demoPagesMenu.sales.subMenu.productID.path}/${id}`}
 					isDisable={isDisabled(name)}
 					onClick={() => connectAction()}
 					>
 					{buttonText(name)}
-				</Button>
+				</Button>) : (button())}
 			</CardFooter>
 		</Card>
 	);

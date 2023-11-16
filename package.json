@@ -71,6 +71,7 @@
 		"classnames": "^2.3.2",
 		"date-fns": "^2.30.0",
 		"dayjs": "^1.11.9",
+		"facebook-sdk": "^0.3.3",
 		"formik": "^2.4.3",
 		"framer-motion": "^10.15.2",
 		"i18next": "^23.4.4",
@@ -88,6 +89,7 @@
 		"react-credit-cards-2": "0.10.0",
 		"react-date-range": "^1.4.0",
 		"react-dom": "^18.2.0",
+		"react-facebook-login": "^4.1.1",
 		"react-ga4": "^2.1.0",
 		"react-i18next": "^13.1.2",
 		"react-image-webp": "^0.8.0",
@@ -108,9 +110,7 @@
 		"use-clipboard-copy": "^0.2.0",
 		"wagmi": "^1.4.2",
 		"web-vitals": "^3.4.0",
-		"web3": "^1.10.2",
-		"facebook-sdk": "^0.3.3",
-		"react-facebook-login": "^4.1.1"
+		"web3": "^1.10.2"
 	},
 	"devDependencies": {
 		"@metamask/eslint-config": "^10.0.0",
@@ -137,6 +137,7 @@
 		"@types/prismjs": "^1.26.0",
 		"@types/react-big-calendar": "^1.6.4",
 		"@types/react-date-range": "^1.4.4",
+		"@types/react-facebook-login": "^4.1.9",
 		"@types/react-input-mask": "^3.0.2",
 		"@types/react-router-hash-link": "^2.4.6",
 		"@types/react-scrollspy": "^3.3.5",
@@ -147,6 +148,7 @@
 		"assert": "^2.1.0",
 		"bootstrap": "^5.3.1",
 		"buffer": "^6.0.3",
+		"cross-env": "^7.0.3",
 		"crypto-browserify": "^3.12.0",
 		"eslint": "^8.47.0",
 		"eslint-config-airbnb": "^19.0.4",
@@ -183,8 +185,7 @@
 		"stylelint-scss": "^5.1.0",
 		"trim-newlines": "^5.0.0",
 		"url": "^0.11.3",
-		"webpack": "5",
-		"cross-env": "^7.0.3"
+		"webpack": "5"
 	},
 	"resolutions": {
 		"glob-parent": ">=5.1.2",
@@ -198,8 +199,5 @@
 		"nth-check": ">=2.1.1",
 		"trim": "^1.0.1"
 	},
-	"packageManager": "yarn@3.2.1",
-	"engines": {
-		"node": ">=16.0.0"
-	}
+	"packageManager": "yarn@3.2.1"
 }
