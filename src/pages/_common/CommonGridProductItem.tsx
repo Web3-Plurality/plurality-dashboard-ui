@@ -103,15 +103,19 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 			width: 2,
 		},
 	};
+
+	const cardOpacity = () => {
+		return isDisabled(name) ? '0.4' : '1'
+	}
 	return (
-		<Card>
+		<Card style={{opacity: cardOpacity()}}>
 			<CardHeader>
 				<CardLabel>
 					<CardTitle tag='div' className='h5'>
 						{name}{' '}
 					</CardTitle>
 				</CardLabel>
-				<CardActions>
+				{/* <CardActions>
 					<Dropdown>
 						<DropdownToggle hasIcon={false}>
 							<Button
@@ -150,7 +154,7 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 							</DropdownItem>
 						</DropdownMenu>
 					</Dropdown>
-				</CardActions>
+				</CardActions> */}
 			</CardHeader>
 			<CardBody>
 				<img

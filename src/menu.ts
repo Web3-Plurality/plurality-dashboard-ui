@@ -1061,7 +1061,7 @@ export const customizedDashboardPagesMenu = {
 export const customizedDemoPagesMenu = {
 	sales: {
 		id: 'socials',
-		text: 'Social Medias',
+		text: 'Connected Profiles',
 		path: 'sales/grid',
 		icon: 'CalendarViewMonth',
 		},
