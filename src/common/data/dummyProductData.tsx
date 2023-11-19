@@ -26,6 +26,7 @@ const loginTwitter = async () => {
   };
 
   const responseFacebook = async (response: any) => {
+	console.log(response);
   };
 
 const facebookLoginButton = () => {

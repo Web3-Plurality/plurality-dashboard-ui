@@ -115,10 +115,6 @@ const ProductsGridPage = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [editItem]);
 
-	const responseFacebook = async (response: any) => {
-		console.log(response);
-	  };
-
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.productsGrid.text}>
 			<Page>

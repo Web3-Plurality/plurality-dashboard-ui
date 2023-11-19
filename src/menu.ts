@@ -1049,20 +1049,20 @@ export const productsExampleMenu = {
 // The Pages that we are actually using
 
 export const customizedDashboardPagesMenu = {
-	summary: {
-		id: 'dashboard',
-		text: 'Dashboard',
-		path: '/',
-		icon: 'sticky_note_2',
-		subMenu: null,
-	},
+	// summary: {
+	// 	id: 'dashboard',
+	// 	text: 'Dashboard',
+	// 	path: '/',
+	// 	icon: 'sticky_note_2',
+	// 	subMenu: null,
+	// },
 }
 
 export const customizedDemoPagesMenu = {
 	sales: {
 		id: 'socials',
 		text: 'Connected Profiles',
-		path: 'sales/grid',
+		path: '/',
 		icon: 'CalendarViewMonth',
 		},
 }
