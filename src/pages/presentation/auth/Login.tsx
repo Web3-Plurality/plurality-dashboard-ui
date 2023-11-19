@@ -11,38 +11,37 @@ import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
 import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
-import Spinner from '../../../components/bootstrap/Spinner';
 import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 
 interface ILoginHeaderProps {
-	isNewUser?: boolean;
+	isSnap?: boolean;
 }
-const LoginHeader: FC<ILoginHeaderProps> = ({ isNewUser }) => {
-	if (isNewUser) {
+const LoginHeader: FC<ILoginHeaderProps> = ({ isSnap }) => {
+	if (isSnap) {
 		return (
 			<>
-				<div className='text-center h1 fw-bold mt-5'>Create Account,</div>
-				<div className='text-center h4 text-muted mb-5'>Sign up to get started!</div>
+			<div className='text-center h1 fw-bold mt-5'>Reputation Connect</div>
+			<div className='text-center h4 text-muted mb-5'>Sign in to continue!</div>
 			</>
 		);
 	}
 	return (
 		<>
-			<div className='text-center h1 fw-bold mt-5'>Reputation connect</div>
-			<div className='text-center h4 text-muted mb-5'>Sign in to continue!</div>
+			<div className='text-center h1 fw-bold mt-5'>Reputation Connect</div>
+			<div className='text-center h4 text-muted mb-5'>Connect your social profiles to:</div>
+			<div className='text-center h5 text-muted mb-5'>https://dapp-name.com</div>
 		</>
 	);
 };
 LoginHeader.defaultProps = {
-	isNewUser: false,
+	isSnap: true,
 };
 
 interface ILoginProps {
 	isSignUp?: boolean;
 }
-
 const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { setUser } = useContext(AuthContext);
 
@@ -50,7 +49,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const [signInPassword, setSignInPassword] = useState<boolean>(false);
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
-	const [signInStatus, setSignInStatus] = useState<boolean>(false);
 
 	const navigate = useNavigate();
 	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
@@ -115,18 +113,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}, 1000);
 	};
 
-	// TODO delete it and use real state change
-	const mockConnect = () => {
-		setSignInStatus(true);
-	}
-
 	// metamask hooks
 	const [state, dispatch] = useContext(MetaMaskContext);
 	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
 	? state.isFlask
 	: state.snapsDetected;
 
-	const handleConnectClick = async () => {
+	const handleSnapConnect = async () => {
 		try {
 		  await connectSnap();
 		  const installedSnap = await getSnap();
@@ -134,9 +127,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			type: MetamaskActions.SetInstalled,
 			payload: installedSnap,
 		  });
+		  if (setUser) setUser("user");
 		  console.log(state.installedSnap)
-		} catch (e) {
+		  navigate(`/`);
+		} catch (e: any) {
 		  console.error(e);
+		  if (e.message == "Fetching local snaps is disabled.") {
+			alert("Please install flask which is the development version of Metamask from here: https://metamask.io/flask/");
+		  }
+		  else {
+			alert("Metamask Flask not installed. Please install from here: https://metamask.io/flask/");
+
+		  }
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
 		}
 	  };
@@ -151,7 +153,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
 						<Card className='shadow-3d-dark' data-tour='login-page'>
 							<CardBody>
-								<div className='text-center my-5'>
+								<div className='text-center my-5' style={{marginLeft:"40%"}}>
 									<Link
 										to='/'
 										className={classNames(
@@ -162,65 +164,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											},
 										)}
 										aria-label='Facit'>
-										<Logo width={200} />
+										<Logo width={200}/>
 									</Link>
 								</div>
+								<div
+									className={classNames('rounded-3', {
+										'bg-l10-dark': !darkModeStatus,
+										'bg-dark': darkModeStatus,
+									})}>
+								
+								</div>
 
-								<LoginHeader isNewUser={singUpStatus} />
 
-								<form className='row g-4'>
-									{state.installedSnap ? (
+									{/* BEGIN :: Snap install */}
+
+									{!signInPassword && (!isMetaMaskReady || !state.installedSnap) && (
 										<>
-											<div className='col-12 mt-3'>
-												<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomFacebook'
-													onClick={handleOnClick}>
-													Connect Facebook
-												</Button>
-											</div>
-											<div className='col-12'>
-												<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomTwitter'
-													onClick={handleOnClick}>
-													Connect Twitter
-												</Button>
-											</div>
-											<div className='col-12'>
-												{!signInPassword ? (
-													<Button
-														color='warning'
-														className='w-100 py-3'
-														isDisable={!formik.values.loginUsername}
-														onClick={handleContinue}>
-														{isLoading && (
-															<Spinner isSmall inButton isGrow />
-														)}
-														Continue
-													</Button>
-												) : (
-													<Button
-														color='warning'
-														className='w-100 py-3'
-														onClick={formik.handleSubmit}>
-														Login
-													</Button>
-												)}
-											</div> 
-										</>
-									) : (
-										<>
+											<LoginHeader isSnap={true} />
+
+											<form className='row g-4'>
 											<div className='col-12 mt-3'>
 												<Button
 													isOutline
@@ -230,8 +192,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-dark': darkModeStatus,
 													})}
 													icon='CustomMetamask'
-													onClick={handleConnectClick}>
-													Continue with MetaMask
+													onClick={handleSnapConnect}>
+													Sign in with MetaMask
 												</Button>
 											</div>
 											<div className='col-12 mt-3 text-center text-muted'>
@@ -246,21 +208,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-dark': darkModeStatus,
 													})}
 													icon='CustomGoogle'
-													onClick={handleOnClick}>
-													Continue with Google
+													onClick={handleOnClick}
+													isDisable>
+													Coming Soon
 												</Button>
 											</div>
-											<div className='col-12'>
-												<Button
-													color='warning'
-													className='w-100 py-3'
-													onClick={mockConnect}>
-													go forward
-												</Button>
-											</div> 
+											</form>
 										</>
+
 									)}
-								</form>
+									{/* END :: Snap install */}
 							</CardBody>
 						</Card>
 						<div className='text-center'>

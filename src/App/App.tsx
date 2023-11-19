@@ -16,6 +16,7 @@ import { getOS } from '../helpers/helpers';
 import steps, { styles } from '../steps';
 import AsideRoutes from '../layout/Aside/AsideRoutes';
 import { ToastCloseButton } from '../components/bootstrap/Toasts';
+import { MetaMaskProvider } from '../hooks';
 
 const App = () => {
 	getOS();
@@ -72,6 +73,7 @@ const App = () => {
 
 	return (
 		<ThemeProvider theme={theme}>
+			<MetaMaskProvider>
 			<TourProvider steps={steps} styles={styles} showNavigation={false} showBadge={false}>
 				<div
 					ref={ref}
@@ -89,6 +91,7 @@ const App = () => {
 				</Portal>
 				<ToastContainer closeButton={ToastCloseButton} toastClassName='toast show' />
 			</TourProvider>
+			</MetaMaskProvider>
 		</ThemeProvider>
 	);
 };
