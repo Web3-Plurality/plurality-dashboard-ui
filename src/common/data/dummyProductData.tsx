@@ -23,7 +23,9 @@ import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props
 import Button from '../../components/bootstrap/Button';
 
 const loginTwitter = async () => {
-    await getTwitterID();
+	const params = new URLSearchParams(window.location.search)
+	const isWidget = params.get('isWidget')!;
+    await getTwitterID(isWidget);
   };
 
 const responseFacebook = async (response: any) => {

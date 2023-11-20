@@ -14,6 +14,9 @@ import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyDa
 import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
+import { getTwitterID } from '../../../utils/oauth';
+import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
+
 
 interface ILoginHeaderProps {
 	isSnap?: boolean;
@@ -44,9 +47,9 @@ interface ILoginProps {
 }
 const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { setUser } = useContext(AuthContext);
-
 	const { darkModeStatus } = useDarkMode();
 
+	const [isWidget, setIsWidget] = useState(false);  
 	const [signInPassword, setSignInPassword] = useState<boolean>(false);
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
 
@@ -128,8 +131,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			payload: installedSnap,
 		  });
 		  if (setUser) setUser("user");
-		  console.log(state.installedSnap)
-		  navigate(`/`);
+		  console.log(state.installedSnap);
+		  const params = new URLSearchParams(window.location.search)
+		  const isWidget = params.get('isWidget')!;
+		  if (!isWidget || isWidget == "false")
+		  	navigate(`/?isWidget=false`);
+		  else if (isWidget == "true")
+		  	// update widget state
+			  setIsWidget(true);
+		  else
+		  	throw new Error("Something went wrong while parsing the isWidget parameter");
 		} catch (e: any) {
 		  console.error(e);
 		  if (e.message == "Fetching local snaps is disabled.") {
@@ -142,6 +153,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
 		}
 	  };
+	  const handleOnTwitterClick = async () => {
+		const params = new URLSearchParams(window.location.search)
+		const isWidget = params.get('isWidget')!;
+		await getTwitterID(isWidget);
+	  };
+	  const responseFacebook = async (response: any) => {
+		console.log(response);
+		};		
 
 	return (
 		<PageWrapper
@@ -218,6 +237,53 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 									)}
 									{/* END :: Snap install */}
+									{/* BEGIN :: Social Login */}
+									{!signInPassword && isMetaMaskReady && state.installedSnap && isWidget && (
+										<>
+										<LoginHeader isSnap={false} />
+
+											<form className='row g-4'>
+											<div className='col-12 mt-3'>
+											<FacebookLogin
+												appId="696970245672784"
+												autoLoad={false}
+												fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
+												callback={responseFacebook}
+												cssClass='shadow-3d-container'
+												scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
+												render={renderProps => (
+													<Button
+													isOutline
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='CustomFacebook'
+													onClick={renderProps.onClick}
+													>
+													Connect Facebook
+												</Button>
+												)}
+											/>
+											</div>
+											<div className='col-12 mt-3'>
+												<Button
+													isOutline
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='CustomTwitter'
+													onClick={handleOnTwitterClick}>
+													Continue Twitter
+												</Button>
+											</div>
+											</form>
+										</>
+									)}
+									{/* END :: Social Login */}
 							</CardBody>
 						</Card>
 						<div className='text-center'>
