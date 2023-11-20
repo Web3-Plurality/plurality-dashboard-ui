@@ -20,14 +20,19 @@ import Pinterest from '../../assets/img/abstract/pinterest.png';
 import Medium from '../../assets/img/abstract/medium.png';
 import { getTwitterID } from '../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
+import Button from '../../components/bootstrap/Button';
 
 const loginTwitter = async () => {
     await getTwitterID();
   };
 
-  const responseFacebook = async (response: any) => {
-	console.log(response);
-  };
+const responseFacebook = async (response: any) => {
+console.log(response);
+};
+
+const buttonTheme = () => {
+	return "w-100 mb-4 shadow-3d-up-hover shadow-3d-dark"
+}
 
 const facebookLoginButton = () => {
 	return (
@@ -36,10 +41,18 @@ const facebookLoginButton = () => {
 		autoLoad={false}
 		fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
 		callback={responseFacebook}
+		cssClass='shadow-3d-container'
 		scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
 		render={renderProps => (
-		  <button onClick={renderProps.onClick} 
-		  >Connect</button>
+			<Button
+			color='dark'
+			className={buttonTheme()}
+			size='lg'
+			tag='a'
+			onClick={renderProps.onClick}
+			>
+			Connect
+		</Button>
 		)}
 	  />
 	)	
