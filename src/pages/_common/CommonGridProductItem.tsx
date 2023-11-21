@@ -26,16 +26,17 @@ import useDarkMode from '../../hooks/useDarkMode';
 interface ICommonGridProductItemProps {
 	id: string | number;
 	name: string;
-	category: string;
+	category?: string;
 	img: string;
-	color: string;
-	series: ApexOptions['series'];
-	price: number;
-	editAction: any;
-	deleteAction: any;
-	connectAction: any;
+	color?: string;
+	series?: ApexOptions['series'];
+	price?: number;
+	editAction?: any;
+	deleteAction?: any;
+	connectAction?: any;
 	customization?: boolean;
 	button?: any;
+	buttonText?: any;
 }
 const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 	id,
@@ -49,7 +50,8 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 	deleteAction,
 	connectAction,
 	customization,
-	button
+	button,
+	buttonText,
 }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
 
@@ -65,10 +67,6 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 		} else {
 			return `w-100 mb-4`
 		}
-	}
-
-	const buttonText = (name: string) => {
-		return (name === "Facebook" || name === "Twitter") ? 'Connect' : 'Coming soon'
 	}
 
 	const dummyOptions: ApexOptions = {
@@ -115,46 +113,6 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 						{name}{' '}
 					</CardTitle>
 				</CardLabel>
-				{/* <CardActions>
-					<Dropdown>
-						<DropdownToggle hasIcon={false}>
-							<Button
-								icon='MoreHoriz'
-								color={themeStatus}
-								shadow='default'
-								aria-label='Edit'
-							/>
-						</DropdownToggle>
-						<DropdownMenu isAlignmentEnd>
-							<DropdownItem>
-								<Button icon='Edit' onClick={() => editAction()}>
-									Edit
-								</Button>
-							</DropdownItem>
-							<DropdownItem>
-								<Button
-									icon='FileCopy'
-									onClick={() => {
-										showNotification(
-											<span className='d-flex align-items-center'>
-												<Icon icon='Info' size='lg' className='me-1' />
-												<span>{name} duplicated.</span>
-											</span>,
-											`A copy of the ${name} product was created.`,
-										);
-									}}>
-									Duplicate
-								</Button>
-							</DropdownItem>
-							<DropdownItem isDivider />
-							<DropdownItem>
-								<Button icon='Delete' onClick={() => deleteAction()}>
-									Delete
-								</Button>
-							</DropdownItem>
-						</DropdownMenu>
-					</Dropdown>
-				</CardActions> */}
 			</CardHeader>
 			<CardBody>
 				<img
@@ -174,7 +132,7 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 					isDisable={isDisabled(name)}
 					onClick={() => connectAction()}
 					>
-					{buttonText(name)}
+					{buttonText}
 				</Button>) : (button())}
 			</CardFooter>
 		</Card>

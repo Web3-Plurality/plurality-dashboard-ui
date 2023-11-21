@@ -29,7 +29,7 @@ const loginTwitter = async () => {
   };
 
 const responseFacebook = async (response: any) => {
-console.log(response);
+	console.log(response);
 };
 
 const buttonTheme = () => {

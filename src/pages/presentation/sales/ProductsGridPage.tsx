@@ -21,6 +21,17 @@ import Input from '../../../components/bootstrap/forms/Input';
 import PlaceholderImage from '../../../components/extras/PlaceholderImage';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import { demoPagesMenu } from '../../../menu';
+import Facebook from '../../../assets/img/abstract/facebook.png';
+import Twitter from '../../../assets/img/abstract/twitter.png';
+import Linkedin from '../../../assets/img/abstract/linkedin.png';
+import Github from '../../../assets/img/abstract/github.png';
+import Stackoverflow from '../../../assets/img/abstract/stackoverflow.png';
+import Reddit from '../../../assets/img/abstract/reddit.png';
+import Pinterest from '../../../assets/img/abstract/pinterest.png';
+import Medium from '../../../assets/img/abstract/medium.png';
+import { getTwitterID } from '../../../utils/oauth';
+import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
+import { is } from 'date-fns/locale';
 
 interface IValues {
 	name: string;
@@ -70,6 +81,8 @@ const ProductsGridPage = () => {
 	const [data, setData] = useState(tableData);
 	const [editItem, setEditItem] = useState<IValues | null>(null);
 	const [editPanel, setEditPanel] = useState<boolean>(false);
+	const [isFacebookConnected, setIsFacebookConnected] = useState<boolean>(false);
+	const [isTwitterConnected, setIsTwitterConnected] = useState<boolean>(false);
 
 	function handleRemove(id: number) {
 		const newData = data.filter((item) => item.id !== id);
@@ -115,32 +128,171 @@ const ProductsGridPage = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [editItem]);
 
+	useEffect(() => {
+		if ( !isTwitterConnected ) {      
+		  twitter().catch(console.error);
+		}
+	  }, [])
+
+	const twitter = async () => {
+		const params = new URLSearchParams(window.location.search)
+		const username = params.get('username')!;
+		const platform = params.get('id_platform')!;
+	
+		if (username!=null && platform == "twitter") {
+			setIsTwitterConnected(true);
+	 	}
+	}
+
+	const loginTwitter = async () => {
+		const params = new URLSearchParams(window.location.search)
+		const isWidget = params.get('isWidget')!;
+		await getTwitterID(isWidget);
+	  };
+	
+	const responseFacebook = async (response: any) => {
+		setIsFacebookConnected(true);
+		console.log(response);
+	};
+	
+	const buttonTheme = () => {
+		return "w-100 mb-4 shadow-3d-up-hover shadow-3d-dark"
+	}
+
+	const viewDetails = () => {
+		console.log("see more details")
+	}
+	
+	const facebookLoginButton = () => {
+		return (
+			<FacebookLogin
+			appId="696970245672784"
+			autoLoad={false}
+			fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
+			callback={responseFacebook}
+			cssClass='shadow-3d-container'
+			scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
+			render={renderProps => (
+				<Button
+				color='dark'
+				className={buttonTheme()}
+				size='lg'
+				tag='a'
+				onClick={renderProps.onClick}
+				>
+				{isFacebookConnected ? "View Details" : "Connect"}
+			</Button>
+			)}
+		  />
+		)	
+	}
+
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.productsGrid.text}>
 			<Page>
 			<div className='row'>
-					{data.map((item) => (
-						<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
-							<CommonGridProductItem
-								id={item.id}
-								name={item.name}
-								category={item.category}
-								img={item.image}
-								color={item.color}
-								series={item.series}
-								price={item.price}
-								editAction={() => {
-									setEditPanel(true);
-									handleEdit(item.id);
-								}}
-								deleteAction={() => handleRemove(item.id)}
-								connectAction={() => item.login()}
-								customization={item.customization}
-								button={(item.button)}
-							/>
-						</div>
-					))}
+				{
+					!isFacebookConnected ? (
+					<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='1'
+						name='Facebook'
+						img={Facebook}
+						customization={true}
+						button={(facebookLoginButton)}
+					/>
+					</div>) : (
+					<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='1'
+						name='Facebook'
+						img={Facebook}
+						customization={false}
+						connectAction={viewDetails}
+						buttonText={"View Details"}
+					/>
+					</div>
+					)
+				}
+				{
+					!isTwitterConnected ? (
+					<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='2'
+						name='Twitter'					
+						img={Twitter}
+						customization={false}
+						connectAction={loginTwitter}	
+						buttonText={"Connect"}
+					/>
+					</div>) : (
+					<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='2'
+						name='Twitter'
+						img={Twitter}
+						customization={false}
+						connectAction={viewDetails}
+						buttonText={"View Details"}
+					/>
+					</div>
+					)
+				}
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='3'
+						name='Linkedin'					
+						img={Linkedin}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
 				</div>
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='4'
+						name='Github'					
+						img={Github}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
+				</div>
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='5'
+						name='Stackoverflow'					
+						img={Stackoverflow}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
+				</div>
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='6'
+						name='Reddit'					
+						img={Reddit}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
+				</div>
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='7'
+						name='Pinterest'					
+						img={Pinterest}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
+				</div>
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='8'
+						name='Medium'					
+						img={Medium}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
+				</div>
+			</div>
 			</Page>
 
 			<OffCanvas
