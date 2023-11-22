@@ -154,6 +154,8 @@ export const getZkProof = async (profileType: string, groupId: string) : Promise
     zkeyFilePath: "./semaphore.zkey",
     wasmFilePath: "./semaphore.wasm"
 })*/
+
+  console.log("Going to generate the proof");
   const proof = await generateProof(identity, group, groupId, signal);
   console.log(proof); 
 

@@ -16,12 +16,9 @@ import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { Orbis } from "@orbisclub/orbis-sdk";
 import useLocalStorageState from 'use-local-storage-state';
-import {
-	getCommitment,
-	getZkProof,
-  } from '../../../utils';
+import { addCommitmentAndDidToSnap } from '../../../utils/orbis';
+
 
 
 interface ILoginHeaderProps {
@@ -129,16 +126,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	: state.snapsDetected;
 
 	// orbis hooks
-	const [orbisUser, setOrbisUser] = useState();
-	const [orbis, setOrbis] = useState(new Orbis({}));
+	//const [orbisUser, setOrbisUser] = useState();
+	//const [orbis, setOrbis] = useState(new Orbis({}));
 	
 	// local storage states (signed in user & did of user in case of orbis)
-	const [signedInUser, setSignedInUser] = useLocalStorageState('signedInUser', {defaultValue: ""});
-	const [did, setDid] = useLocalStorageState('did', {defaultValue: ""});
+	//const [signedInUser, setSignedInUser] = useLocalStorageState('signedInUser', {defaultValue: ""});
+	//const [did, setDid] = useLocalStorageState('did', {defaultValue: ""});
 
 	// social logins connection hooks
+	//TODO: Add tick or something in the buttons if a social login is already connected
 	const [isFacebookConnected, setFacebookConnected] = useLocalStorageState('isFacebookConnected', {defaultValue: false});
 	const [isTwitterConnected, setTwitterConnected] = useLocalStorageState('isTwitterConnected', {defaultValue: false});
+	const [isTwitterUseEffectCalled, setTwitterUseEffectCalled] = useState(false);
 
 	const handleSnapConnect = async () => {
 		try {
@@ -157,7 +156,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  else if (isWidget == "true") {
 		  	// update widget state
 			  setIsWidget(true);
-			  orbisConnect();
 		  }
 		  else
 		  	throw new Error("Something went wrong while parsing the isWidget parameter");
@@ -182,43 +180,43 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	  const responseFacebook = async (response: any) => {
 		console.log(response);
 		setFacebookConnected(true);
-		};	
+		// TODO: push correct data to ceramic
+		const username = "some username";
+		const description = 'some description';
+		const reputationalAssetType = "Interests";
+		const reputationalAssetData = ["random interest 1", "random interest 2"];
+		await addCommitmentAndDidToSnap(	process.env.REACT_APP_FACEBOOK!, 
+									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
+									username,
+									description,
+									reputationalAssetType,
+									reputationalAssetData
+								);
+		alert("Facebook profile successfully connected");
+	};	
 	
-	/** Calls the Orbis SDK and handles the results */
-	async function orbisConnect() {
-		//dispatch({ type: MetamaskActions.SetInfoMessage, payload: "Signing in your orbis profile" });
-		console.log("Signing in your orbis profile");
-		const res = await orbis.connect_v2({ chain: "ethereum", lit: false });
-		console.log(orbis);
-		/** Check if the connection is successful or not */
-		if(res.status == 200) {
-			console.log(res.did);
-			setOrbisUser(res.did);
-			setSignedInUser("orbis");
-			setDid(res.did);
-			dispatch({ type: MetamaskActions.SetInfoMessage, payload: "" });
-	
-		} else {
-			console.log("Error connecting to Ceramic: ", res);
-			dispatch({ type: MetamaskActions.SetInfoMessage, payload: "User rejected the orbis sign in request" });
-			//alert("Error connecting to Ceramic.");
-		}
-	}
-	async function addInterestsToOrbis() {
-		try {
-		  const { data, error } = await orbis.getProfile(did);
-		  console.log(JSON.stringify(data));
-		  const name = data.details.profile.username;
-		  const updatedBio = data.details.profile.description;
-		  const res = await orbis.updateProfile({username:name, description: updatedBio, data: {interests:"userInterests"}});
-		}
-		catch (error) {
-		  console.log(error);
-		}
-	  }	
 
 	useEffect(() => {
-		
+		const params = new URLSearchParams(window.location.search)
+		const idPlatform = params.get('id_platform')!;
+		if (idPlatform == "twitter") {
+			const params = new URLSearchParams(window.location.search);
+			// TODO: push correct data to ceramic
+			const username = params.get('username')!;
+			const description = 'some description';
+			const reputationalAssetType = "Interests";
+			const reputationalAssetData = ["random interest 1", "random interest 2"];
+			if ( !isTwitterConnected && !isTwitterUseEffectCalled) {      
+				setTwitterUseEffectCalled(true);
+				addCommitmentAndDidToSnap(process.env.REACT_APP_TWITTER!, 
+										process.env.REACT_APP_TWITTER_GROUP_ID!,
+										username,
+										description,
+										reputationalAssetType,
+										reputationalAssetData
+										).catch(console.error);
+			}
+		}
 	}, [])
 
 
