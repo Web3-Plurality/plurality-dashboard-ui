@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -16,6 +16,12 @@ import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
+import { Orbis } from "@orbisclub/orbis-sdk";
+import useLocalStorageState from 'use-local-storage-state';
+import {
+	getCommitment,
+	getZkProof,
+  } from '../../../utils';
 
 
 interface ILoginHeaderProps {
@@ -122,6 +128,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	? state.isFlask
 	: state.snapsDetected;
 
+	// orbis hooks
+	const [orbisUser, setOrbisUser] = useState();
+	const [orbis, setOrbis] = useState(new Orbis({}));
+	
+	// local storage states (signed in user & did of user in case of orbis)
+	const [signedInUser, setSignedInUser] = useLocalStorageState('signedInUser', {defaultValue: ""});
+	const [did, setDid] = useLocalStorageState('did', {defaultValue: ""});
+
+	// social logins connection hooks
+	const [isFacebookConnected, setFacebookConnected] = useLocalStorageState('isFacebookConnected', {defaultValue: false});
+	const [isTwitterConnected, setTwitterConnected] = useLocalStorageState('isTwitterConnected', {defaultValue: false});
+
 	const handleSnapConnect = async () => {
 		try {
 		  await connectSnap();
@@ -136,9 +154,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  const isWidget = params.get('isWidget')!;
 		  if (!isWidget || isWidget == "false")
 		  	navigate(`/?isWidget=false`);
-		  else if (isWidget == "true")
+		  else if (isWidget == "true") {
 		  	// update widget state
 			  setIsWidget(true);
+			  orbisConnect();
+		  }
 		  else
 		  	throw new Error("Something went wrong while parsing the isWidget parameter");
 		} catch (e: any) {
@@ -157,10 +177,50 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const params = new URLSearchParams(window.location.search)
 		const isWidget = params.get('isWidget')!;
 		await getTwitterID(isWidget);
+		setTwitterConnected(true);
 	  };
 	  const responseFacebook = async (response: any) => {
 		console.log(response);
-		};		
+		setFacebookConnected(true);
+		};	
+	
+	/** Calls the Orbis SDK and handles the results */
+	async function orbisConnect() {
+		//dispatch({ type: MetamaskActions.SetInfoMessage, payload: "Signing in your orbis profile" });
+		console.log("Signing in your orbis profile");
+		const res = await orbis.connect_v2({ chain: "ethereum", lit: false });
+		console.log(orbis);
+		/** Check if the connection is successful or not */
+		if(res.status == 200) {
+			console.log(res.did);
+			setOrbisUser(res.did);
+			setSignedInUser("orbis");
+			setDid(res.did);
+			dispatch({ type: MetamaskActions.SetInfoMessage, payload: "" });
+	
+		} else {
+			console.log("Error connecting to Ceramic: ", res);
+			dispatch({ type: MetamaskActions.SetInfoMessage, payload: "User rejected the orbis sign in request" });
+			//alert("Error connecting to Ceramic.");
+		}
+	}
+	async function addInterestsToOrbis() {
+		try {
+		  const { data, error } = await orbis.getProfile(did);
+		  console.log(JSON.stringify(data));
+		  const name = data.details.profile.username;
+		  const updatedBio = data.details.profile.description;
+		  const res = await orbis.updateProfile({username:name, description: updatedBio, data: {interests:"userInterests"}});
+		}
+		catch (error) {
+		  console.log(error);
+		}
+	  }	
+
+	useEffect(() => {
+		
+	}, [])
+
 
 	return (
 		<PageWrapper

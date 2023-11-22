@@ -54,6 +54,7 @@
 		"@hello-pangea/dnd": "^16.3.0",
 		"@metamask/providers": "^9.0.0",
 		"@omtanke/react-use-event-outside": "^1.0.1",
+		"@orbisclub/orbis-sdk": "^0.4.89",
 		"@popperjs/core": "^2.11.8",
 		"@reactour/tour": "^3.5.0",
 		"@semaphore-protocol/data": "^3.11.1",
@@ -108,6 +109,7 @@
 		"react-use": "^17.4.0",
 		"typescript": "^5.1.6",
 		"use-clipboard-copy": "^0.2.0",
+		"use-local-storage-state": "^19.1.0",
 		"wagmi": "^1.4.2",
 		"web-vitals": "^3.4.0",
 		"web3": "^1.10.2"
