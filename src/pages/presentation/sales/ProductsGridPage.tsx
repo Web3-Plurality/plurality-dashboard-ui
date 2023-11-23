@@ -159,8 +159,12 @@ const ProductsGridPage = () => {
 		return "w-100 mb-4 shadow-3d-up-hover shadow-3d-dark"
 	}
 
-	const viewDetails = () => {
-		console.log("see more details")
+	const viewFacebookDetails = () => {
+		setEditPanel(true)
+	}
+
+	const viewTwitterDetails = () => {
+		setEditPanel(true)
 	}
 	
 	const facebookLoginButton = () => {
@@ -208,7 +212,7 @@ const ProductsGridPage = () => {
 						name='Facebook'
 						img={Facebook}
 						customization={false}
-						connectAction={viewDetails}
+						connectAction={viewFacebookDetails}
 						buttonText={"View Details"}
 					/>
 					</div>
@@ -232,7 +236,7 @@ const ProductsGridPage = () => {
 						name='Twitter'
 						img={Twitter}
 						customization={false}
-						connectAction={viewDetails}
+						connectAction={viewTwitterDetails}
 						buttonText={"View Details"}
 					/>
 					</div>
@@ -303,7 +307,7 @@ const ProductsGridPage = () => {
 				noValidate
 				onSubmit={formik.handleSubmit}>
 				<OffCanvasHeader setOpen={setEditPanel}>
-					<OffCanvasTitle id='edit-panel'>
+					{/* <OffCanvasTitle id='edit-panel'>
 						{editItem?.name || 'New Product'}{' '}
 						{editItem?.name ? (
 							<Badge color='primary' isLight>
@@ -314,67 +318,17 @@ const ProductsGridPage = () => {
 								New
 							</Badge>
 						)}
-					</OffCanvasTitle>
+					</OffCanvasTitle> */}
 				</OffCanvasHeader>
 				<OffCanvasBody>
 					<Card>
 						<CardHeader>
-							<CardLabel icon='Photo' iconColor='info'>
-								<CardTitle>Product Image</CardTitle>
-							</CardLabel>
-						</CardHeader>
-						<CardBody>
-							<div className='row'>
-								<div className='col-12'>
-									{editItem?.image ? (
-										<img
-											src={editItem.image}
-											alt=''
-											width={128}
-											height={128}
-											className='mx-auto d-block img-fluid mb-3'
-										/>
-									) : (
-										<PlaceholderImage
-											width={128}
-											height={128}
-											className='mx-auto d-block img-fluid mb-3 rounded'
-										/>
-									)}
-								</div>
-								<div className='col-12'>
-									<div className='row g-4'>
-										<div className='col-12'>
-											<Input type='file' autoComplete='photo' />
-										</div>
-										<div className='col-12'>
-											{editItem && (
-												<Button
-													color='dark'
-													isLight
-													icon='Delete'
-													className='w-100'
-													onClick={() => {
-														setEditItem({ ...editItem, image: null });
-													}}>
-													Delete Image
-												</Button>
-											)}
-										</div>
-									</div>
-								</div>
-							</div>
-						</CardBody>
-					</Card>
-
-					<Card>
-						<CardHeader>
 							<CardLabel icon='Description' iconColor='success'>
-								<CardTitle>Product Details</CardTitle>
+								<CardTitle>Social Media Details</CardTitle>
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
-							<div className='row g-4'>
+							{/* <div className='row g-4'>
 								<div className='col-12'>
 									<FormGroup id='name' label='Name' isFloating>
 										<Input
@@ -431,11 +385,11 @@ const ProductsGridPage = () => {
 										/>
 									</FormGroup>
 								</div>
-							</div>
+							</div> */}
 						</CardBody>
 					</Card>
 				</OffCanvasBody>
-				<div className='p-3'>
+				{/* <div className='p-3'>
 					<Button
 						color='info'
 						icon='Save'
@@ -443,7 +397,7 @@ const ProductsGridPage = () => {
 						isDisable={!formik.isValid && !!formik.submitCount}>
 						Save
 					</Button>
-				</div>
+				</div> */}
 			</OffCanvas>
 		</PageWrapper>
 	);
