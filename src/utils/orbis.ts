@@ -63,7 +63,7 @@ import {
 			// add the data from current web2 profile into the list of existing web2 profiles 
 			profileDataObjects.push(newData);
 			console.log(profileDataObjects);
-			res = await orbis.updateProfile({username:name, description: description, data: {web2ProfilesData:[profileDataObjects]}});
+			res = await orbis.updateProfile({username:name, description: description, data: {web2ProfilesData:profileDataObjects}});
 			console.log(res);
 		  } 
 		  if (res.status !== 200) {
