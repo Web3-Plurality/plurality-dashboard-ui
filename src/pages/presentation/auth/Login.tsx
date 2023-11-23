@@ -16,8 +16,7 @@ import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import useLocalStorageState from 'use-local-storage-state';
-import { addCommitmentAndDidToSnap } from '../../../utils/orbis';
+import { checkIfProfileSaved, createProfile, AssetType } from '../../../utils/orbis';
 
 
 
@@ -125,19 +124,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	? state.isFlask
 	: state.snapsDetected;
 
-	// orbis hooks
-	//const [orbisUser, setOrbisUser] = useState();
-	//const [orbis, setOrbis] = useState(new Orbis({}));
-	
-	// local storage states (signed in user & did of user in case of orbis)
-	//const [signedInUser, setSignedInUser] = useLocalStorageState('signedInUser', {defaultValue: ""});
-	//const [did, setDid] = useLocalStorageState('did', {defaultValue: ""});
-
 	// social logins connection hooks
 	//TODO: Add tick or something in the buttons if a social login is already connected
-	const [isFacebookConnected, setFacebookConnected] = useLocalStorageState('isFacebookConnected', {defaultValue: false});
-	const [isTwitterConnected, setTwitterConnected] = useLocalStorageState('isTwitterConnected', {defaultValue: false});
-	const [isTwitterUseEffectCalled, setTwitterUseEffectCalled] = useState(false);
+	const [isTwitterUseEffectCalled, setTwitterUseEffectCalled] = useState<Boolean>(false);
+	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
+	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 
 	const handleSnapConnect = async () => {
 		try {
@@ -166,7 +157,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  }
 		  else {
 			alert("Metamask Flask not installed. Please install from here: https://metamask.io/flask/");
-
 		  }
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
 		}
@@ -183,20 +173,26 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		// TODO: push correct data to ceramic
 		const username = "some username";
 		const description = 'some description';
-		const reputationalAssetType = "Interests";
 		const reputationalAssetData = ["random interest 1", "random interest 2"];
-		await addCommitmentAndDidToSnap(	process.env.REACT_APP_FACEBOOK!, 
+		await createProfile(	process.env.REACT_APP_FACEBOOK!, 
 									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
 									username,
 									description,
-									reputationalAssetType,
+									AssetType.INTEREST,
 									reputationalAssetData
 								);
 		alert("Facebook profile successfully connected");
 	};	
 	
-
+	//TODO: Call this and add disable buttons on facebook and twitter
+	const checkConnectProfilesOnPageLoad = async () => {
+		const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
+		const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
+		setTwitterConnected(twitter);
+		setFacebookConnected(facebook);
+	}
 	useEffect(() => {
+
 		const params = new URLSearchParams(window.location.search)
 		const idPlatform = params.get('id_platform')!;
 		if (idPlatform == "twitter") {
@@ -204,15 +200,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			// TODO: push correct data to ceramic
 			const username = params.get('username')!;
 			const description = 'some description';
-			const reputationalAssetType = "Interests";
 			const reputationalAssetData = ["random interest 1", "random interest 2"];
 			if ( !isTwitterConnected && !isTwitterUseEffectCalled) {      
 				setTwitterUseEffectCalled(true);
-				addCommitmentAndDidToSnap(process.env.REACT_APP_TWITTER!, 
+				createProfile(process.env.REACT_APP_TWITTER!, 
 										process.env.REACT_APP_TWITTER_GROUP_ID!,
 										username,
 										description,
-										reputationalAssetType,
+										AssetType.INTEREST,
 										reputationalAssetData
 										).catch(console.error);
 			}
