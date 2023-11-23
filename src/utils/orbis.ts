@@ -130,7 +130,7 @@ import {
 				}
 				const result = await getZkProof(profileType, groupId);
 				if (result !== "") {
-					alert("Reputation ownership proved");
+					console.log("Reputation ownership proved");
 				}
 				else {
 					alert("Reputation invalid" );

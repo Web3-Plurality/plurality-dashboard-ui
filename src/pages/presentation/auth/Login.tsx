@@ -18,6 +18,7 @@ import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import { checkIfProfileSaved, createProfile, AssetType } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
+import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 
 
 
@@ -127,7 +128,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	// social logins connection hooks
 	//TODO: Add tick or something in the buttons if a social login is already connected
-	const [isTwitterUseEffectCalled, setTwitterUseEffectCalled] = useState<Boolean>(false);
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 
@@ -166,13 +166,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const params = new URLSearchParams(window.location.search)
 		const isWidget = params.get('isWidget')!;
 		await getTwitterID(isWidget);
-		setTwitterConnected(true);
 	  };
 	  const responseFacebook = async (response: any) => {
 		console.log(response);
+		//TODO: Start a loader here
 		const interests = getFacebookInterests(response);
-		setFacebookConnected(true);
-		// TODO: push correct data to ceramic
 		const username = "some username";
 		const description = 'some description';
 		//const reputationalAssetData = ["random interest 1", "random interest 2"];
@@ -183,36 +181,58 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									AssetType.INTEREST,
 									interests
 								);
-		alert("Facebook profile successfully connected");
+		setFacebookConnected(true);
+
 	};	
 	
-	//TODO: Call this and add disable buttons on facebook and twitter
 	const checkConnectProfilesOnPageLoad = async () => {
-		const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
-		const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
-		setTwitterConnected(twitter);
-		setFacebookConnected(facebook);
-	}
-	useEffect(() => {
+		if (isMetaMaskReady) {
+			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
+			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
+			setTwitterConnected(twitter);
+			setFacebookConnected(facebook);
 
+			if (facebook && twitter) {
+				// close the browser tab
+				alert("All required profiles have been connected. Closing the widget");
+				window.open("about:blank", "_self");
+				window.close();
+			}
+		}
+	}
+
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search)
+		const widget = params.get('isWidget')!;
+		if (widget == "true") {
+			setIsWidget(true);
+			checkConnectProfilesOnPageLoad().catch(console.error);
+		}
+		if ((widget=="false" || !widget) && isMetaMaskReady) {
+			navigate(`/?isWidget=false`);
+
+		} 
+	}, [isMetaMaskReady])
+	
+	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const idPlatform = params.get('id_platform')!;
+
 		if (idPlatform == "twitter") {
 			const params = new URLSearchParams(window.location.search);
-			// TODO: push correct data to ceramic
 			const username = params.get('username')!;
 			const description = 'some description';
-			const reputationalAssetData = ["random interest 1", "random interest 2"];
-			if ( !isTwitterConnected && !isTwitterUseEffectCalled) {      
-				setTwitterUseEffectCalled(true);
-				createProfile(process.env.REACT_APP_TWITTER!, 
-										process.env.REACT_APP_TWITTER_GROUP_ID!,
-										username,
-										description,
-										AssetType.INTEREST,
-										reputationalAssetData
-										).catch(console.error);
-			}
+			//TODO: Start a loader here
+			createProfile(process.env.REACT_APP_TWITTER!, 
+						process.env.REACT_APP_TWITTER_GROUP_ID!,
+						username,
+						description,
+						AssetType.INTEREST,
+						getTwitterInterests({})	//TODO: Fetch more information from twitter
+						).catch(console.error);
+			
+			setTwitterConnected(true);
+
 		}
 	}, [])
 
@@ -293,7 +313,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									)}
 									{/* END :: Snap install */}
 									{/* BEGIN :: Social Login */}
-									{!signInPassword && isMetaMaskReady && state.installedSnap && isWidget && (
+									{isMetaMaskReady && state.installedSnap && isWidget && (
 										<>
 										<LoginHeader isSnap={false} />
 

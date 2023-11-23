@@ -1,6 +1,7 @@
-export const getTwitterInterestsForLens = (userProfile: any) => { 
+export const getTwitterInterests = (userProfile: any) => { 
     var interests:string[] = [];
-    interests.push("LENS");   
+    interests.push("CRYPTO");   
+    interests.push("SOCIAL_MEDIA_PLATFORMS");   
     interests.push("CRYPTO__WEB3_SOCIAL");   
     return interests;
 }
