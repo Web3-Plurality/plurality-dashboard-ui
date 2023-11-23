@@ -17,6 +17,7 @@ import { defaultSnapOrigin } from '../../../config';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import { checkIfProfileSaved, createProfile, AssetType } from '../../../utils/orbis';
+import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 
 
 
@@ -169,17 +170,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	  };
 	  const responseFacebook = async (response: any) => {
 		console.log(response);
+		const interests = getFacebookInterests(response);
 		setFacebookConnected(true);
 		// TODO: push correct data to ceramic
 		const username = "some username";
 		const description = 'some description';
-		const reputationalAssetData = ["random interest 1", "random interest 2"];
+		//const reputationalAssetData = ["random interest 1", "random interest 2"];
 		await createProfile(	process.env.REACT_APP_FACEBOOK!, 
 									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
 									username,
 									description,
 									AssetType.INTEREST,
-									reputationalAssetData
+									interests
 								);
 		alert("Facebook profile successfully connected");
 	};	
@@ -307,6 +309,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												render={renderProps => (
 													<Button
 													isOutline
+													isDisable= {isFacebookConnected==true ? true: false}
 													color={darkModeStatus ? 'light' : 'dark'}
 													className={classNames('w-100 py-3', {
 														'border-light': !darkModeStatus,
@@ -315,7 +318,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													icon='CustomFacebook'
 													onClick={renderProps.onClick}
 													>
-													Connect Facebook
+														{!isFacebookConnected && (
+															<>
+															Connect Facebook
+															</>
+														)}
+														{isFacebookConnected && (
+															<>
+															Connected
+															</>
+														)}
 												</Button>
 												)}
 											/>
@@ -323,6 +335,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											<div className='col-12 mt-3'>
 												<Button
 													isOutline
+													isDisable= {isTwitterConnected==true ? true: false}
 													color={darkModeStatus ? 'light' : 'dark'}
 													className={classNames('w-100 py-3', {
 														'border-light': !darkModeStatus,
@@ -330,7 +343,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													})}
 													icon='CustomTwitter'
 													onClick={handleOnTwitterClick}>
-													Continue Twitter
+													{!isTwitterConnected && (
+															<>
+															Connect Twitter
+															</>
+														)}
+														{isTwitterConnected && (
+															<>
+															Connected
+															</>
+														)}
 												</Button>
 											</div>
 											</form>
