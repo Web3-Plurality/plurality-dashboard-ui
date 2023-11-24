@@ -170,19 +170,20 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	  const responseFacebook = async (response: any) => {
 		console.log(response);
 		//TODO: Start a loader here
-		const interests = getFacebookInterests(response);
-		const username = "some username";
-		const description = 'some description';
-		//const reputationalAssetData = ["random interest 1", "random interest 2"];
-		await createProfile(	process.env.REACT_APP_FACEBOOK!, 
-									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
-									username,
-									description,
-									AssetType.INTEREST,
-									interests
-								);
-		setFacebookConnected(true);
-
+		if (response.accessToken) {
+			const interests = getFacebookInterests(response);
+			const username = "some username";
+			const description = 'some description';
+			//const reputationalAssetData = ["random interest 1", "random interest 2"];
+			await createProfile(	process.env.REACT_APP_FACEBOOK!, 
+										process.env.REACT_APP_FACEBOOK_GROUP_ID!,
+										username,
+										description,
+										AssetType.INTEREST,
+										interests
+									);
+			setFacebookConnected(true);
+		}
 	};	
 	
 	const checkConnectProfilesOnPageLoad = async () => {

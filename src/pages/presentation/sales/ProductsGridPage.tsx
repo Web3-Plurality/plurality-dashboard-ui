@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useFormik } from 'formik';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
@@ -16,10 +16,7 @@ import Card, {
 	CardLabel,
 	CardTitle,
 } from '../../../components/bootstrap/Card';
-import Badge from '../../../components/bootstrap/Badge';
-import Input from '../../../components/bootstrap/forms/Input';
-import PlaceholderImage from '../../../components/extras/PlaceholderImage';
-import FormGroup from '../../../components/bootstrap/forms/FormGroup';
+import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { demoPagesMenu } from '../../../menu';
 import Facebook from '../../../assets/img/abstract/facebook.png';
 import Twitter from '../../../assets/img/abstract/twitter.png';
@@ -31,7 +28,12 @@ import Pinterest from '../../../assets/img/abstract/pinterest.png';
 import Medium from '../../../assets/img/abstract/medium.png';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { is } from 'date-fns/locale';
+import { getFacebookInterests } from '../../../utils/facebookUserInterest';
+import { getTwitterInterests } from '../../../utils/twitterUserInterest';
+import { checkIfProfileSaved, createProfile, AssetType, getProfileData } from '../../../utils/orbis';
+import { MetaMaskContext, MetamaskActions } from '../../../hooks';
+import { defaultSnapOrigin } from '../../../config';
+import { useAccount } from 'wagmi';
 
 interface IValues {
 	name: string;
@@ -81,8 +83,14 @@ const ProductsGridPage = () => {
 	const [data, setData] = useState(tableData);
 	const [editItem, setEditItem] = useState<IValues | null>(null);
 	const [editPanel, setEditPanel] = useState<boolean>(false);
-	const [isFacebookConnected, setIsFacebookConnected] = useState<boolean>(false);
-	const [isTwitterConnected, setIsTwitterConnected] = useState<boolean>(false);
+	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
+	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
+	const [sidePanelData, setSidePanelData] = useState<any>();
+	const [state, dispatch] = useContext(MetaMaskContext);
+	const { address, connector, isConnected } = useAccount()
+	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
+	? state.isFlask
+	: state.snapsDetected;
 
 	function handleRemove(id: number) {
 		const newData = data.filter((item) => item.id !== id);
@@ -129,10 +137,42 @@ const ProductsGridPage = () => {
 	}, [editItem]);
 
 	useEffect(() => {
+		const params = new URLSearchParams(window.location.search)
+		const widget = params.get('isWidget')!;
+		checkConnectProfilesOnPageLoad().catch(console.error);
+	}, [isMetaMaskReady])
+
+	useEffect(() => {
 		if ( !isTwitterConnected ) {      
-		  twitter().catch(console.error);
+			const params = new URLSearchParams(window.location.search)
+			const idPlatform = params.get('id_platform')!;
+	
+			if (idPlatform == "twitter") {
+				const params = new URLSearchParams(window.location.search);
+				const username = params.get('username')!;
+				const description = 'some description';
+				//TODO: Start a loader here
+				createProfile(process.env.REACT_APP_TWITTER!, 
+							process.env.REACT_APP_TWITTER_GROUP_ID!,
+							username,
+							description,
+							AssetType.INTEREST,
+							getTwitterInterests({})	//TODO: Fetch more information from twitter
+							).catch(console.error);
+				
+				setTwitterConnected(true);
+			}
 		}
 	  }, [])
+
+	  const checkConnectProfilesOnPageLoad = async () => {
+		if (isMetaMaskReady) {
+			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
+			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
+			setTwitterConnected(twitter);
+			setFacebookConnected(facebook);
+		}
+	}
 
 	const twitter = async () => {
 		const params = new URLSearchParams(window.location.search)
@@ -140,7 +180,7 @@ const ProductsGridPage = () => {
 		const platform = params.get('id_platform')!;
 	
 		if (username!=null && platform == "twitter") {
-			setIsTwitterConnected(true);
+			setTwitterConnected(true);
 	 	}
 	}
 
@@ -151,7 +191,21 @@ const ProductsGridPage = () => {
 	  };
 	
 	const responseFacebook = async (response: any) => {
-		setIsFacebookConnected(true);
+		if (response.accessToken) {
+			
+			const interests = getFacebookInterests(response);
+			const username = "some username";
+			const description = 'some description';
+			//const reputationalAssetData = ["random interest 1", "random interest 2"];
+			await createProfile(	process.env.REACT_APP_FACEBOOK!, 
+										process.env.REACT_APP_FACEBOOK_GROUP_ID!,
+										username,
+										description,
+										AssetType.INTEREST,
+										interests
+									);
+			setFacebookConnected(true);
+		}
 		console.log(response);
 	};
 	
@@ -159,12 +213,30 @@ const ProductsGridPage = () => {
 		return "w-100 mb-4 shadow-3d-up-hover shadow-3d-dark"
 	}
 
-	const viewFacebookDetails = () => {
+	const viewFacebookDetails = async () => {
+		const detail = await getSocialMediaDetails("facebook")
+		console.log(detail)
+		setSidePanelData(detail)
 		setEditPanel(true)
 	}
 
-	const viewTwitterDetails = () => {
+	const viewTwitterDetails = async () => {
+		const detail =  await getSocialMediaDetails("twitter")
+		console.log(detail)
+		setSidePanelData(detail)
 		setEditPanel(true)
+	}
+
+	const getSocialMediaDetails = async (platform: string) => {
+		console.log(address)
+		const socialMediaDetails = await getProfileData(address || "")
+		console.log(socialMediaDetails)
+		for (let detail of socialMediaDetails) {
+			if (detail.dataFetchedFrom === platform)
+			{
+				return detail
+			}
+		}
 	}
 	
 	const facebookLoginButton = () => {
@@ -324,10 +396,13 @@ const ProductsGridPage = () => {
 					<Card>
 						<CardHeader>
 							<CardLabel icon='Description' iconColor='success'>
-								<CardTitle>Social Media Details</CardTitle>
+								<CardTitle>Your interests</CardTitle>
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
+							<div>
+								{sidePanelData?.assetData.map((interest: any) =><li>{interest}</li>)}							
+							</div>
 							{/* <div className='row g-4'>
 								<div className='col-12'>
 									<FormGroup id='name' label='Name' isFloating>
