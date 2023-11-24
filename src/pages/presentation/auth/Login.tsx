@@ -190,11 +190,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	};	
 	
 	const checkConnectProfilesOnPageLoad = async () => {
-		if (isMetaMaskReady) {
+		if (isMetaMaskReady && state.installedSnap) {
 			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
 			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
-			setTwitterConnected(twitter);
-			setFacebookConnected(facebook);
+			if (twitter == true) setTwitterConnected(twitter);
+			if (facebook == true) setFacebookConnected(facebook);
 
 			if (facebook && twitter) {
 				// close the browser tab
@@ -219,12 +219,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			navigate(`/?isWidget=false`);
 
 		} 
-	}, [isMetaMaskReady])
+	}, [isMetaMaskReady,state])
 	
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const idPlatform = params.get('id_platform')!;
-		if (idPlatform == "twitter") {
+		if (idPlatform == "twitter" ) {
 			const params = new URLSearchParams(window.location.search);
 			const username = params.get('username')!;
 			const description = 'some description';
@@ -236,7 +236,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						AssetType.INTEREST,
 						getTwitterInterests({})	//TODO: Fetch more information from twitter
 						).catch(console.error);
-			
+			//console.log("****All done now connecting twitter");
 			setTwitterConnected(true);
 
 		}

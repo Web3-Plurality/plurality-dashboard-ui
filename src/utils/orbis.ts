@@ -96,7 +96,6 @@ import {
 		let profileDataObjects: ProfileData[] = data.details.profile?.data.web2ProfilesData;
 		return profileDataObjects;
 	}
-	//TODO: return the stream id from this function
 	export const createProfile = async (profileType: string, 
 												groupId: string,
 												username: string,
@@ -110,10 +109,6 @@ import {
 			return;
 		}
 		else {
-			// TODO: Confirm that this DID is indeed the one that's being used
-			// See difference between did:key and did:pkh
-			// TODO: Add this DID in the snap
-			// TODO: If this DID and commitment already in snap then return the same one, do not create new
 			const did = await orbisConnect();
 
 			const [res, commitment] =  await saveProfile(profileType, groupId);
