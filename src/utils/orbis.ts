@@ -106,7 +106,7 @@ import {
 													
 		const isStored =  await checkIfProfileSaved(profileType);
 		if (isStored) {
-			alert("Your profile has already been linked. Nothing more to do :) ");
+			console.log("Your profile has already been linked. Nothing more to do :) ");
 			return;
 		}
 		else {

@@ -24,8 +24,9 @@ import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 
 interface ILoginHeaderProps {
 	isSnap?: boolean;
+	callingDApp?: String;
 }
-const LoginHeader: FC<ILoginHeaderProps> = ({ isSnap }) => {
+const LoginHeader: FC<ILoginHeaderProps> = ({ isSnap, callingDApp }) => {
 	if (isSnap) {
 		return (
 			<>
@@ -38,12 +39,13 @@ const LoginHeader: FC<ILoginHeaderProps> = ({ isSnap }) => {
 		<>
 			<div className='text-center h1 fw-bold mt-5'>Reputation Connect</div>
 			<div className='text-center h4 text-muted mb-5'>Connect your social profiles to:</div>
-			<div className='text-center h5 text-muted mb-5'>https://dapp-name.com</div>
+			<div className='text-center h5 text-muted mb-5'>{callingDApp}</div>
 		</>
 	);
 };
 LoginHeader.defaultProps = {
 	isSnap: true,
+	callingDApp: "http://some-dapp.com"
 };
 
 interface ILoginProps {
@@ -56,7 +58,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isWidget, setIsWidget] = useState(false);  
 	const [signInPassword, setSignInPassword] = useState<boolean>(false);
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
-
+	
 	const navigate = useNavigate();
 	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
 
@@ -130,6 +132,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	//TODO: Add tick or something in the buttons if a social login is already connected
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
+	const [callingDApp, setCallingDApp] = useState<String>("");
 
 	const handleSnapConnect = async () => {
 		try {
@@ -195,9 +198,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 			if (facebook && twitter) {
 				// close the browser tab
-				alert("All required profiles have been connected. Closing the widget");
-				window.open("about:blank", "_self");
-				window.close();
+				//alert("All required profiles have been connected. Closing the widget");
+				//window.open("about:blank", "_self");
+				//window.close();
 			}
 		}
 	}
@@ -205,7 +208,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const widget = params.get('isWidget')!;
+		const dAppName = params.get('origin')!; 
+
 		if (widget == "true") {
+			setCallingDApp(dAppName);
 			setIsWidget(true);
 			checkConnectProfilesOnPageLoad().catch(console.error);
 		}
@@ -218,7 +224,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const idPlatform = params.get('id_platform')!;
-
 		if (idPlatform == "twitter") {
 			const params = new URLSearchParams(window.location.search);
 			const username = params.get('username')!;
@@ -275,7 +280,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 									{!signInPassword && (!isMetaMaskReady || !state.installedSnap) && (
 										<>
-											<LoginHeader isSnap={true} />
+											<LoginHeader isSnap={true} callingDApp={callingDApp}/>
 
 											<form className='row g-4'>
 											<div className='col-12 mt-3'>
@@ -316,7 +321,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									{/* BEGIN :: Social Login */}
 									{isMetaMaskReady && state.installedSnap && isWidget && (
 										<>
-										<LoginHeader isSnap={false} />
+										<LoginHeader isSnap={false} callingDApp={callingDApp} />
 
 											<form className='row g-4'>
 											<div className='col-12 mt-3'>
