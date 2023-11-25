@@ -34,6 +34,7 @@ import { checkIfProfileSaved, createProfile, AssetType, getProfileData } from '.
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 import { useAccount } from 'wagmi';
+import { useNavigate } from 'react-router-dom';
 
 interface IValues {
 	name: string;
@@ -88,6 +89,8 @@ const ProductsGridPage = () => {
 	const [sidePanelData, setSidePanelData] = useState<any>();
 	const [state, dispatch] = useContext(MetaMaskContext);
 	const { address, connector, isConnected } = useAccount()
+	const navigate = useNavigate();
+
 	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
 	? state.isFlask
 	: state.snapsDetected;
@@ -139,6 +142,9 @@ const ProductsGridPage = () => {
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const widget = params.get('isWidget')!;
+		if ((widget=="false" || !widget) && !isMetaMaskReady) {
+			navigate(`/auth-pages/login?isWidget=false`);
+		} 
 		checkConnectProfilesOnPageLoad().catch(console.error);
 	}, [isMetaMaskReady])
 
