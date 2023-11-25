@@ -95,24 +95,14 @@ export const checkProfile = async (profileType: string): Promise<Boolean> => {
  */
 
 export const saveProfile = async (profileType: string, groupId: string): Promise<[boolean, string]> => {
-  let acceptance = await window.ethereum.request({
-    method: 'wallet_invokeSnap',
-    params: { snapId: defaultSnapOrigin, request: { method: 'commitment_request', params: {source:profileType} }},
-  });
-  if (acceptance) {
-    let commitment = await window.ethereum.request({
-      method: 'wallet_invokeSnap',
-      params: { snapId: defaultSnapOrigin, request: { method: 'commitment_fetch', params: {source:profileType} } },
-    });
-    console.log(commitment);
-    await createGroup(groupId);
-    await addMemberToGroup(commitment, groupId);
-    return [true, commitment!.toString()];
-  }
-  else {
-    console.log("User rejected the request for commitment");
-    return [false,""];
-  }
+      const commitment = await window.ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: { snapId: defaultSnapOrigin, request: { method: 'commitment_request', params: {source:profileType} }},
+      });
+      console.log("identityCommitment " + commitment);
+      await createGroup(groupId);
+      await addMemberToGroup(commitment, groupId);
+      return [true, commitment!.toString()];
 };
 
 /** 
@@ -139,7 +129,7 @@ export const getZkProof = async (profileType: string, groupId: string) : Promise
 
 
   const members = await semaphoreEthers.getGroupMembers(groupId);
-  console.log(members);
+  //console.log(members);
   const group = new Group(groupId, 20, members);
   const signal = 1;
   /*const commitment=identity.commitment;
