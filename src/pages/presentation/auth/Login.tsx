@@ -234,11 +234,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						username,
 						description,
 						AssetType.INTEREST,
-						getTwitterInterests({})	//TODO: Fetch more information from twitter
-						).catch(console.error);
-			//console.log("****All done now connecting twitter");
+						getTwitterInterests({})).catch(console.error);
 			setTwitterConnected(true);
-
 		}
 	}, [])
 

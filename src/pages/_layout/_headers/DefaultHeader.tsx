@@ -10,6 +10,8 @@ const DefaultHeader = () => {
 	return (
 		<Header>
 			<HeaderLeft>
+			<></>
+
 				{/* <Navigation
 					menu={{ ...pageLayoutTypesPagesMenu, ...componentPagesMenu }}
 					id='header-top-menu'

@@ -379,6 +379,8 @@ const ProductsGridPage = () => {
 				noValidate
 				onSubmit={formik.handleSubmit}>
 				<OffCanvasHeader setOpen={setEditPanel}>
+				<></>
+
 					{/* <OffCanvasTitle id='edit-panel'>
 						{editItem?.name || 'New Product'}{' '}
 						{editItem?.name ? (
