@@ -75,13 +75,13 @@ export const sendHello = async () => {
  */
 
 export const checkProfile = async (profileType: string): Promise<Boolean> => {
-    console.log("In isCommitmentAlreadyStored");
+    //console.log("In isCommitmentAlreadyStored");
     try {
       let commitment = await window.ethereum.request({
         method: 'wallet_invokeSnap',
         params: { snapId: defaultSnapOrigin, request: { method: 'commitment_fetch', params: {source:profileType} } },
       });
-      console.log(commitment);
+      //console.log(commitment);
       if (commitment=="") return false;
       else return true; 
     } catch (e) {

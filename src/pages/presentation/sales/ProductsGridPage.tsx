@@ -142,11 +142,6 @@ const ProductsGridPage = () => {
 	}, [editItem]);
 
 	useEffect(() => {
-		const params = new URLSearchParams(window.location.search)
-		const widget = params.get('isWidget')!;
-		if ((widget=="false" || !widget) && !state.installedSnap) {
-			navigate(`/auth-pages/login?isWidget=false`);
-		} 
 		checkConnectProfilesOnPageLoad().catch(console.error);
 	}, [state])
 
@@ -175,9 +170,15 @@ const ProductsGridPage = () => {
 	  }, [])
 
 	  const checkConnectProfilesOnPageLoad = async () => {
-		if (isMetaMaskReady) {
+		const params = new URLSearchParams(window.location.search)
+		const widget = params.get('isWidget')!;
+		const snap = await getSnap();
+		if ((widget=="false" || !widget) && !snap) {
+			navigate(`/auth-pages/login?isWidget=false`);
+		} 
+		else {
 			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
-			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
+			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!);
 			setTwitterConnected(twitter);
 			setFacebookConnected(facebook);
 		}
