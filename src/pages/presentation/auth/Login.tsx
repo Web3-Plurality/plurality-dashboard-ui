@@ -160,7 +160,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			alert("Please install flask which is the development version of Metamask from here: https://metamask.io/flask/");
 		  }
 		  else {
-			alert("Metamask Flask not installed. Please install from here: https://metamask.io/flask/");
+			// alert("Metamask Flask not installed. Please install from here: https://metamask.io/flask/");
+			alert("Snap installation failed, please make sure you are using Metamask Flask (can be downloaded from https://metamask.io/flask/) and try again");
 		  }
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
 		}
@@ -249,7 +250,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
 						<Card className='shadow-3d-dark' data-tour='login-page'>
 							<CardBody>
-								<div className='text-center my-5' style={{marginLeft:"40%"}}>
+								<div className='text-center my-5'>
 									<Link
 										to='/'
 										className={classNames(

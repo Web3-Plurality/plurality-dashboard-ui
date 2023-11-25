@@ -37,7 +37,9 @@ const User = () => {
 				onClick={() => setCollapseStatus(!collapseStatus)}>
 				<div className='user-info'>
 					<div className='user-name d-flex align-items-center'>
-						{isConnected ? address : ""}
+						<p className='truncate-text'>
+							{isConnected ? address : ""}
+						</p>	
 					</div>
 					{/* <div className='user-sub-title'>{userData?.position}</div> */}
 				</div>

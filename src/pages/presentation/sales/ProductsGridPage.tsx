@@ -148,7 +148,7 @@ const ProductsGridPage = () => {
 			navigate(`/auth-pages/login?isWidget=false`);
 		} 
 		checkConnectProfilesOnPageLoad().catch(console.error);
-	}, [isMetaMaskReady,state])
+	}, [state])
 
 	useEffect(() => {
 		if ( !isTwitterConnected ) {      
