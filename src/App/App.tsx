@@ -21,6 +21,8 @@ import { polygonMumbai, polygon } from "wagmi/chains";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { InjectedConnector } from "wagmi/connectors/injected";
+import LoadingProvider from '../utils/LoadingProvider';
+import Spinner from '../utils/Spinner';
 
 const App = () => {
 	getOS();
@@ -95,6 +97,8 @@ const App = () => {
 
 	return (
 		<ThemeProvider theme={theme}>
+			<LoadingProvider>
+      		<Spinner />
 			<MetaMaskProvider>
 			<WagmiConfig config={config}>
 			<TourProvider steps={steps} styles={styles} showNavigation={false} showBadge={false}>
@@ -116,6 +120,7 @@ const App = () => {
 			</TourProvider>
 			</WagmiConfig>
 			</MetaMaskProvider>
+			</LoadingProvider>
 		</ThemeProvider>
 	);
 };

@@ -35,6 +35,7 @@ import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 import { useAccount } from 'wagmi';
 import { useNavigate } from 'react-router-dom';
+import LoadingContext from '../../../utils/LoadingContext'
 
 interface IValues {
 	name: string;
@@ -89,6 +90,7 @@ const ProductsGridPage = () => {
 	const [sidePanelData, setSidePanelData] = useState<any>();
 	const [state, dispatch] = useContext(MetaMaskContext);
 	const { address, connector, isConnected } = useAccount()
+	const { showLoading, hideLoading } = useContext(LoadingContext)
 	const navigate = useNavigate();
 
 	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
@@ -142,18 +144,18 @@ const ProductsGridPage = () => {
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const widget = params.get('isWidget')!;
-		if ((widget=="false" || !widget) && !isMetaMaskReady) {
+		if ((widget=="false" || !widget) && !state.installedSnap) {
 			navigate(`/auth-pages/login?isWidget=false`);
 		} 
 		checkConnectProfilesOnPageLoad().catch(console.error);
-	}, [isMetaMaskReady])
+	}, [isMetaMaskReady,state])
 
 	useEffect(() => {
 		if ( !isTwitterConnected ) {      
 			const params = new URLSearchParams(window.location.search)
 			const idPlatform = params.get('id_platform')!;
-	
 			if (idPlatform == "twitter") {
+				showLoading();
 				const params = new URLSearchParams(window.location.search);
 				const username = params.get('username')!;
 				const description = 'some description';
@@ -167,6 +169,7 @@ const ProductsGridPage = () => {
 							).catch(console.error);
 				
 				setTwitterConnected(true);
+				hideLoading();
 			}
 		}
 	  }, [])
@@ -198,7 +201,7 @@ const ProductsGridPage = () => {
 	
 	const responseFacebook = async (response: any) => {
 		if (response.accessToken) {
-			
+			showLoading();
 			const interests = getFacebookInterests(response);
 			const username = "some username";
 			const description = 'some description';
@@ -212,6 +215,7 @@ const ProductsGridPage = () => {
 									);
 			setFacebookConnected(true);
 		}
+		hideLoading();
 		console.log(response);
 	};
 	
@@ -234,7 +238,6 @@ const ProductsGridPage = () => {
 	}
 
 	const getSocialMediaDetails = async (platform: string) => {
-		console.log(address)
 		const socialMediaDetails = await getProfileData(address || "")
 		console.log(socialMediaDetails)
 		for (let detail of socialMediaDetails) {
@@ -409,7 +412,7 @@ const ProductsGridPage = () => {
 						</CardHeader>
 						<CardBody>
 							<div>
-								{sidePanelData?.assetData.map((interest: any) =><li>{interest}</li>)}							
+								{sidePanelData?.assetData.map((interest: any) =><li key={interest}>{interest}</li>)}							
 							</div>
 							{/* <div className='row g-4'>
 								<div className='col-12'>

@@ -215,9 +215,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			setIsWidget(true);
 			checkConnectProfilesOnPageLoad().catch(console.error);
 		}
-		if ((widget=="false" || !widget) && isMetaMaskReady) {
+		if ((widget=="false" || !widget) && state.installedSnap) {
 			navigate(`/?isWidget=false`);
-
 		} 
 	}, [isMetaMaskReady,state])
 	
