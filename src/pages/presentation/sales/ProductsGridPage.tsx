@@ -146,10 +146,10 @@ const ProductsGridPage = () => {
 	}, [state])
 
 	useEffect(() => {
-		if ( !isTwitterConnected ) {      
+		if ( !isTwitterConnected ) {  
 			const params = new URLSearchParams(window.location.search)
 			const idPlatform = params.get('id_platform')!;
-			if (idPlatform == "twitter") {
+			if (idPlatform == "twitter") { 
 				showLoading();
 				const params = new URLSearchParams(window.location.search);
 				const username = params.get('username')!;
@@ -161,10 +161,11 @@ const ProductsGridPage = () => {
 							description,
 							AssetType.INTEREST,
 							getTwitterInterests({})	//TODO: Fetch more information from twitter
-							).catch(console.error);
-				
-				setTwitterConnected(true);
-				hideLoading();
+							).then(res => {
+								hideLoading();
+								// Add condition for making sure that the user has indeed connected
+								setTwitterConnected(true);
+							})		
 			}
 		}
 	  }, [])
