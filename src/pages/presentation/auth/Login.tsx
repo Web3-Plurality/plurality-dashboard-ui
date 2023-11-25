@@ -19,6 +19,7 @@ import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props
 import { checkIfProfileSaved, createProfile, AssetType } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
+import LoadingContext from '../../../utils/LoadingContext';
 
 
 
@@ -133,6 +134,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 	const [callingDApp, setCallingDApp] = useState<String>("");
+	const { showLoading, hideLoading } = useContext(LoadingContext);
+
 
 	const handleSnapConnect = async () => {
 		try {
@@ -173,20 +176,30 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	  };
 	  const responseFacebook = async (response: any) => {
 		console.log(response);
-		//TODO: Start a loader here
 		if (response.accessToken) {
+			showLoading();
 			const interests = getFacebookInterests(response);
 			const username = "some username";
 			const description = 'some description';
-			//const reputationalAssetData = ["random interest 1", "random interest 2"];
-			await createProfile(	process.env.REACT_APP_FACEBOOK!, 
-										process.env.REACT_APP_FACEBOOK_GROUP_ID!,
-										username,
-										description,
-										AssetType.INTEREST,
-										interests
-									);
-			setFacebookConnected(true);
+			try {
+			const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!, 
+									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
+									username,
+									description,
+									AssetType.INTEREST,
+									interests
+								);
+			if (isProfileCreated) 
+				setFacebookConnected(true);
+			else
+				console.log("Profile could not be created. Please try again");
+
+			hideLoading();
+			}
+			catch (error) {
+				console.log(error);
+				hideLoading();
+			}
 		}
 	};	
 	
@@ -219,25 +232,34 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if ((widget=="false" || !widget) && state.installedSnap) {
 			navigate(`/?isWidget=false`);
 		} 
-	}, [isMetaMaskReady,state])
+	}, [state])
 	
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const idPlatform = params.get('id_platform')!;
-		if (idPlatform == "twitter" ) {
+		if (idPlatform == "twitter" && state.installedSnap) {
 			const params = new URLSearchParams(window.location.search);
 			const username = params.get('username')!;
 			const description = 'some description';
-			//TODO: Start a loader here
+			showLoading();
 			createProfile(process.env.REACT_APP_TWITTER!, 
 						process.env.REACT_APP_TWITTER_GROUP_ID!,
 						username,
 						description,
 						AssetType.INTEREST,
-						getTwitterInterests({})).catch(console.error);
-			setTwitterConnected(true);
+						getTwitterInterests({})).then(isProfileCreated => {
+							if (isProfileCreated) 
+							// Add condition for making sure that the user has indeed connected
+								setTwitterConnected(true);
+							else 
+								console.log("Profile could not be created. Please try again");
+							hideLoading();
+						}).catch(error => {
+							console.log(error);
+							hideLoading();
+						})
 		}
-	}, [])
+	}, [state])
 
 
 	return (

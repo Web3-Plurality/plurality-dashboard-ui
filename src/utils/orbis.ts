@@ -30,7 +30,7 @@ import {
 			return res.did;
 		} else {
 			console.log("Error connecting to Ceramic: ", res);
-			alert("User rejected the orbis sign in request");
+			//alert("User rejected the orbis sign in request");
 			//alert("Error connecting to Ceramic.");
 			return "";
 		}
@@ -101,34 +101,40 @@ import {
 												username: string,
 												description: string,
 												reputationalAssetType: AssetType,
-												reputationalAssetData: string[]) => {
+												reputationalAssetData: string[]): Promise<Boolean> => {
 													
 		const isStored =  await checkIfProfileSaved(profileType);
 		if (isStored) {
 			console.log("Your profile has already been linked. Nothing more to do :) ");
-			return;
+			return true;
 		}
 		else {
 			const did = await orbisConnect();
+			if (did == "") {
+				console.log("Orbis connect request was rejected");
+				return false;
+			}
 
 			const [res, commitment] =  await saveProfile(profileType, groupId);
 			if (!res) {
 				alert("User rejected the authentication request.");
-				return -1;
+				return false;
 			}
 			else {
 				
 				const res = await addDataToOrbis(profileType, did, username, description, reputationalAssetType, reputationalAssetData);
 				if (res == -1) {
 					console.log("Could not add profile data to ceramic. Returning");
-					return -1;
+					return false;
 				}
 				const result = await getZkProof(profileType, groupId);
 				if (result !== "") {
 					console.log("Reputation ownership proved");
+					return true;
 				}
 				else {
 					alert("Reputation invalid" );
+					return false;
 				}
 			}
 		}

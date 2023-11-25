@@ -86,7 +86,7 @@ export const createGroup = async (groupId: string) => {
     const receipt = await tx
     .send({
       from: signer.address,
-      gasLimit: 9100000
+      gasLimit: 6100000
     })
     .once("transactionHash", (txhash: any) => {
       console.log(`Mining addMemberToGroup transaction ...`);
