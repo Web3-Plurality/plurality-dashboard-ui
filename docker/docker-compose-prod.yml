@@ -6,7 +6,7 @@ services:
     plurality-verifier-be:
         container_name: plurality-verifier-be
         build:
-            context: ./plurality-backend-api
+            context: ../plurality-backend-api
             dockerfile: Dockerfile
         environment:
             PORT: 5000
@@ -15,6 +15,8 @@ services:
             TWITTER_CLIENT_SECRET: ${TWITTER_CLIENT_SECRET}
             SIGNER_PRIVATE_KEY: ${VERIFIER_WALLET_PRIVATE_KEY}
             VERIFIER_UI_URL: ${VERIFIER_UI_URL}
+            DASHBOARD_UI_URL: ${DASHBOARD_UI_URL}
+            WIDGET_UI_URL: ${WIDGET_UI_URL}
         labels:
             - 'traefik.enable=true'
             - 'traefik.http.routers.plurality-verifier-be-route.service=plurality-verifier-be-service'
@@ -33,7 +35,7 @@ services:
     plurality-verifier-ui:
         container_name: plurality-verifier-ui
         build:
-            context: .
+            context: ../
             dockerfile: Dockerfile
         labels:
             - 'traefik.enable=true'
