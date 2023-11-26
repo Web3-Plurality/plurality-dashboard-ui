@@ -172,7 +172,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	  const handleOnTwitterClick = async () => {
 		const params = new URLSearchParams(window.location.search)
 		const isWidget = params.get('isWidget')!;
-		await getTwitterID(isWidget);
+		const origin = params.get('origin')!;
+		await getTwitterID(isWidget, origin);
 	  };
 	  const responseFacebook = async (response: any) => {
 		console.log(response);

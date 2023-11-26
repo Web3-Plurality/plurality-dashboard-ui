@@ -200,9 +200,7 @@ const ProductsGridPage = () => {
 	}
 
 	const loginTwitter = async () => {
-		const params = new URLSearchParams(window.location.search)
-		const isWidget = params.get('isWidget')!;
-		await getTwitterID(isWidget);
+		await getTwitterID("false", "plurality-dashboard");
 	  };
 	
 	  const responseFacebook = async (response: any) => {
