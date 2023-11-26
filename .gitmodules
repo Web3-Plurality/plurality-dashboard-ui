@@ -4,3 +4,6 @@
 [submodule "plurality-metamask-snap"]
 	path = plurality-metamask-snap
 	url = https://github.com/Web3-Plurality/plurality-metamask-snap
+[submodule "plurality-repconnect-demo"]
+	path = plurality-repconnect-demo
+	url = https://github.com/Web3-Plurality/plurality-repconnect-demo.git
