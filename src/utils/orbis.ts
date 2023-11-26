@@ -3,8 +3,10 @@ import {
 	checkProfile,
 	saveProfile,
 	getZkProof,
+	getCommitment,
   } from './snap';
 
+  const Cryptr = require('cryptr');
   const orbis = new Orbis();
 
 
@@ -43,8 +45,14 @@ import {
 			return -1;
 		  }
 
+		  const secret = await getCommitment(profileType);
+
+		  const cryptr = new Cryptr(secret);
+		  const encryptedString = cryptr.encrypt(repAssetData);
+
+
 		  // the data fetched from web2 profile to be pushed to ceramic
-		  let newData:ProfileData = {dataFetchedFrom: profileType, assetType: repAssetType, assetData: repAssetData};
+		  let newData:ProfileData = {dataFetchedFrom: profileType, assetType: repAssetType, assetData: encryptedString};
 		  console.log(JSON.stringify(data));
 		  console.log(data.details);
 		  console.log(data.details.profile?.data);
@@ -86,7 +94,7 @@ import {
 		return "did:pkh:eip155:1:"+connectedAddress;
 	}
 
-	export const getProfileData = async (connectedAddress: string) : Promise<ProfileData[]> => {
+	export const getProfileData = async (connectedAddress: string, profileType: string) : Promise<ProfileData[]> => {
 		const did = getDid(connectedAddress);
 		const { data, error } = await orbis.getProfile(did);
 		  if (error) {
@@ -94,6 +102,23 @@ import {
 			return [];
 		  }
 		let profileDataObjects: ProfileData[] = data.details.profile?.data.web2ProfilesData;
+		  //todo: simplify this workflow and use a better encryption mechanism
+		  // todo: ideally implement ceramic's encrypted data streams
+		  // IMPORTANT: This is a workaround for testing - not production ready
+		for (let i=0;i<profileDataObjects.length;i++) {
+			if (profileDataObjects[i].dataFetchedFrom == profileType) {
+			const secret = await getCommitment(profileType);
+			console.log("Secret is" + secret);
+			const cryptr = new Cryptr(secret);
+			const decryptedAssetData = cryptr.decrypt(profileDataObjects[i].assetData);
+			console.log(decryptedAssetData);
+			var assetDataArray = new Array();
+			// This will return an array with strings "1", "2", etc.
+			assetDataArray = decryptedAssetData.split(",");
+			profileDataObjects[i].assetData = assetDataArray;
+			console.log(profileDataObjects[i].assetData);
+		}
+		}
 		return profileDataObjects;
 	}
 	export const createProfile = async (profileType: string, 

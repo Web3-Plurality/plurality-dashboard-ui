@@ -90,6 +90,20 @@ export const checkProfile = async (profileType: string): Promise<Boolean> => {
     }
 };
 
+export const getCommitment = async (profileType: string): Promise<String> => {
+  //console.log("In isCommitmentAlreadyStored");
+  try {
+    let commitment = await window.ethereum.request({
+      method: 'wallet_invokeSnap',
+      params: { snapId: defaultSnapOrigin, request: { method: 'commitment_fetch', params: {source:profileType} } },
+    });
+    return commitment!.toString();
+  } catch (e) {
+    console.log(e);
+    return "";
+  }
+};
+
 /**
  * Invoke the "commitment_request" method from the example snap.
  */
