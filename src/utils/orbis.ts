@@ -159,7 +159,9 @@ import {
 					console.log("Could not add profile data to ceramic. Returning");
 					return false;
 				}
-				const result = await getZkProof(profileType, groupId);
+				return true;
+				// No need for zk proof creation here
+				/*const result = await getZkProof(profileType, groupId);
 				if (result !== "") {
 					console.log("Reputation ownership proved");
 					return true;
@@ -167,7 +169,7 @@ import {
 				else {
 					alert("Reputation invalid" );
 					return false;
-				}
+				}*/
 			}
 		}
 	}
