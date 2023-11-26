@@ -2,6 +2,8 @@ import React, { lazy } from 'react';
 import { RouteProps } from 'react-router-dom';
 import {
 	componentPagesMenu,
+	customizedDashboardPagesMenu,
+	customizedDemoPagesMenu,
 	dashboardPagesMenu,
 	demoPagesMenu,
 	gettingStartedPagesMenu,
@@ -12,7 +14,8 @@ import Login from '../pages/presentation/auth/Login';
 const LANDING = {
 	DASHBOARD: lazy(() => import('../pages/presentation/dashboard/DashboardPage')),
 	DASHBOARD_BOOKING: lazy(() => import('../pages/presentation/dashboard/DashboardBookingPage')),
-	SUMMARY: lazy(() => import('../pages/presentation/SummaryPage')),
+	//SUMMARY: lazy(() => import('../pages/presentation/SummaryPage')),
+	SUMMARY: lazy(() => import('../pages/presentation/sales/ProductsGridPage')),
 };
 const SINGLE = {
 	BOXED: lazy(() => import('../pages/presentation/single-pages/SingleBoxedPage')),
@@ -202,7 +205,7 @@ const presentation: RouteProps[] = [
 		element: <LANDING.DASHBOARD_BOOKING />,
 	},
 	{
-		path: dashboardPagesMenu.summary.path,
+		path: customizedDemoPagesMenu.sales.path,
 		element: <LANDING.SUMMARY />,
 	},
 

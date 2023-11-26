@@ -13,11 +13,13 @@ import Icon from '../../components/icon/Icon';
 import useNavigationItemHandle from '../../hooks/useNavigationItemHandle';
 import AuthContext from '../../contexts/authContext';
 import ThemeContext from '../../contexts/themeContext';
+import { useAccount } from 'wagmi';
 
 const User = () => {
 	const { width } = useWindowSize();
 	const { setAsideStatus } = useContext(ThemeContext);
 	const { userData, setUser } = useContext(AuthContext);
+	const { address, connector, isConnected } = useAccount()
 
 	const navigate = useNavigate();
 	const handleItem = useNavigationItemHandle();
@@ -33,21 +35,13 @@ const User = () => {
 				className={classNames('user', { open: collapseStatus })}
 				role='presentation'
 				onClick={() => setCollapseStatus(!collapseStatus)}>
-				<div className='user-avatar'>
-					<img
-						srcSet={userData?.srcSet}
-						src={userData?.src}
-						alt='Avatar'
-						width={128}
-						height={128}
-					/>
-				</div>
 				<div className='user-info'>
 					<div className='user-name d-flex align-items-center'>
-						{`${userData?.name} ${userData?.surname}`}
-						<Icon icon='Verified' className='ms-1' color='info' />
+						<p className='truncate-text'>
+							{isConnected ? address : ""}
+						</p>	
 					</div>
-					<div className='user-sub-title'>{userData?.position}</div>
+					{/* <div className='user-sub-title'>{userData?.position}</div> */}
 				</div>
 			</div>
 			<DropdownMenu>
@@ -72,7 +66,7 @@ const User = () => {
 				</DropdownItem>
 			</DropdownMenu>
 
-			<Collapse isOpen={collapseStatus} className='user-menu'>
+			{/* <Collapse isOpen={collapseStatus} className='user-menu'>
 				<nav aria-label='aside-bottom-user-menu'>
 					<div className='navigation'>
 						<div
@@ -144,7 +138,7 @@ const User = () => {
 						</div>
 					</div>
 				</nav>
-			</Collapse>
+			</Collapse> */}
 		</>
 	);
 };

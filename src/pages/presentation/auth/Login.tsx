@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -6,37 +6,47 @@ import { useFormik } from 'formik';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
-import FormGroup from '../../../components/bootstrap/forms/FormGroup';
-import Input from '../../../components/bootstrap/forms/Input';
 import Button from '../../../components/bootstrap/Button';
 import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
 import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
-import Spinner from '../../../components/bootstrap/Spinner';
-import Alert from '../../../components/bootstrap/Alert';
+import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
+import { MetaMaskContext, MetamaskActions } from '../../../hooks';
+import { defaultSnapOrigin } from '../../../config';
+import { getTwitterID } from '../../../utils/oauth';
+import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
+import { checkIfProfileSaved, createProfile, AssetType } from '../../../utils/orbis';
+import { getFacebookInterests } from '../../../utils/facebookUserInterest';
+import { getTwitterInterests } from '../../../utils/twitterUserInterest';
+import LoadingContext from '../../../utils/LoadingContext';
+
+
 
 interface ILoginHeaderProps {
-	isNewUser?: boolean;
+	isSnap?: boolean;
+	callingDApp?: String;
 }
-const LoginHeader: FC<ILoginHeaderProps> = ({ isNewUser }) => {
-	if (isNewUser) {
+const LoginHeader: FC<ILoginHeaderProps> = ({ isSnap, callingDApp }) => {
+	if (isSnap) {
 		return (
 			<>
-				<div className='text-center h1 fw-bold mt-5'>Create Account,</div>
-				<div className='text-center h4 text-muted mb-5'>Sign up to get started!</div>
+			<div className='text-center h1 fw-bold mt-5'>Reputation Connect</div>
+			<div className='text-center h4 text-muted mb-5'>Sign in to continue!</div>
 			</>
 		);
 	}
 	return (
 		<>
-			<div className='text-center h1 fw-bold mt-5'>Welcome,</div>
-			<div className='text-center h4 text-muted mb-5'>Sign in to continue!</div>
+			<div className='text-center h1 fw-bold mt-5'>Reputation Connect</div>
+			<div className='text-center h4 text-muted mb-5'>Connect your social profiles to:</div>
+			<div className='text-center h5 text-muted mb-5'>{callingDApp}</div>
 		</>
 	);
 };
 LoginHeader.defaultProps = {
-	isNewUser: false,
+	isSnap: true,
+	callingDApp: "http://some-dapp.com"
 };
 
 interface ILoginProps {
@@ -44,12 +54,12 @@ interface ILoginProps {
 }
 const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { setUser } = useContext(AuthContext);
-
 	const { darkModeStatus } = useDarkMode();
 
+	const [isWidget, setIsWidget] = useState(false);  
 	const [signInPassword, setSignInPassword] = useState<boolean>(false);
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
-
+	
 	const navigate = useNavigate();
 	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
 
@@ -113,6 +123,145 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}, 1000);
 	};
 
+	// metamask hooks
+	const [state, dispatch] = useContext(MetaMaskContext);
+	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
+	? state.isFlask
+	: state.snapsDetected;
+
+	// social logins connection hooks
+	//TODO: Add tick or something in the buttons if a social login is already connected
+	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
+	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
+	const [callingDApp, setCallingDApp] = useState<String>("");
+	const { showLoading, hideLoading } = useContext(LoadingContext);
+
+
+	const handleSnapConnect = async () => {
+		try {
+		  await connectSnap();
+		  const installedSnap = await getSnap();
+		  dispatch({
+			type: MetamaskActions.SetInstalled,
+			payload: installedSnap,
+		  });
+		  if (setUser) setUser("user");
+		  console.log(state.installedSnap);
+		  const params = new URLSearchParams(window.location.search)
+		  const isWidget = params.get('isWidget')!;
+		  if (!isWidget || isWidget == "false")
+		  	navigate(`/?isWidget=false`);
+		  else if (isWidget == "true") {
+		  	// update widget state
+			  setIsWidget(true);
+		  }
+		  else
+		  	throw new Error("Something went wrong while parsing the isWidget parameter");
+		} catch (e: any) {
+		  console.error(e);
+		  if (e.message == "Fetching local snaps is disabled.") {
+			alert("Please install flask which is the development version of Metamask from here: https://metamask.io/flask/");
+		  }
+		  else {
+			// alert("Metamask Flask not installed. Please install from here: https://metamask.io/flask/");
+			alert("Snap installation failed, please make sure you are using Metamask Flask (can be downloaded from https://metamask.io/flask/) and try again");
+		  }
+		  dispatch({ type: MetamaskActions.SetError, payload: e });
+		}
+	  };
+	  const handleOnTwitterClick = async () => {
+		const params = new URLSearchParams(window.location.search)
+		const isWidget = params.get('isWidget')!;
+		await getTwitterID(isWidget);
+	  };
+	  const responseFacebook = async (response: any) => {
+		console.log(response);
+		if (response.accessToken) {
+			showLoading();
+			const interests = getFacebookInterests(response);
+			const username = "some username";
+			const description = 'some description';
+			try {
+			const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!, 
+									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
+									username,
+									description,
+									AssetType.INTEREST,
+									interests
+								);
+			if (isProfileCreated) 
+				setFacebookConnected(true);
+			else
+				console.log("Profile could not be created. Please try again");
+
+			hideLoading();
+			}
+			catch (error) {
+				console.log(error);
+				hideLoading();
+			}
+		}
+	};	
+	
+	const checkConnectProfilesOnPageLoad = async () => {
+		if (isMetaMaskReady && state.installedSnap) {
+			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
+			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
+			if (twitter == true) setTwitterConnected(twitter);
+			if (facebook == true) setFacebookConnected(facebook);
+
+			if (facebook && twitter) {
+				// close the browser tab
+				//alert("All required profiles have been connected. Closing the widget");
+				//window.open("about:blank", "_self");
+				//window.close();
+			}
+		}
+	}
+
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search)
+		const widget = params.get('isWidget')!;
+		const dAppName = params.get('origin')!; 
+
+		if (widget == "true") {
+			setCallingDApp(dAppName);
+			setIsWidget(true);
+			checkConnectProfilesOnPageLoad().catch(console.error);
+		}
+		if ((widget=="false" || !widget) && state.installedSnap) {
+			navigate(`/?isWidget=false`);
+		} 
+	}, [state])
+	
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search)
+		const idPlatform = params.get('id_platform')!;
+		if (idPlatform == "twitter" && state.installedSnap) {
+			const params = new URLSearchParams(window.location.search);
+			const username = params.get('username')!;
+			const description = 'some description';
+			showLoading();
+			createProfile(process.env.REACT_APP_TWITTER!, 
+						process.env.REACT_APP_TWITTER_GROUP_ID!,
+						username,
+						description,
+						AssetType.INTEREST,
+						getTwitterInterests({})).then(isProfileCreated => {
+							if (isProfileCreated) 
+							// Add condition for making sure that the user has indeed connected
+								setTwitterConnected(true);
+							else 
+								console.log("Profile could not be created. Please try again");
+							hideLoading();
+						}).catch(error => {
+							console.log(error);
+							hideLoading();
+						})
+		}
+	}, [state])
+
+
 	return (
 		<PageWrapper
 			isProtected={false}
@@ -134,7 +283,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											},
 										)}
 										aria-label='Facit'>
-										<Logo width={200} />
+										<Logo width={200}/>
 									</Link>
 								</div>
 								<div
@@ -142,177 +291,17 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										'bg-l10-dark': !darkModeStatus,
 										'bg-dark': darkModeStatus,
 									})}>
-									<div className='row row-cols-2 g-3 pb-3 px-3 mt-0'>
-										<div className='col'>
-											<Button
-												color={darkModeStatus ? 'light' : 'dark'}
-												isLight={singUpStatus}
-												className='rounded-1 w-100'
-												size='lg'
-												onClick={() => {
-													setSignInPassword(false);
-													setSingUpStatus(!singUpStatus);
-												}}>
-												Login
-											</Button>
-										</div>
-										<div className='col'>
-											<Button
-												color={darkModeStatus ? 'light' : 'dark'}
-												isLight={!singUpStatus}
-												className='rounded-1 w-100'
-												size='lg'
-												onClick={() => {
-													setSignInPassword(false);
-													setSingUpStatus(!singUpStatus);
-												}}>
-												Sign Up
-											</Button>
-										</div>
-									</div>
+								
 								</div>
 
-								<LoginHeader isNewUser={singUpStatus} />
 
-								<Alert isLight icon='Lock' isDismissible>
-									<div className='row'>
-										<div className='col-12'>
-											<strong>Username:</strong> {USERS.JOHN.username}
-										</div>
-										<div className='col-12'>
-											<strong>Password:</strong> {USERS.JOHN.password}
-										</div>
-									</div>
-								</Alert>
-								<form className='row g-4'>
-									{singUpStatus ? (
-										<>
-											<div className='col-12'>
-												<FormGroup
-													id='signup-email'
-													isFloating
-													label='Your email'>
-													<Input type='email' autoComplete='email' />
-												</FormGroup>
-											</div>
-											<div className='col-12'>
-												<FormGroup
-													id='signup-name'
-													isFloating
-													label='Your name'>
-													<Input autoComplete='given-name' />
-												</FormGroup>
-											</div>
-											<div className='col-12'>
-												<FormGroup
-													id='signup-surname'
-													isFloating
-													label='Your surname'>
-													<Input autoComplete='family-name' />
-												</FormGroup>
-											</div>
-											<div className='col-12'>
-												<FormGroup
-													id='signup-password'
-													isFloating
-													label='Password'>
-													<Input
-														type='password'
-														autoComplete='password'
-													/>
-												</FormGroup>
-											</div>
-											<div className='col-12'>
-												<Button
-													color='info'
-													className='w-100 py-3'
-													onClick={handleOnClick}>
-													Sign Up
-												</Button>
-											</div>
-										</>
-									) : (
-										<>
-											<div className='col-12'>
-												<FormGroup
-													id='loginUsername'
-													isFloating
-													label='Your email or username'
-													className={classNames({
-														'd-none': signInPassword,
-													})}>
-													<Input
-														autoComplete='username'
-														value={formik.values.loginUsername}
-														isTouched={formik.touched.loginUsername}
-														invalidFeedback={
-															formik.errors.loginUsername
-														}
-														isValid={formik.isValid}
-														onChange={formik.handleChange}
-														onBlur={formik.handleBlur}
-														onFocus={() => {
-															formik.setErrors({});
-														}}
-													/>
-												</FormGroup>
-												{signInPassword && (
-													<div className='text-center h4 mb-3 fw-bold'>
-														Hi, {formik.values.loginUsername}.
-													</div>
-												)}
-												<FormGroup
-													id='loginPassword'
-													isFloating
-													label='Password'
-													className={classNames({
-														'd-none': !signInPassword,
-													})}>
-													<Input
-														type='password'
-														autoComplete='current-password'
-														value={formik.values.loginPassword}
-														isTouched={formik.touched.loginPassword}
-														invalidFeedback={
-															formik.errors.loginPassword
-														}
-														validFeedback='Looks good!'
-														isValid={formik.isValid}
-														onChange={formik.handleChange}
-														onBlur={formik.handleBlur}
-													/>
-												</FormGroup>
-											</div>
-											<div className='col-12'>
-												{!signInPassword ? (
-													<Button
-														color='warning'
-														className='w-100 py-3'
-														isDisable={!formik.values.loginUsername}
-														onClick={handleContinue}>
-														{isLoading && (
-															<Spinner isSmall inButton isGrow />
-														)}
-														Continue
-													</Button>
-												) : (
-													<Button
-														color='warning'
-														className='w-100 py-3'
-														onClick={formik.handleSubmit}>
-														Login
-													</Button>
-												)}
-											</div>
-										</>
-									)}
+									{/* BEGIN :: Snap install */}
 
-									{/* BEGIN :: Social Login */}
-									{!signInPassword && (
+									{!signInPassword && (!isMetaMaskReady || !state.installedSnap) && (
 										<>
-											<div className='col-12 mt-3 text-center text-muted'>
-												OR
-											</div>
+											<LoginHeader isSnap={true} callingDApp={callingDApp}/>
+
+											<form className='row g-4'>
 											<div className='col-12 mt-3'>
 												<Button
 													isOutline
@@ -321,10 +310,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-light': !darkModeStatus,
 														'border-dark': darkModeStatus,
 													})}
-													icon='CustomApple'
-													onClick={handleOnClick}>
-													Sign in with Apple
+													icon='CustomMetamask'
+													onClick={handleSnapConnect}>
+													Sign in with MetaMask
 												</Button>
+											</div>
+											<div className='col-12 mt-3 text-center text-muted'>
+												OR
 											</div>
 											<div className='col-12'>
 												<Button
@@ -335,14 +327,83 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-dark': darkModeStatus,
 													})}
 													icon='CustomGoogle'
-													onClick={handleOnClick}>
-													Continue with Google
+													onClick={handleOnClick}
+													isDisable>
+													Coming Soon
 												</Button>
 											</div>
+											</form>
+										</>
+
+									)}
+									{/* END :: Snap install */}
+									{/* BEGIN :: Social Login */}
+									{isMetaMaskReady && state.installedSnap && isWidget && (
+										<>
+										<LoginHeader isSnap={false} callingDApp={callingDApp} />
+
+											<form className='row g-4'>
+											<div className='col-12 mt-3'>
+											<FacebookLogin
+												appId="696970245672784"
+												autoLoad={false}
+												fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
+												callback={responseFacebook}
+												cssClass='shadow-3d-container'
+												scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
+												render={renderProps => (
+													<Button
+													isOutline
+													isDisable= {isFacebookConnected==true ? true: false}
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='CustomFacebook'
+													onClick={renderProps.onClick}
+													>
+														{!isFacebookConnected && (
+															<>
+															Connect Facebook
+															</>
+														)}
+														{isFacebookConnected && (
+															<>
+															Connected
+															</>
+														)}
+												</Button>
+												)}
+											/>
+											</div>
+											<div className='col-12 mt-3'>
+												<Button
+													isOutline
+													isDisable= {isTwitterConnected==true ? true: false}
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='CustomTwitter'
+													onClick={handleOnTwitterClick}>
+													{!isTwitterConnected && (
+															<>
+															Connect Twitter
+															</>
+														)}
+														{isTwitterConnected && (
+															<>
+															Connected
+															</>
+														)}
+												</Button>
+											</div>
+											</form>
 										</>
 									)}
 									{/* END :: Social Login */}
-								</form>
 							</CardBody>
 						</Card>
 						<div className='text-center'>

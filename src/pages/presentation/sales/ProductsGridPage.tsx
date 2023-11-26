@@ -1,12 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useFormik } from 'formik';
 import Page from '../../../layout/Page/Page';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
-import SubHeader, {
-	SubHeaderLeft,
-	SubHeaderRight,
-	SubheaderSeparator,
-} from '../../../layout/SubHeader/SubHeader';
 import Button from '../../../components/bootstrap/Button';
 import CommonGridProductItem from '../../_common/CommonGridProductItem';
 import tableData from '../../../common/data/dummyProductData';
@@ -21,12 +16,26 @@ import Card, {
 	CardLabel,
 	CardTitle,
 } from '../../../components/bootstrap/Card';
-import Badge from '../../../components/bootstrap/Badge';
-import Input from '../../../components/bootstrap/forms/Input';
-import PlaceholderImage from '../../../components/extras/PlaceholderImage';
-import FormGroup from '../../../components/bootstrap/forms/FormGroup';
+import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { demoPagesMenu } from '../../../menu';
-import Breadcrumb from '../../../components/bootstrap/Breadcrumb';
+import Facebook from '../../../assets/img/abstract/facebook.png';
+import Twitter from '../../../assets/img/abstract/twitter.png';
+import Linkedin from '../../../assets/img/abstract/linkedin.png';
+import Github from '../../../assets/img/abstract/github.png';
+import Stackoverflow from '../../../assets/img/abstract/stackoverflow.png';
+import Reddit from '../../../assets/img/abstract/reddit.png';
+import Pinterest from '../../../assets/img/abstract/pinterest.png';
+import Medium from '../../../assets/img/abstract/medium.png';
+import { getTwitterID } from '../../../utils/oauth';
+import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
+import { getFacebookInterests } from '../../../utils/facebookUserInterest';
+import { getTwitterInterests } from '../../../utils/twitterUserInterest';
+import { checkIfProfileSaved, createProfile, AssetType, getProfileData } from '../../../utils/orbis';
+import { MetaMaskContext, MetamaskActions } from '../../../hooks';
+import { defaultSnapOrigin } from '../../../config';
+import { useAccount } from 'wagmi';
+import { useNavigate } from 'react-router-dom';
+import LoadingContext from '../../../utils/LoadingContext'
 
 interface IValues {
 	name: string;
@@ -76,6 +85,17 @@ const ProductsGridPage = () => {
 	const [data, setData] = useState(tableData);
 	const [editItem, setEditItem] = useState<IValues | null>(null);
 	const [editPanel, setEditPanel] = useState<boolean>(false);
+	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
+	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
+	const [sidePanelData, setSidePanelData] = useState<any>();
+	const [state, dispatch] = useContext(MetaMaskContext);
+	const { address, connector, isConnected } = useAccount()
+	const { showLoading, hideLoading } = useContext(LoadingContext)
+	const navigate = useNavigate();
+
+	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
+	? state.isFlask
+	: state.snapsDetected;
 
 	function handleRemove(id: number) {
 		const newData = data.filter((item) => item.id !== id);
@@ -121,57 +141,258 @@ const ProductsGridPage = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [editItem]);
 
+	useEffect(() => {
+		checkConnectProfilesOnPageLoad().catch(console.error);
+	}, [state])
+
+	useEffect(() => {
+		if ( !isTwitterConnected ) {  
+			const params = new URLSearchParams(window.location.search)
+			const idPlatform = params.get('id_platform')!;
+			if (idPlatform == "twitter" && state.installedSnap) { 
+				showLoading();
+				const params = new URLSearchParams(window.location.search);
+				const username = params.get('username')!;
+				const description = 'some description';
+				createProfile(process.env.REACT_APP_TWITTER!, 
+							process.env.REACT_APP_TWITTER_GROUP_ID!,
+							username,
+							description,
+							AssetType.INTEREST,
+							getTwitterInterests({})).then(isProfileCreated => {
+								if (isProfileCreated) 
+								// Add condition for making sure that the user has indeed connected
+									setTwitterConnected(true);
+								else 
+									console.log("Profile could not be created. Please try again");
+								hideLoading();
+							}).catch(error => {
+								console.log(error);
+								hideLoading();
+							})		
+			}
+		}
+	  }, [state])
+
+	  const checkConnectProfilesOnPageLoad = async () => {
+		const params = new URLSearchParams(window.location.search)
+		const widget = params.get('isWidget')!;
+		const snap = await getSnap();
+		if ((widget=="false" || !widget) && !snap) {
+			navigate(`/auth-pages/login?isWidget=false`);
+		} 
+		else {
+			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
+			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!);
+			setTwitterConnected(twitter);
+			setFacebookConnected(facebook);
+		}
+	}
+
+	const twitter = async () => {
+		const params = new URLSearchParams(window.location.search)
+		const username = params.get('username')!;
+		const platform = params.get('id_platform')!;
+	
+		if (username!=null && platform == "twitter") {
+			setTwitterConnected(true);
+	 	}
+	}
+
+	const loginTwitter = async () => {
+		const params = new URLSearchParams(window.location.search)
+		const isWidget = params.get('isWidget')!;
+		await getTwitterID(isWidget);
+	  };
+	
+	  const responseFacebook = async (response: any) => {
+		console.log(response);
+		if (response.accessToken) {
+			showLoading();
+			const interests = getFacebookInterests(response);
+			const username = "some username";
+			const description = 'some description';
+			try {
+			const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!, 
+									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
+									username,
+									description,
+									AssetType.INTEREST,
+									interests
+								);
+			if (isProfileCreated) 
+				setFacebookConnected(true);
+			else
+				console.log("Profile could not be created. Please try again");
+
+			hideLoading();
+			}
+			catch (error) {
+				console.log(error);
+				hideLoading();
+			}
+		}
+	};	
+	
+	const buttonTheme = () => {
+		return "w-100 mb-4 shadow-3d-up-hover shadow-3d-dark"
+	}
+
+	const viewFacebookDetails = async () => {
+		const detail = await getSocialMediaDetails("facebook")
+		console.log(detail)
+		setSidePanelData(detail)
+		setEditPanel(true)
+	}
+
+	const viewTwitterDetails = async () => {
+		const detail =  await getSocialMediaDetails("twitter")
+		console.log(detail)
+		setSidePanelData(detail)
+		setEditPanel(true)
+	}
+
+	const getSocialMediaDetails = async (platform: string) => {
+		const socialMediaDetails = await getProfileData(address || "", platform)
+		console.log(socialMediaDetails)
+		for (let detail of socialMediaDetails) {
+			if (detail.dataFetchedFrom === platform)
+			{
+				return detail
+			}
+		}
+	}
+	
+	const facebookLoginButton = () => {
+		return (
+			<FacebookLogin
+			appId="696970245672784"
+			autoLoad={false}
+			fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
+			callback={responseFacebook}
+			cssClass='shadow-3d-container'
+			scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
+			render={renderProps => (
+				<Button
+				color='dark'
+				className={buttonTheme()}
+				size='lg'
+				tag='a'
+				onClick={renderProps.onClick}
+				>
+				{isFacebookConnected ? "View Details" : "Connect"}
+			</Button>
+			)}
+		  />
+		)	
+	}
+
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.productsGrid.text}>
-			{/* <SubHeader>
-				<SubHeaderLeft>
-					<Breadcrumb
-						list={[
-							{ title: demoPagesMenu.sales.text, to: demoPagesMenu.sales.path },
-							{
-								title: demoPagesMenu.sales.subMenu.productsGrid.text,
-								to: demoPagesMenu.sales.subMenu.productsGrid.path,
-							},
-						]}
-					/>
-					<SubheaderSeparator />
-					<span className='text-muted'>{data.length} items</span>
-				</SubHeaderLeft>
-				<SubHeaderRight>
-					<Button
-						color='dark'
-						isLight
-						icon='Add'
-						onClick={() => {
-							setEditItem(null);
-							setEditPanel(true);
-						}}>
-						Add New
-					</Button>
-				</SubHeaderRight>
-			</SubHeader> */}
 			<Page>
-				<div className='display-4 fw-bold py-3'>All Social Medias</div>
-				<div className='row'>
-					{data.map((item) => (
-						<div key={item.id} className='col-xxl-3 col-xl-4 col-md-6'>
-							<CommonGridProductItem
-								id={item.id}
-								name={item.name}
-								category={item.category}
-								img={item.image}
-								color={item.color}
-								series={item.series}
-								price={item.price}
-								editAction={() => {
-									setEditPanel(true);
-									handleEdit(item.id);
-								}}
-								deleteAction={() => handleRemove(item.id)}
-							/>
-						</div>
-					))}
+			<div className='row'>
+				{
+					!isFacebookConnected ? (
+					<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='1'
+						name='Facebook'
+						img={Facebook}
+						customization={true}
+						button={(facebookLoginButton)}
+					/>
+					</div>) : (
+					<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='1'
+						name='Facebook'
+						img={Facebook}
+						customization={false}
+						connectAction={viewFacebookDetails}
+						buttonText={"View Details"}
+					/>
+					</div>
+					)
+				}
+				{
+					!isTwitterConnected ? (
+					<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='2'
+						name='Twitter'					
+						img={Twitter}
+						customization={false}
+						connectAction={loginTwitter}	
+						buttonText={"Connect"}
+					/>
+					</div>) : (
+					<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='2'
+						name='Twitter'
+						img={Twitter}
+						customization={false}
+						connectAction={viewTwitterDetails}
+						buttonText={"View Details"}
+					/>
+					</div>
+					)
+				}
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='3'
+						name='Linkedin'					
+						img={Linkedin}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
 				</div>
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='4'
+						name='Github'					
+						img={Github}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
+				</div>
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='5'
+						name='Stackoverflow'					
+						img={Stackoverflow}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
+				</div>
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='6'
+						name='Reddit'					
+						img={Reddit}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
+				</div>
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='7'
+						name='Pinterest'					
+						img={Pinterest}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
+				</div>
+				<div className='col-xxl-3 col-xl-4 col-md-6'>
+					<CommonGridProductItem
+						id='8'
+						name='Medium'					
+						img={Medium}
+						customization={false}
+						buttonText={"Coming soon"}
+					/>
+				</div>
+			</div>
 			</Page>
 
 			<OffCanvas
@@ -182,7 +403,9 @@ const ProductsGridPage = () => {
 				noValidate
 				onSubmit={formik.handleSubmit}>
 				<OffCanvasHeader setOpen={setEditPanel}>
-					<OffCanvasTitle id='edit-panel'>
+				<></>
+
+					{/* <OffCanvasTitle id='edit-panel'>
 						{editItem?.name || 'New Product'}{' '}
 						{editItem?.name ? (
 							<Badge color='primary' isLight>
@@ -193,67 +416,20 @@ const ProductsGridPage = () => {
 								New
 							</Badge>
 						)}
-					</OffCanvasTitle>
+					</OffCanvasTitle> */}
 				</OffCanvasHeader>
 				<OffCanvasBody>
 					<Card>
 						<CardHeader>
-							<CardLabel icon='Photo' iconColor='info'>
-								<CardTitle>Product Image</CardTitle>
-							</CardLabel>
-						</CardHeader>
-						<CardBody>
-							<div className='row'>
-								<div className='col-12'>
-									{editItem?.image ? (
-										<img
-											src={editItem.image}
-											alt=''
-											width={128}
-											height={128}
-											className='mx-auto d-block img-fluid mb-3'
-										/>
-									) : (
-										<PlaceholderImage
-											width={128}
-											height={128}
-											className='mx-auto d-block img-fluid mb-3 rounded'
-										/>
-									)}
-								</div>
-								<div className='col-12'>
-									<div className='row g-4'>
-										<div className='col-12'>
-											<Input type='file' autoComplete='photo' />
-										</div>
-										<div className='col-12'>
-											{editItem && (
-												<Button
-													color='dark'
-													isLight
-													icon='Delete'
-													className='w-100'
-													onClick={() => {
-														setEditItem({ ...editItem, image: null });
-													}}>
-													Delete Image
-												</Button>
-											)}
-										</div>
-									</div>
-								</div>
-							</div>
-						</CardBody>
-					</Card>
-
-					<Card>
-						<CardHeader>
 							<CardLabel icon='Description' iconColor='success'>
-								<CardTitle>Product Details</CardTitle>
+								<CardTitle>Your interests</CardTitle>
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
-							<div className='row g-4'>
+							<div>
+								{sidePanelData?.assetData.map((interest: any) =><li key={interest}>{interest}</li>)}							
+							</div>
+							{/* <div className='row g-4'>
 								<div className='col-12'>
 									<FormGroup id='name' label='Name' isFloating>
 										<Input
@@ -310,11 +486,11 @@ const ProductsGridPage = () => {
 										/>
 									</FormGroup>
 								</div>
-							</div>
+							</div> */}
 						</CardBody>
 					</Card>
 				</OffCanvasBody>
-				<div className='p-3'>
+				{/* <div className='p-3'>
 					<Button
 						color='info'
 						icon='Save'
@@ -322,7 +498,7 @@ const ProductsGridPage = () => {
 						isDisable={!formik.isValid && !!formik.submitCount}>
 						Save
 					</Button>
-				</div>
+				</div> */}
 			</OffCanvas>
 		</PageWrapper>
 	);

@@ -34,7 +34,7 @@ export const dashboardPagesMenu = {
 	dashboard: {
 		id: 'dashboard',
 		text: 'Dashboard',
-		path: '/',
+		path: 'dashboard',
 		icon: 'Dashboard',
 		subMenu: null,
 	},
@@ -1049,20 +1049,20 @@ export const productsExampleMenu = {
 // The Pages that we are actually using
 
 export const customizedDashboardPagesMenu = {
-	summary: {
-		id: 'dashboard',
-		text: 'Dashboard',
-		path: 'summary',
-		icon: 'sticky_note_2',
-		subMenu: null,
-	},
+	// summary: {
+	// 	id: 'dashboard',
+	// 	text: 'Dashboard',
+	// 	path: '/',
+	// 	icon: 'sticky_note_2',
+	// 	subMenu: null,
+	// },
 }
 
 export const customizedDemoPagesMenu = {
 	sales: {
 		id: 'socials',
-		text: 'Social Medias',
-		path: 'sales/grid',
+		text: 'Connected Profiles',
+		path: '/',
 		icon: 'CalendarViewMonth',
 		},
 }

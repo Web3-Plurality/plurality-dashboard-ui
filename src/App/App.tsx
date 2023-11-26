@@ -16,6 +16,13 @@ import { getOS } from '../helpers/helpers';
 import steps, { styles } from '../steps';
 import AsideRoutes from '../layout/Aside/AsideRoutes';
 import { ToastCloseButton } from '../components/bootstrap/Toasts';
+import { MetaMaskProvider } from '../hooks';
+import { polygonMumbai, polygon } from "wagmi/chains";
+import { configureChains, createConfig, WagmiConfig } from "wagmi";
+import { publicProvider } from "wagmi/providers/public";
+import { InjectedConnector } from "wagmi/connectors/injected";
+import LoadingProvider from '../utils/LoadingProvider';
+import Spinner from '../utils/Spinner';
 
 const App = () => {
 	getOS();
@@ -59,6 +66,11 @@ const App = () => {
 		onClose: () => setFullScreenStatus(false),
 	});
 
+	const { publicClient, webSocketPublicClient } = configureChains(
+		[polygonMumbai, polygon],
+		[publicProvider()]
+	  );
+
 	/**
 	 * Modern Design
 	 */
@@ -70,8 +82,25 @@ const App = () => {
 		}
 	});
 
+	const config = createConfig({
+		autoConnect: true,
+		publicClient,
+		webSocketPublicClient,
+		connectors: [
+		  new InjectedConnector({
+			options: {
+			  shimDisconnect: false,
+			},
+		  }),
+		],
+	  });
+
 	return (
 		<ThemeProvider theme={theme}>
+			<LoadingProvider>
+      		<Spinner />
+			<MetaMaskProvider>
+			<WagmiConfig config={config}>
 			<TourProvider steps={steps} styles={styles} showNavigation={false} showBadge={false}>
 				<div
 					ref={ref}
@@ -89,6 +118,9 @@ const App = () => {
 				</Portal>
 				<ToastContainer closeButton={ToastCloseButton} toastClassName='toast show' />
 			</TourProvider>
+			</WagmiConfig>
+			</MetaMaskProvider>
+			</LoadingProvider>
 		</ThemeProvider>
 	);
 };

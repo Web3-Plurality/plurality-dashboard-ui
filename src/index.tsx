@@ -13,9 +13,7 @@ const children = (
 	<AuthContextProvider>
 		<ThemeContextProvider>
 			<Router>
-				<React.StrictMode>
 					<App />
-				</React.StrictMode>
 			</Router>
 		</ThemeContextProvider>
 	</AuthContextProvider>

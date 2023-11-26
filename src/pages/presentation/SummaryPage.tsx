@@ -280,33 +280,6 @@ const SummaryPage = () => {
 
 	return (
 		<PageWrapper ref={ref} title='React Admin Dashboard Template'>
-			{/* <SubHeader>
-				<SubHeaderLeft>
-					<span className='fw-bold'>React Admin Dashboard Template</span>
-					<SubheaderSeparator />
-					<span>
-						incl. Bootstrap{' '}
-						<sup>
-							<Badge color='primary' isLight rounded={1}>
-								5
-							</Badge>
-						</sup>
-					</span>
-				</SubHeaderLeft>
-				<SubHeaderRight>
-					<Button color='success' isLight icon='ShoppingCart' tag='a' href='/'>
-						Buy on Envato
-					</Button>
-					<Button
-						color='info'
-						isLight
-						tag='a'
-						href='mailto:info@omtanke.studio'
-						icon='MarkunreadMailbox'>
-						Support
-					</Button>
-				</SubHeaderRight>
-			</SubHeader> */}
 			<Page>
 				<div id='intro' className='scroll-margin'>
 					<div className={classNames('row', 'h-fluid-min-100', classes.intro)}>
@@ -342,7 +315,7 @@ const SummaryPage = () => {
 									icon='Class'
 									tag='a'
 									to='#bootstrap'>
-									Read More
+									A link Here Please replace
 								</Button>
 							</div>
 						</div>

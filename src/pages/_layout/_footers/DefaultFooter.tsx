@@ -8,7 +8,8 @@ const DefaultFooter = () => {
 
 	return (
 		<Footer>
-			<div className='container-fluid'>
+			<></>
+			{/* <div className='container-fluid'>
 				<div className='row'>
 					<div className='col'>
 						<span className='fw-light'>Copyright © 2023 - Version 4.3.1</span>
@@ -24,7 +25,7 @@ const DefaultFooter = () => {
 						</a>
 					</div>
 				</div>
-			</div>
+			</div> */}
 		</Footer>
 	);
 };

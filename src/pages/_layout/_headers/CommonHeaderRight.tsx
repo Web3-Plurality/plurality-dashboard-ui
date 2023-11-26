@@ -23,6 +23,7 @@ import showNotification from '../../../components/extras/showNotification';
 import useDarkMode from '../../../hooks/useDarkMode';
 import Popovers from '../../../components/bootstrap/Popovers';
 import Spinner from '../../../components/bootstrap/Spinner';
+import { HashLink } from 'react-router-hash-link'
 
 interface ICommonHeaderRightProps {
 	beforeChildren?: ReactNode;
@@ -68,7 +69,7 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 			<div className='row g-3'>
 				{beforeChildren}
 				{/* Tour Modal */}
-				{localStorage.getItem('tourModalStarted') === 'shown' && (
+				{/* {localStorage.getItem('tourModalStarted') === 'shown' && (
 					<div className='col-auto position-relative'>
 						<Popovers trigger='hover' desc='Start the "Facit" tour'>
 							<Button
@@ -88,7 +89,7 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 							)}
 						/>
 					</div>
-				)}
+				)} */}
 
 				{/* Dark Mode */}
 				<div className='col-auto'>
@@ -110,7 +111,7 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 				</div>
 
 				{/*	Full Screen */}
-				<div className='col-auto'>
+				{/* <div className='col-auto'>
 					<Popovers trigger='hover' desc='Fullscreen'>
 						<Button
 							// eslint-disable-next-line react/jsx-props-no-spreading
@@ -120,10 +121,10 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 							aria-label='Toggle fullscreen'
 						/>
 					</Popovers>
-				</div>
+				</div> */}
 
 				{/* Lang Selector */}
-				<div className='col-auto'>
+				{/* <div className='col-auto'>
 					<Dropdown>
 						<DropdownToggle hasIcon={false}>
 							{typeof getLangWithKey(i18n.language as ILang['key']['lng'])?.icon ===
@@ -160,82 +161,11 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 							))}
 						</DropdownMenu>
 					</Dropdown>
-				</div>
+				</div> */}
 
-				{/* Quick Panel */}
-				<div className='col-auto'>
-					<Dropdown>
-						<DropdownToggle hasIcon={false}>
-							{/* eslint-disable-next-line react/jsx-props-no-spreading */}
-							<Button {...styledBtn} icon='Tune' aria-label='Quick menu' />
-						</DropdownToggle>
-						<DropdownMenu isAlignmentEnd size='lg' className='py-0 overflow-hidden'>
-							<div className='row g-0'>
-								<div
-									className={classNames(
-										'col-12',
-										'p-4',
-										'd-flex justify-content-center',
-										'fw-bold fs-5',
-										'text-info',
-										'border-bottom border-info',
-										{
-											'bg-l25-info': !darkModeStatus,
-											'bg-lo25-info': darkModeStatus,
-										},
-									)}>
-									Quick Panel
-								</div>
-								<div
-									className={classNames(
-										'col-6 p-4 transition-base cursor-pointer bg-light-hover',
-										'border-end border-bottom',
-										{ 'border-dark': darkModeStatus },
-									)}>
-									<div className='d-flex flex-column align-items-center justify-content-center'>
-										<Icon icon='Public' size='3x' color='info' />
-										<span>Dealers</span>
-										<small className='text-muted'>Options</small>
-									</div>
-								</div>
-								<div
-									className={classNames(
-										'col-6 p-4 transition-base cursor-pointer bg-light-hover',
-										'border-bottom',
-										{ 'border-dark': darkModeStatus },
-									)}>
-									<div className='d-flex flex-column align-items-center justify-content-center'>
-										<Icon icon='Upcoming' size='3x' color='success' />
-										<span>Inbox</span>
-										<small className='text-muted'>Configuration</small>
-									</div>
-								</div>
-								<div
-									className={classNames(
-										'col-6 p-4 transition-base cursor-pointer bg-light-hover',
-										'border-end',
-										{ 'border-dark': darkModeStatus },
-									)}>
-									<div className='d-flex flex-column align-items-center justify-content-center'>
-										<Icon icon='Print' size='3x' color='danger' />
-										<span>Print</span>
-										<small className='text-muted'>Settings</small>
-									</div>
-								</div>
-								<div className='col-6 p-4 transition-base cursor-pointer bg-light-hover'>
-									<div className='d-flex flex-column align-items-center justify-content-center'>
-										<Icon icon='ElectricalServices' size='3x' color='warning' />
-										<span>Power</span>
-										<small className='text-muted'>Mode</small>
-									</div>
-								</div>
-							</div>
-						</DropdownMenu>
-					</Dropdown>
-				</div>
 
 				{/*	Notifications */}
-				<div className='col-auto'>
+				{/* <div className='col-auto'>
 					<Button
 						// eslint-disable-next-line react/jsx-props-no-spreading
 						{...styledBtn}
@@ -244,7 +174,7 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 						aria-label='Notifications'
 					/>
 				</div>
-				{afterChildren}
+				{afterChildren} */}
 			</div>
 
 			<OffCanvas

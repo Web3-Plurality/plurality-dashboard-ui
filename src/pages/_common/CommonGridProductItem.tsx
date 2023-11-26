@@ -26,13 +26,17 @@ import useDarkMode from '../../hooks/useDarkMode';
 interface ICommonGridProductItemProps {
 	id: string | number;
 	name: string;
-	category: string;
+	category?: string;
 	img: string;
-	color: string;
-	series: ApexOptions['series'];
-	price: number;
-	editAction: any;
-	deleteAction: any;
+	color?: string;
+	series?: ApexOptions['series'];
+	price?: number;
+	editAction?: any;
+	deleteAction?: any;
+	connectAction?: any;
+	customization?: boolean;
+	button?: any;
+	buttonText?: any;
 }
 const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 	id,
@@ -44,8 +48,26 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 	price,
 	editAction,
 	deleteAction,
+	connectAction,
+	customization,
+	button,
+	buttonText,
 }) => {
 	const { themeStatus, darkModeStatus } = useDarkMode();
+
+	const isDisabled = (name: string) => {
+		return (name === "Facebook" || name === "Twitter") ? false : true
+	}
+
+	const buttonTheme = (name: string) => {
+		if (name === "Facebook" || name === "Twitter") {
+			return `w-100 mb-4 shadow-3d-up-hover shadow-3d-${
+				darkModeStatus ? 'light' : 'dark'
+			}`
+		} else {
+			return `w-100 mb-4`
+		}
+	}
 
 	const dummyOptions: ApexOptions = {
 		colors: [color],
@@ -79,62 +101,18 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 			width: 2,
 		},
 	};
+
+	const cardOpacity = () => {
+		return isDisabled(name) ? '0.4' : '1'
+	}
 	return (
-		<Card>
+		<Card style={{opacity: cardOpacity()}}>
 			<CardHeader>
 				<CardLabel>
 					<CardTitle tag='div' className='h5'>
 						{name}{' '}
-						{price && (
-							<Badge color='success' isLight className='ms-2'>
-								{priceFormat(price)}
-							</Badge>
-						)}
 					</CardTitle>
-					<CardSubTitle tag='div' className='h6'>
-						{category}
-					</CardSubTitle>
 				</CardLabel>
-				<CardActions>
-					<Dropdown>
-						<DropdownToggle hasIcon={false}>
-							<Button
-								icon='MoreHoriz'
-								color={themeStatus}
-								shadow='default'
-								aria-label='Edit'
-							/>
-						</DropdownToggle>
-						<DropdownMenu isAlignmentEnd>
-							<DropdownItem>
-								<Button icon='Edit' onClick={() => editAction()}>
-									Edit
-								</Button>
-							</DropdownItem>
-							<DropdownItem>
-								<Button
-									icon='FileCopy'
-									onClick={() => {
-										showNotification(
-											<span className='d-flex align-items-center'>
-												<Icon icon='Info' size='lg' className='me-1' />
-												<span>{name} duplicated.</span>
-											</span>,
-											`A copy of the ${name} product was created.`,
-										);
-									}}>
-									Duplicate
-								</Button>
-							</DropdownItem>
-							<DropdownItem isDivider />
-							<DropdownItem>
-								<Button icon='Delete' onClick={() => deleteAction()}>
-									Delete
-								</Button>
-							</DropdownItem>
-						</DropdownMenu>
-					</Dropdown>
-				</CardActions>
 			</CardHeader>
 			<CardBody>
 				<img
@@ -144,30 +122,18 @@ const CommonGridProductItem: FC<ICommonGridProductItemProps> = ({
 					height={128}
 					className='mx-auto d-block img-fluid mb-3'
 				/>
-				<div className='row align-items-center'>
-					<div className='col'>Monthly sales</div>
-					<div className='col-auto'>
-						<Chart
-							series={series}
-							options={dummyOptions}
-							type={dummyOptions.chart?.type}
-							height={dummyOptions.chart?.height}
-							width={dummyOptions.chart?.width}
-						/>
-					</div>
-				</div>
 			</CardBody>
 			<CardFooter className='shadow-3d-container'>
-				<Button
+				{!customization ? (<Button
 					color='dark'
-					className={`w-100 mb-4 shadow-3d-up-hover shadow-3d-${
-						darkModeStatus ? 'light' : 'dark'
-					}`}
+					className={buttonTheme(name)}
 					size='lg'
 					tag='a'
-					to={`../${demoPagesMenu.sales.subMenu.productID.path}/${id}`}>
-					View Product
-				</Button>
+					isDisable={isDisabled(name)}
+					onClick={() => connectAction()}
+					>
+					{buttonText}
+				</Button>) : (button())}
 			</CardFooter>
 		</Card>
 	);

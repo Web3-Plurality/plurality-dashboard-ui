@@ -16,3 +16,13 @@
 	}
 }
 // stylelint-enable
+
+.truncate-text {
+	width: 180px;
+	max-width: 100%;
+	white-space: nowrap;
+	display: inline-block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin-bottom: 0px;
+  }
