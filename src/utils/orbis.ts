@@ -105,19 +105,26 @@ import {
 		  //todo: simplify this workflow and use a better encryption mechanism
 		  // todo: ideally implement ceramic's encrypted data streams
 		  // IMPORTANT: This is a workaround for testing - not production ready
-		for (let i=0;i<profileDataObjects.length;i++) {
-			if (profileDataObjects[i].dataFetchedFrom == profileType) {
-			const secret = await getCommitment(profileType);
-			console.log("Secret is" + secret);
-			const cryptr = new Cryptr(secret);
-			const decryptedAssetData = cryptr.decrypt(profileDataObjects[i].assetData);
-			console.log(decryptedAssetData);
-			var assetDataArray = new Array();
-			// This will return an array with strings "1", "2", etc.
-			assetDataArray = decryptedAssetData.split(",");
-			profileDataObjects[i].assetData = assetDataArray;
-			console.log(profileDataObjects[i].assetData);
+		  try {
+			for (let i=0;i<profileDataObjects.length;i++) {
+				if (profileDataObjects[i].dataFetchedFrom == profileType) {
+				const secret = await getCommitment(profileType);
+				console.log("Secret is" + secret);
+				const cryptr = new Cryptr(secret);
+				const decryptedAssetData = cryptr.decrypt(profileDataObjects[i].assetData);
+				console.log(decryptedAssetData);
+				var assetDataArray = new Array();
+				assetDataArray = decryptedAssetData.split(",");
+				profileDataObjects[i].assetData = assetDataArray;
+				console.log(profileDataObjects[i].assetData);
+
+				}
+			}
 		}
+		catch(err) {
+			console.log(err);
+			alert("The data was encrypted with a different key. Did you remove the secrets from the snap?");
+			return [];
 		}
 		return profileDataObjects;
 	}
