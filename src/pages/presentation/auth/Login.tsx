@@ -274,8 +274,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						<Card className='shadow-3d-dark' data-tour='login-page'>
 							<CardBody>
 								<div className='text-center my-5'>
-									<Link
-										to='/'
+									<div
 										className={classNames(
 											'text-decoration-none  fw-bold display-2',
 											{
@@ -285,7 +284,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										)}
 										aria-label='Facit'>
 										<Logo width={200}/>
-									</Link>
+									</div>
 								</div>
 								<div
 									className={classNames('rounded-3', {
