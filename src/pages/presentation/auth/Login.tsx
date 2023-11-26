@@ -20,6 +20,8 @@ import { checkIfProfileSaved, createProfile, AssetType } from '../../../utils/or
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
+import { shareDataWithDApp } from '../../../utils/shareData';
+import { useAccount } from 'wagmi';
 
 
 
@@ -74,6 +76,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 	const [callingDApp, setCallingDApp] = useState<String>("");
 	const { showLoading, hideLoading } = useContext(LoadingContext);
+	const { address, connector, isConnected } = useAccount();
 
 
 	const handleSnapConnect = async () => {
@@ -148,15 +151,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
 			if (twitter == true) setTwitterConnected(twitter);
 			if (facebook == true) setFacebookConnected(facebook);
-
-			if (facebook && twitter) {
-				// close the browser tab
-				//alert("All required profiles have been connected. Closing the widget");
-				//window.open("about:blank", "_self");
-				//window.close();
-			}
 		}
 	}
+
+	const sendDataToDApp = async () => {
+		if (isFacebookConnected && isTwitterConnected) {
+			const dataToSend = await shareDataWithDApp(address!.toString());
+				const urlParams = new URLSearchParams(window.location.search);
+        		const originURL = urlParams.get('origin');
+
+				if (originURL) {
+					console.log("Sending to dApp: ");
+					console.log(dataToSend);
+					window.opener.postMessage(dataToSend, originURL);
+				}
+		}
+	}
+	useEffect(() => {
+		sendDataToDApp().catch(console.error);
+	}, [isTwitterConnected, isFacebookConnected])
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)

@@ -89,7 +89,7 @@ import {
 		return isStored;
 	}
 
-	const getDid = (connectedAddress: string) : string => {
+	export const getDid = (connectedAddress: string) : string => {
 		//TODO : this is just a hacky workaround for now
 		return "did:pkh:eip155:1:"+connectedAddress;
 	}
