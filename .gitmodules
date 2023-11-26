@@ -7,3 +7,6 @@
 [submodule "plurality-repconnect-demo"]
 	path = plurality-repconnect-demo
 	url = https://github.com/Web3-Plurality/plurality-repconnect-demo.git
+[submodule "plurality-repconnect-widget"]
+	path = plurality-repconnect-widget
+	url = https://github.com/Web3-Plurality/plurality-repconnect-widget.git
