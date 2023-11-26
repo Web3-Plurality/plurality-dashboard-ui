@@ -110,6 +110,19 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 					</Popovers>
 				</div>
 
+				{/*	Disconnect */}
+				<div className='col-auto'>
+					<Popovers trigger='hover' desc='Disconnect'>
+						<Button
+							// eslint-disable-next-line react/jsx-props-no-spreading
+							{...styledBtn}
+							icon={'Cancel'}
+							onClick={() => {console.log("disconnect logic here")}}
+							aria-label='Disconnect'
+						/>
+					</Popovers>
+				</div>
+
 				{/*	Full Screen */}
 				{/* <div className='col-auto'>
 					<Popovers trigger='hover' desc='Fullscreen'>
