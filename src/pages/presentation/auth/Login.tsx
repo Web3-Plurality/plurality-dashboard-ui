@@ -2,7 +2,7 @@ import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { useFormik } from 'formik';
+//import { useFormik } from 'formik';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
@@ -10,7 +10,7 @@ import Button from '../../../components/bootstrap/Button';
 import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
-import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
+//import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
 import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
@@ -20,6 +20,8 @@ import { checkIfProfileSaved, createProfile, AssetType } from '../../../utils/or
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
+import { shareDataWithDApp } from '../../../utils/shareData';
+import { useAccount } from 'wagmi';
 
 
 
@@ -63,66 +65,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const navigate = useNavigate();
 	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
 
-	const usernameCheck = (username: string) => {
-		return !!getUserDataWithUsername(username);
-	};
-
-	const passwordCheck = (username: string, password: string) => {
-		return getUserDataWithUsername(username).password === password;
-	};
-
-	const formik = useFormik({
-		enableReinitialize: true,
-		initialValues: {
-			loginUsername: USERS.JOHN.username,
-			loginPassword: USERS.JOHN.password,
-		},
-		validate: (values) => {
-			const errors: { loginUsername?: string; loginPassword?: string } = {};
-
-			if (!values.loginUsername) {
-				errors.loginUsername = 'Required';
-			}
-
-			if (!values.loginPassword) {
-				errors.loginPassword = 'Required';
-			}
-
-			return errors;
-		},
-		validateOnChange: false,
-		onSubmit: (values) => {
-			if (usernameCheck(values.loginUsername)) {
-				if (passwordCheck(values.loginUsername, values.loginPassword)) {
-					if (setUser) {
-						setUser(values.loginUsername);
-					}
-
-					handleOnClick();
-				} else {
-					formik.setFieldError('loginPassword', 'Username and password do not match.');
-				}
-			}
-		},
-	});
-
-	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const handleContinue = () => {
-		setIsLoading(true);
-		setTimeout(() => {
-			if (
-				!Object.keys(USERS).find(
-					(f) => USERS[f].username.toString() === formik.values.loginUsername,
-				)
-			) {
-				formik.setFieldError('loginUsername', 'No such user found in the system.');
-			} else {
-				setSignInPassword(true);
-			}
-			setIsLoading(false);
-		}, 1000);
-	};
-
 	// metamask hooks
 	const [state, dispatch] = useContext(MetaMaskContext);
 	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
@@ -130,11 +72,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	: state.snapsDetected;
 
 	// social logins connection hooks
-	//TODO: Add tick or something in the buttons if a social login is already connected
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 	const [callingDApp, setCallingDApp] = useState<String>("");
 	const { showLoading, hideLoading } = useContext(LoadingContext);
+	const { address, connector, isConnected } = useAccount();
 
 
 	const handleSnapConnect = async () => {
@@ -163,7 +105,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			alert("Please install flask which is the development version of Metamask from here: https://metamask.io/flask/");
 		  }
 		  else {
-			// alert("Metamask Flask not installed. Please install from here: https://metamask.io/flask/");
 			alert("Snap installation failed, please make sure you are using Metamask Flask (can be downloaded from https://metamask.io/flask/) and try again");
 		  }
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -210,15 +151,28 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
 			if (twitter == true) setTwitterConnected(twitter);
 			if (facebook == true) setFacebookConnected(facebook);
-
-			if (facebook && twitter) {
-				// close the browser tab
-				//alert("All required profiles have been connected. Closing the widget");
-				//window.open("about:blank", "_self");
-				//window.close();
-			}
 		}
 	}
+
+	const sendDataToDApp = async () => {
+		if (isFacebookConnected && isTwitterConnected) {
+			showLoading();
+			const dataToSend = await shareDataWithDApp(address!.toString());
+				const urlParams = new URLSearchParams(window.location.search);
+        		const originURL = urlParams.get('origin');
+
+				if (originURL) {
+					console.log("Sending to dApp: ");
+					console.log(dataToSend);
+					window.opener.postMessage(dataToSend, originURL);
+					window.close();
+				}
+			hideLoading();
+		}
+	}
+	useEffect(() => {
+		sendDataToDApp().catch(console.error);
+	}, [isTwitterConnected, isFacebookConnected])
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)

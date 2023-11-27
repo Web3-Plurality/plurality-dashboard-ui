@@ -30,6 +30,24 @@ services:
         networks:
             - plurality-verifier-network
     #######
+    # Demo dApp
+    #######
+    plurality-demo-dapp:
+        container_name: plurality-demo-dapp
+        build:
+            context: ../plurality-repconnect-demo
+            dockerfile: Dockerfile
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.http.routers.plurality-demo-dapp-route.service=plurality-demo-dapp-service'
+            - 'traefik.http.routers.plurality-demo-dapp-route.entrypoints=websecure'
+            - 'traefik.http.routers.plurality-demo-dapp-route.tls.certresolver=myresolver'
+            - 'traefik.http.routers.plurality-demo-dapp-route.rule=Host(`${ORBIS_DAPP_DOMAIN}`)'
+            - 'traefik.http.services.plurality-demo-dapp-service.loadbalancer.server.port=3000'
+        restart: always
+        networks:
+            - plurality-verifier-network
+    #######
     # Verifier UI
     #######
     plurality-verifier-ui:
@@ -44,26 +62,6 @@ services:
             - 'traefik.http.routers.plurality-verifier-ui-route.tls.certresolver=myresolver'
             - 'traefik.http.routers.plurality-verifier-ui-route.rule=Host(`${PLURALITY_DOMAIN}`)'
             - 'traefik.http.services.plurality-verifier-ui-service.loadbalancer.server.port=3000'
-        restart: always
-        networks:
-            - plurality-verifier-network
-    #######
-    # Demo dApp
-    #######
-    plurality-demo-dapp:
-        container_name: plurality-demo-dapp
-        build:
-            context: ../
-            dockerfile: Dockerfile
-        labels:
-            - 'traefik.enable=true'
-            - 'traefik.http.routers.plurality-demo-dapp-route.service=plurality-demo-dapp-service'
-            - 'traefik.http.routers.plurality-demo-dapp-route.entrypoints=websecure'
-            - 'traefik.http.routers.plurality-demo-dapp-route.tls.certresolver=myresolver'
-            - 'traefik.http.routers.plurality-demo-dapp-route.rule=Host(`${PLURALITY_DOMAIN}`) && PathPrefix(`/orbis`)'
-            - 'traefik.http.routers.plurality-demo-dapp-route.middlewares=plurality-demo-dapp-stripprefix@docker'
-            - 'traefik.http.middlewares.plurality-demo-dapp-stripprefix.stripprefix.prefixes=/orbis'
-            - 'traefik.http.services.plurality-demo-dapp-service.loadbalancer.server.port=3000'
         restart: always
         networks:
             - plurality-verifier-network
