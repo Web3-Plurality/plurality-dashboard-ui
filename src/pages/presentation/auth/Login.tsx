@@ -156,6 +156,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const sendDataToDApp = async () => {
 		if (isFacebookConnected && isTwitterConnected) {
+			showLoading();
 			const dataToSend = await shareDataWithDApp(address!.toString());
 				const urlParams = new URLSearchParams(window.location.search);
         		const originURL = urlParams.get('origin');
@@ -164,7 +165,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					console.log("Sending to dApp: ");
 					console.log(dataToSend);
 					window.opener.postMessage(dataToSend, originURL);
+					window.close();
 				}
+			hideLoading();
 		}
 	}
 	useEffect(() => {
