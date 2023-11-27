@@ -171,6 +171,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const isWidget = params.get('isWidget')!;
 		await getTwitterID(isWidget);
 	  };
+	  const handleOnRequestTwitterClick = () => {
+		console.log("add ur logic here")
+	  }
+	  const handleOnRequestFacebookClick = () => {
+		console.log("add ur logic here")
+	  }
+
 	  const responseFacebook = async (response: any) => {
 		console.log(response);
 		//TODO: Start a loader here
@@ -344,39 +351,97 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												</Button>
 											</div>
 											<div className='col-12 mt-3'>
-											<FacebookLogin
-												appId="696970245672784"
-												autoLoad={false}
-												fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
-												callback={responseFacebook}
-												cssClass='shadow-3d-container'
-												scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
-												render={renderProps => (
-													<Button
+												<FacebookLogin
+													appId="696970245672784"
+													autoLoad={false}
+													fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
+													callback={responseFacebook}
+													cssClass='shadow-3d-container'
+													scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
+													render={renderProps => (
+														<Button
+														isOutline
+														isDisable= {isFacebookConnected==true ? true: false}
+														color={darkModeStatus ? 'light' : 'dark'}
+														className={classNames('w-100 py-3', {
+															'border-light': !darkModeStatus,
+															'border-dark': darkModeStatus,
+														})}
+														icon='CustomFacebook'
+														onClick={renderProps.onClick}
+														>
+															{!isFacebookConnected && (
+																<>
+																Connect Facebook
+																</>
+															)}
+															{isFacebookConnected && (
+																<>
+																Connected
+																</>
+															)}
+													</Button>
+													)}
+												/>
+											</div>
+											{/* <div className='col-12 mt-3'>
+												{ !isTwitterConnected ? (<Button
 													isOutline
-													isDisable= {isFacebookConnected==true ? true: false}
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='CustomTwitter'
+													onClick={handleOnTwitterClick}>
+															Connect Twitter
+												</Button>) : (<Button
+													isOutline
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='CustomTwitter'
+													onClick={handleOnRequestTwitterClick}>
+															Request Twitter access
+												</Button>)}
+											</div>
+											<div className='col-12 mt-3'>
+												{ !isFacebookConnected ? (<FacebookLogin
+													appId="696970245672784"
+													autoLoad={false}
+													fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
+													callback={responseFacebook}
+													cssClass='shadow-3d-container'
+													scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
+													render={renderProps => (
+														<Button
+														isOutline
+														isDisable= {isFacebookConnected==true ? true: false}
+														color={darkModeStatus ? 'light' : 'dark'}
+														className={classNames('w-100 py-3', {
+															'border-light': !darkModeStatus,
+															'border-dark': darkModeStatus,
+														})}
+														icon='CustomFacebook'
+														onClick={renderProps.onClick}
+														>
+																Connect Facebook
+													</Button>
+													)}
+												/>) : (<Button
+													isOutline
 													color={darkModeStatus ? 'light' : 'dark'}
 													className={classNames('w-100 py-3', {
 														'border-light': !darkModeStatus,
 														'border-dark': darkModeStatus,
 													})}
 													icon='CustomFacebook'
-													onClick={renderProps.onClick}
-													>
-														{!isFacebookConnected && (
-															<>
-															Connect Facebook
-															</>
-														)}
-														{isFacebookConnected && (
-															<>
-															Connected
-															</>
-														)}
-												</Button>
-												)}
-											/>
-											</div>
+													onClick={handleOnRequestFacebookClick}>
+															Request Facebook access
+												</Button>)}
+											</div> */}
 											</form>
 										</>
 									)}
