@@ -321,6 +321,29 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 											<form className='row g-4'>
 											<div className='col-12 mt-3'>
+												<Button
+													isOutline
+													isDisable= {isTwitterConnected==true ? true: false}
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='CustomTwitter'
+													onClick={handleOnTwitterClick}>
+													{!isTwitterConnected && (
+															<>
+															Connect Twitter
+															</>
+														)}
+														{isTwitterConnected && (
+															<>
+															Connected
+															</>
+														)}
+												</Button>
+											</div>
+											<div className='col-12 mt-3'>
 											<FacebookLogin
 												appId="696970245672784"
 												autoLoad={false}
@@ -353,29 +376,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												</Button>
 												)}
 											/>
-											</div>
-											<div className='col-12 mt-3'>
-												<Button
-													isOutline
-													isDisable= {isTwitterConnected==true ? true: false}
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomTwitter'
-													onClick={handleOnTwitterClick}>
-													{!isTwitterConnected && (
-															<>
-															Connect Twitter
-															</>
-														)}
-														{isTwitterConnected && (
-															<>
-															Connected
-															</>
-														)}
-												</Button>
 											</div>
 											</form>
 										</>

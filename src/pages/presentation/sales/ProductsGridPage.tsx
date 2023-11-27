@@ -226,17 +226,21 @@ const ProductsGridPage = () => {
 	}
 
 	const viewFacebookDetails = async () => {
+		showLoading()
 		const detail = await getSocialMediaDetails("facebook")
 		console.log(detail)
 		setSidePanelData(detail)
 		setEditPanel(true)
+		hideLoading()
 	}
 
 	const viewTwitterDetails = async () => {
+		showLoading()
 		const detail =  await getSocialMediaDetails("twitter")
 		console.log(detail)
 		setSidePanelData(detail)
 		setEditPanel(true)
+		hideLoading()
 	}
 
 	const getSocialMediaDetails = async (platform: string) => {
