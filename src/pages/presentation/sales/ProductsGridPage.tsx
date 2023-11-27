@@ -153,13 +153,17 @@ const ProductsGridPage = () => {
 				showLoading();
 				const params = new URLSearchParams(window.location.search);
 				const username = params.get('username')!;
+				const displayName = params.get('display_name')!;
+				const profileUrl = params.get('picture_url')!;
+	
 				const description = 'some description';
+				const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
 				createProfile(process.env.REACT_APP_TWITTER!, 
 							process.env.REACT_APP_TWITTER_GROUP_ID!,
 							username,
 							description,
 							AssetType.INTEREST,
-							getTwitterInterests({})).then(isProfileCreated => {
+							getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
 								if (isProfileCreated) 
 								// Add condition for making sure that the user has indeed connected
 									setTwitterConnected(true);
@@ -208,15 +212,17 @@ const ProductsGridPage = () => {
 		if (response.accessToken) {
 			showLoading();
 			const interests = getFacebookInterests(response);
-			const username = "some username";
+			const username = response.name;
 			const description = 'some description';
+			const profile = {name: username, profileUrl: ""};
 			try {
 			const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!, 
 									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
 									username,
 									description,
 									AssetType.INTEREST,
-									interests
+									interests,
+									JSON.stringify(profile)
 								);
 			if (isProfileCreated) 
 				setFacebookConnected(true);
@@ -424,11 +430,16 @@ const ProductsGridPage = () => {
 					<Card>
 						<CardHeader>
 							<CardLabel icon='Description' iconColor='success'>
-								<CardTitle>Your interests</CardTitle>
+								<CardTitle>Data fetched from your profile</CardTitle>
 							</CardLabel>
 						</CardHeader>
 						<CardBody>
 							<div>
+								<h3>Profile</h3>
+								<img src={sidePanelData? JSON.parse(sidePanelData?.profileData).profileUrl: ""}/>
+								<p>Name: {sidePanelData? JSON.parse(sidePanelData?.profileData).name: ""}</p>
+
+								<h3>Interests</h3>
 								{sidePanelData?.assetData.map((interest: any) =><li key={interest}>{interest}</li>)}							
 							</div>
 							{/* <div className='row g-4'>
