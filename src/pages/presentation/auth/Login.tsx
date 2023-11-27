@@ -127,16 +127,19 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		console.log(response);
 		if (response.accessToken) {
 			showLoading();
+			console.log(response);
 			const interests = getFacebookInterests(response);
-			const username = "some username";
+			const username = response.name;
 			const description = 'some description';
+			const profile = {name: username, profileUrl: ""};
 			try {
 			const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!, 
 									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
 									username,
 									description,
 									AssetType.INTEREST,
-									interests
+									interests,
+									JSON.stringify(profile)
 								);
 			if (isProfileCreated) 
 				setFacebookConnected(true);
@@ -202,14 +205,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if (idPlatform == "twitter" && state.installedSnap) {
 			const params = new URLSearchParams(window.location.search);
 			const username = params.get('username')!;
+			const displayName = params.get('display_name')!;
+			const profileUrl = params.get('picture_url')!;
+
 			const description = 'some description';
+			const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
 			showLoading();
 			createProfile(process.env.REACT_APP_TWITTER!, 
 						process.env.REACT_APP_TWITTER_GROUP_ID!,
 						username,
 						description,
 						AssetType.INTEREST,
-						getTwitterInterests({})).then(isProfileCreated => {
+						getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
 							if (isProfileCreated) 
 							// Add condition for making sure that the user has indeed connected
 								setTwitterConnected(true);

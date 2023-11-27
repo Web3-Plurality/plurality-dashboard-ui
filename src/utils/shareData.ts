@@ -22,10 +22,15 @@ export async function shareDataWithDApp(walletAddress: string): Promise<ProfileD
 				const secret = await getCommitment(profileDataObjects[i].dataFetchedFrom);
 				const cryptr = new Cryptr(secret);
 				const decryptedAssetData = cryptr.decrypt(profileDataObjects[i].assetData);
+				const decryptedProfileData = cryptr.decrypt(profileDataObjects[i].profileData);
+
 				console.log(decryptedAssetData);
+				console.log(decryptedProfileData);
+
 				var assetDataArray = new Array();
 				assetDataArray = decryptedAssetData.split(",");
 				profileDataObjects[i].assetData = assetDataArray;
+				profileDataObjects[i].profileData = decryptedProfileData;
 				console.log(profileDataObjects[i].assetData);
 			}
 		}
