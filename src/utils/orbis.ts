@@ -119,6 +119,8 @@ import {
 			return [];
 		  }
 		let profileDataObjects: ProfileData[] = data.details.profile?.data.web2ProfilesData;
+		if (!profileDataObjects) return [];
+
 		  //todo: simplify this workflow and use a better encryption mechanism
 		  // todo: ideally implement ceramic's encrypted data streams
 		  // IMPORTANT: This is a workaround for testing - not production ready
@@ -146,14 +148,13 @@ import {
 		}
 		catch(err) {
 			console.log(err);
-			alert("The data was encrypted with a different key. Did you remove the secrets from the snap?");
 			return [];
 		}
 		return profileDataObjects;
 	}
-	async function createOrbisPost(zkproof: string, platform: string, username: string) {
+	async function createOrbisPost(zkproof: string, platform: string) {
 		const postContent = "Gm folks! \n"+
-		"I just connected my " + platform + " with username "+ username + " \n" +
+		"I just connected my " + platform + " \n" +
 		"View my zk proof verification on etherscan: " + zkproof +" \n" + 
 		"Let's make social media sovereign!";
 		/** Add the results in a media array used when sharing the post (the media object must be an array) */
@@ -198,7 +199,7 @@ import {
 				const zkProofTx = await getZkProof(profileType, groupId);
 				if (zkProofTx !== "") {
 					console.log("Reputation ownership proved");
-					createOrbisPost(zkProofTx,profileType,username);
+					createOrbisPost(zkProofTx,profileType);
 					return true;
 				}
 				else {
@@ -208,3 +209,64 @@ import {
 			}
 		}
 	}
+
+	//TODO: The above function has overlaps with the following two functions, need to cleanup
+	export const createProfileTwitterPopup = async (profileType: string, 
+											groupId: string,
+											username: string,
+											description: string,
+											reputationalAssetType: AssetType,
+											reputationalAssetData: string[],
+											profileData: string): Promise<Boolean> => {
+													
+		const isStored =  await checkIfProfileSaved(profileType);
+		if (isStored) {
+			console.log("Your profile has already been linked. Nothing more to do :) ");
+			return true;
+		}
+		else {
+			const did = await orbisConnect();
+			if (did == "") {
+				console.log("Orbis connect request was rejected");
+				return false;
+			}
+
+			const [res, commitment] =  await saveProfile(profileType, groupId);
+			if (!res) {
+				alert("User rejected the authentication request.");
+				return false;
+			}
+			else {
+				
+				const res = await addDataToOrbis(profileType, did, username, description, reputationalAssetType, reputationalAssetData, profileData);
+				if (res == -1) {
+					console.log("Could not add profile data to ceramic. Returning");
+					return false;
+				}
+				else {
+					return true;
+				}
+			}
+		}
+	}
+
+
+	
+		export const createZKProofTwitterPopup = async (profileType: string, 
+											groupId: string,
+											): Promise<Boolean> => {
+													
+			const zkProofTx = await getZkProof(profileType, groupId);
+			if (zkProofTx !== "") {
+				console.log("Reputation ownership proved");
+				createOrbisPost(zkProofTx,profileType);
+				return true;
+			}
+			else {
+				alert("Reputation invalid" );
+				return false;
+			}
+	}
+
+
+	

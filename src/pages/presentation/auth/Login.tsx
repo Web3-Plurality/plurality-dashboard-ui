@@ -16,12 +16,12 @@ import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { checkIfProfileSaved, createProfile, AssetType, getProfileData } from '../../../utils/orbis';
+import { checkIfProfileSaved, createProfile, AssetType, getProfileData, createProfileTwitterPopup, createZKProofTwitterPopup } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
 import { shareDataWithDApp } from '../../../utils/shareData';
-import { useAccount } from 'wagmi';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import TwitterOAuthPopup from '../../../components/social/TwitterOAuthPopup';
 import ReactDOM from 'react-dom';
 
@@ -78,11 +78,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 	const [callingDApp, setCallingDApp] = useState<String>("");
 	const { showLoading, hideLoading } = useContext(LoadingContext);
-	const { address, connector, isConnected } = useAccount();
 
+
+	// wagmi connectors and disconnectors
+	const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
+	const { address, connector, isConnected } = useAccount();
+	const { disconnect } = useDisconnect()
+
+	const [renderBlocker, setRenderBlocker] = useState(false);
 
 	const handleSnapConnect = async () => {
-		try {
+		
+		try {	
 		  await connectSnap();
 		  const installedSnap = await getSnap();
 		  dispatch({
@@ -91,6 +98,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  });
 		  if (setUser) setUser("user");
 		  console.log(state.installedSnap);
+		  const res = await ensureMetamaskConnection();
+
 		  const params = new URLSearchParams(window.location.search)
 		  const isWidget = params.get('isWidget')!;
 		  if (!isWidget || isWidget == "false")
@@ -166,7 +175,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		//if (isFacebookConnected && isTwitterConnected) {
 			try {
 			showLoading();
-			console.log("Address is: "+ address);
+			ensureMetamaskConnection().then(res=> {
+				if (res) console.log("address connected");
+				else console.log("Address not connected");
+			});
 			const dataToSend = await shareDataWithDApp(address!.toString());
 				const urlParams = new URLSearchParams(window.location.search);
         		const originURL = urlParams.get('origin');
@@ -187,7 +199,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		//}
 	}
 
-	const openTwitterOAuthPopup = () => {
+	const ensureMetamaskConnection = async (): Promise<Boolean> => {
+		console.log("Ensure metamask connection called");
+		if (!address || !isConnected) {
+			for (let i=0; i < connectors.length; i++) {
+				let connector = connectors[i];
+				console.log("Trying to connect with connector: "+connectors[i].name);
+				connect({ connector});
+			}
+		}
+		return true;
+	}
+	const openTwitterOAuthPopup = async () => {
 		const params = new URLSearchParams(window.location.search)
 		const isWidget = params.get('isWidget')!;
 		const origin = params.get('origin')!;
@@ -206,6 +229,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  `width=${popupWidth}, height=${popupHeight}, top=${popupTop}, left=${popupLeft}`
 		);
 
+		ensureMetamaskConnection().then(res=> {
+			if (res) console.log("address connected");
+			else console.log("Address not connected");
+		});
+
 		// Add a loop after opening the popup window
 		const intervalId = setInterval(() => {
 			getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObjects => {
@@ -215,10 +243,24 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						if (profileDataObjects[i].dataFetchedFrom == process.env.REACT_APP_TWITTER!) {
 							console.log(profileDataObjects[i]);
 							//end this loop
-							window.opener.postMessage(profileDataObjects[i], origin);
-							clearInterval(intervalId); // Clear the interval if got data from ceramic
-							setTwitterConnected(true);
-							window.close();
+							createZKProofTwitterPopup(process.env.REACT_APP_TWITTER!, process.env.REACT_APP_TWITTER_GROUP_ID!).then(res => {
+								if (res) {
+									console.log("Added twitter verification post to orbis");
+									window.opener.postMessage(profileDataObjects[i], origin);
+									clearInterval(intervalId); // Clear the interval if got data from ceramic
+									setTwitterConnected(true);
+									window.close();
+
+								}
+								else {
+									console.log("Could not add twitter verification post to orbis");	
+									window.close();								
+								}
+							}).catch(err => {
+								console.log(err);
+							});
+
+
 						}
 					}
 
@@ -245,9 +287,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}, [state])
 	
 	useEffect(() => {
+		//ensureMetamaskConnection().then(res=>{console.log(res)});
 		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
-		if (idPlatform == "twitter" && state.installedSnap) {
+		if (idPlatform == "twitter" && state.installedSnap && !renderBlocker) {
+			setRenderBlocker(true);
 			const params = new URLSearchParams(window.location.search);
 			const username = params.get('username')!;
 			const displayName = params.get('display_name')!;
@@ -256,19 +300,19 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const description = 'some description';
 			const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
 			showLoading();
-			createProfile(process.env.REACT_APP_TWITTER!, 
+			createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
 						process.env.REACT_APP_TWITTER_GROUP_ID!,
 						username,
 						description,
 						AssetType.INTEREST,
 						getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
-							/*if (isProfileCreated) {
+							if (isProfileCreated) {
 								// Add condition for making sure that the user has indeed connected
-								setTwitterConnected(true);
-								sendDataToDApp().then(result => {console.log("Data sent to dApp? ")}).catch(console.error);
+								//setTwitterConnected(true);
+								alert("Twitter is successfully connected");
 							}
 							else 
-								console.log("Profile could not be created. Please try again");*/
+								alert("Profile could not be created. Please try again");
 							hideLoading();
 							window.close();
 						}).catch(error => {
@@ -286,6 +330,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			title={singUpStatus ? 'Sign Up' : 'Login'}
 			className={classNames({ 'bg-dark': !singUpStatus, 'bg-light': singUpStatus })}>
 			<Page className='p-0'>
+				{ !renderBlocker && (
 				<div className='row h-100 align-items-center justify-content-center'>
 					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
 						<Card className='shadow-3d-dark' data-tour='login-page'>
@@ -355,7 +400,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									)}
 									{/* END :: Snap install */}
 									{/* BEGIN :: Social Login */}
-									{isMetaMaskReady && state.installedSnap && isWidget && (
+									{isMetaMaskReady && state.installedSnap && isWidget && isConnected &&(
 										<>
 										<LoginHeader isSnap={false} callingDApp={callingDApp} />
 
@@ -449,6 +494,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						</div>
 					</div>
 				</div>
+				)}
 			</Page>
 		</PageWrapper>
 	);
