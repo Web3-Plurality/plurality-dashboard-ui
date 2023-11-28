@@ -10,7 +10,6 @@ import Button from '../../../components/bootstrap/Button';
 import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
-//import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
 import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
@@ -20,10 +19,7 @@ import { checkIfProfileSaved, createProfile, AssetType, getProfileData, createPr
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
-import { shareDataWithDApp } from '../../../utils/shareData';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import TwitterOAuthPopup from '../../../components/social/TwitterOAuthPopup';
-import ReactDOM from 'react-dom';
 
 
 
@@ -121,14 +117,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
 		}
 	  };
-	  const handleOnTwitterClick = async () => {
-		const params = new URLSearchParams(window.location.search)
-		const isWidget = params.get('isWidget')!;
-		const origin = params.get('origin')!;
-		await getTwitterID(isWidget, origin);
-	  };
 
-	  const responseFacebook = async (response: any) => {
+	const responseFacebook = async (response: any) => {
 		console.log(response);
 		if (response.accessToken) {
 			showLoading();
@@ -148,7 +138,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								);
 			if (isProfileCreated) {
 				setFacebookConnected(true);
-				await sendDataToDApp();
+				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
+				if (profileDataObj) {
+					const params = new URLSearchParams(window.location.search)
+					const origin = params.get('origin')!;
+					window.opener.postMessage(profileDataObj, origin);
+					window.close();
+				}
+				//await sendDataToDApp();
 			}
 			else
 				console.log("Profile could not be created. Please try again");
@@ -195,34 +192,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}
 
-	const sendDataToDApp = async () => {
-		//if (isFacebookConnected && isTwitterConnected) {
-			try {
-			showLoading();
-			ensureMetamaskConnection().then(res=> {
-				if (res) console.log("address connected");
-				else console.log("Address not connected");
-			});
-			const dataToSend = await shareDataWithDApp(address!.toString());
-				const urlParams = new URLSearchParams(window.location.search);
-        		const originURL = urlParams.get('origin');
-
-				if (originURL) {
-					console.log("Sending to dApp: ");
-					console.log(dataToSend);
-					console.log(window.opener);
-					window.opener.postMessage(dataToSend, originURL);
-					window.close();
-				}
-			hideLoading();
-			}
-			catch (err) {
-				console.log(err);
-				hideLoading();
-			}
-		//}
-	}
-
 	const ensureMetamaskConnection = async (): Promise<Boolean> => {
 		console.log("Ensure metamask connection called");
 		if (!address || !isConnected) {
@@ -249,9 +218,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const params = new URLSearchParams(window.location.search)
 		const isWidget = params.get('isWidget')!;
 		const origin = params.get('origin')!;
-		//const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
+		const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
 		//TODO: Change it back
-		const apiUrl = "http://localhost:3000/auth-pages/login?isWidget=true&origin=http://localhost:3001/&id_platform=twitter&username=hirasiddiqui199&display_name=HiraSiddiqui&picture_url=https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"; // Replace with your Twitter API endpoint
+		//const apiUrl = "http://localhost:3000/auth-pages/login?isWidget=true&origin=http://localhost:3001/&id_platform=twitter&username=hirasiddiqui199&display_name=HiraSiddiqui&picture_url=https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"; // Replace with your Twitter API endpoint
 	
 		// Define the dimensions for the popup window
 		const popupWidth = 600;
@@ -317,7 +286,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}, [state])
 	
 	useEffect(() => {
-		const wait = () => new Promise(resolve => setTimeout(resolve, 3000));
+		const wait = () => new Promise(resolve => setTimeout(resolve, 5000));
 
 		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
