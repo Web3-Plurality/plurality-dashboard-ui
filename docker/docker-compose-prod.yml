@@ -6,7 +6,7 @@ services:
     plurality-verifier-be:
         container_name: plurality-verifier-be
         build:
-            context: ./plurality-backend-api
+            context: ../plurality-backend-api
             dockerfile: Dockerfile
         environment:
             PORT: 5000
@@ -15,6 +15,8 @@ services:
             TWITTER_CLIENT_SECRET: ${TWITTER_CLIENT_SECRET}
             SIGNER_PRIVATE_KEY: ${VERIFIER_WALLET_PRIVATE_KEY}
             VERIFIER_UI_URL: ${VERIFIER_UI_URL}
+            DASHBOARD_UI_URL: ${DASHBOARD_UI_URL}
+            WIDGET_UI_URL: ${WIDGET_UI_URL}
         labels:
             - 'traefik.enable=true'
             - 'traefik.http.routers.plurality-verifier-be-route.service=plurality-verifier-be-service'
@@ -28,12 +30,30 @@ services:
         networks:
             - plurality-verifier-network
     #######
+    # Demo dApp
+    #######
+    plurality-demo-dapp:
+        container_name: plurality-demo-dapp
+        build:
+            context: ../plurality-repconnect-demo
+            dockerfile: Dockerfile
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.http.routers.plurality-demo-dapp-route.service=plurality-demo-dapp-service'
+            - 'traefik.http.routers.plurality-demo-dapp-route.entrypoints=websecure'
+            - 'traefik.http.routers.plurality-demo-dapp-route.tls.certresolver=myresolver'
+            - 'traefik.http.routers.plurality-demo-dapp-route.rule=Host(`${ORBIS_DAPP_DOMAIN}`)'
+            - 'traefik.http.services.plurality-demo-dapp-service.loadbalancer.server.port=3000'
+        restart: always
+        networks:
+            - plurality-verifier-network
+    #######
     # Verifier UI
     #######
     plurality-verifier-ui:
         container_name: plurality-verifier-ui
         build:
-            context: .
+            context: ../
             dockerfile: Dockerfile
         labels:
             - 'traefik.enable=true'

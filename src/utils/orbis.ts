@@ -3,8 +3,10 @@ import {
 	checkProfile,
 	saveProfile,
 	getZkProof,
+	getCommitment,
   } from './snap';
 
+  const Cryptr = require('cryptr');
   const orbis = new Orbis();
 
 
@@ -30,7 +32,7 @@ import {
 			return res.did;
 		} else {
 			console.log("Error connecting to Ceramic: ", res);
-			alert("User rejected the orbis sign in request");
+			//alert("User rejected the orbis sign in request");
 			//alert("Error connecting to Ceramic.");
 			return "";
 		}
@@ -43,8 +45,14 @@ import {
 			return -1;
 		  }
 
+		  const secret = await getCommitment(profileType);
+
+		  const cryptr = new Cryptr(secret);
+		  const encryptedString = cryptr.encrypt(repAssetData);
+
+
 		  // the data fetched from web2 profile to be pushed to ceramic
-		  let newData:ProfileData = {dataFetchedFrom: profileType, assetType: repAssetType, assetData: repAssetData};
+		  let newData:ProfileData = {dataFetchedFrom: profileType, assetType: repAssetType, assetData: encryptedString};
 		  console.log(JSON.stringify(data));
 		  console.log(data.details);
 		  console.log(data.details.profile?.data);
@@ -81,12 +89,12 @@ import {
 		return isStored;
 	}
 
-	const getDid = (connectedAddress: string) : string => {
+	export const getDid = (connectedAddress: string) : string => {
 		//TODO : this is just a hacky workaround for now
 		return "did:pkh:eip155:1:"+connectedAddress;
 	}
 
-	export const getProfileData = async (connectedAddress: string) : Promise<ProfileData[]> => {
+	export const getProfileData = async (connectedAddress: string, profileType: string) : Promise<ProfileData[]> => {
 		const did = getDid(connectedAddress);
 		const { data, error } = await orbis.getProfile(did);
 		  if (error) {
@@ -94,6 +102,30 @@ import {
 			return [];
 		  }
 		let profileDataObjects: ProfileData[] = data.details.profile?.data.web2ProfilesData;
+		  //todo: simplify this workflow and use a better encryption mechanism
+		  // todo: ideally implement ceramic's encrypted data streams
+		  // IMPORTANT: This is a workaround for testing - not production ready
+		  try {
+			for (let i=0;i<profileDataObjects.length;i++) {
+				if (profileDataObjects[i].dataFetchedFrom == profileType) {
+				const secret = await getCommitment(profileType);
+				console.log("Secret is" + secret);
+				const cryptr = new Cryptr(secret);
+				const decryptedAssetData = cryptr.decrypt(profileDataObjects[i].assetData);
+				console.log(decryptedAssetData);
+				var assetDataArray = new Array();
+				assetDataArray = decryptedAssetData.split(",");
+				profileDataObjects[i].assetData = assetDataArray;
+				console.log(profileDataObjects[i].assetData);
+
+				}
+			}
+		}
+		catch(err) {
+			console.log(err);
+			alert("The data was encrypted with a different key. Did you remove the secrets from the snap?");
+			return [];
+		}
 		return profileDataObjects;
 	}
 	export const createProfile = async (profileType: string, 
@@ -101,35 +133,43 @@ import {
 												username: string,
 												description: string,
 												reputationalAssetType: AssetType,
-												reputationalAssetData: string[]) => {
+												reputationalAssetData: string[]): Promise<Boolean> => {
 													
 		const isStored =  await checkIfProfileSaved(profileType);
 		if (isStored) {
 			console.log("Your profile has already been linked. Nothing more to do :) ");
-			return;
+			return true;
 		}
 		else {
 			const did = await orbisConnect();
+			if (did == "") {
+				console.log("Orbis connect request was rejected");
+				return false;
+			}
 
 			const [res, commitment] =  await saveProfile(profileType, groupId);
 			if (!res) {
 				alert("User rejected the authentication request.");
-				return -1;
+				return false;
 			}
 			else {
 				
 				const res = await addDataToOrbis(profileType, did, username, description, reputationalAssetType, reputationalAssetData);
 				if (res == -1) {
 					console.log("Could not add profile data to ceramic. Returning");
-					return -1;
+					return false;
 				}
-				const result = await getZkProof(profileType, groupId);
+				return true;
+				// No need for zk proof creation here
+				/*const result = await getZkProof(profileType, groupId);
 				if (result !== "") {
 					console.log("Reputation ownership proved");
+					return true;
 				}
 				else {
 					alert("Reputation invalid" );
-				}
+					return false;
+				}*/
 			}
 		}
 	}

@@ -2,7 +2,7 @@ import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { useFormik } from 'formik';
+//import { useFormik } from 'formik';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
@@ -10,7 +10,7 @@ import Button from '../../../components/bootstrap/Button';
 import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
-import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
+//import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
 import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
@@ -19,6 +19,9 @@ import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props
 import { checkIfProfileSaved, createProfile, AssetType } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
+import LoadingContext from '../../../utils/LoadingContext';
+import { shareDataWithDApp } from '../../../utils/shareData';
+import { useAccount } from 'wagmi';
 
 
 
@@ -62,66 +65,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const navigate = useNavigate();
 	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
 
-	const usernameCheck = (username: string) => {
-		return !!getUserDataWithUsername(username);
-	};
-
-	const passwordCheck = (username: string, password: string) => {
-		return getUserDataWithUsername(username).password === password;
-	};
-
-	const formik = useFormik({
-		enableReinitialize: true,
-		initialValues: {
-			loginUsername: USERS.JOHN.username,
-			loginPassword: USERS.JOHN.password,
-		},
-		validate: (values) => {
-			const errors: { loginUsername?: string; loginPassword?: string } = {};
-
-			if (!values.loginUsername) {
-				errors.loginUsername = 'Required';
-			}
-
-			if (!values.loginPassword) {
-				errors.loginPassword = 'Required';
-			}
-
-			return errors;
-		},
-		validateOnChange: false,
-		onSubmit: (values) => {
-			if (usernameCheck(values.loginUsername)) {
-				if (passwordCheck(values.loginUsername, values.loginPassword)) {
-					if (setUser) {
-						setUser(values.loginUsername);
-					}
-
-					handleOnClick();
-				} else {
-					formik.setFieldError('loginPassword', 'Username and password do not match.');
-				}
-			}
-		},
-	});
-
-	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const handleContinue = () => {
-		setIsLoading(true);
-		setTimeout(() => {
-			if (
-				!Object.keys(USERS).find(
-					(f) => USERS[f].username.toString() === formik.values.loginUsername,
-				)
-			) {
-				formik.setFieldError('loginUsername', 'No such user found in the system.');
-			} else {
-				setSignInPassword(true);
-			}
-			setIsLoading(false);
-		}, 1000);
-	};
-
 	// metamask hooks
 	const [state, dispatch] = useContext(MetaMaskContext);
 	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
@@ -129,10 +72,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	: state.snapsDetected;
 
 	// social logins connection hooks
-	//TODO: Add tick or something in the buttons if a social login is already connected
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 	const [callingDApp, setCallingDApp] = useState<String>("");
+	const { showLoading, hideLoading } = useContext(LoadingContext);
+	const { address, connector, isConnected } = useAccount();
+
 
 	const handleSnapConnect = async () => {
 		try {
@@ -160,7 +105,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			alert("Please install flask which is the development version of Metamask from here: https://metamask.io/flask/");
 		  }
 		  else {
-			// alert("Metamask Flask not installed. Please install from here: https://metamask.io/flask/");
 			alert("Snap installation failed, please make sure you are using Metamask Flask (can be downloaded from https://metamask.io/flask/) and try again");
 		  }
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -169,7 +113,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	  const handleOnTwitterClick = async () => {
 		const params = new URLSearchParams(window.location.search)
 		const isWidget = params.get('isWidget')!;
-		await getTwitterID(isWidget);
+		const origin = params.get('origin')!;
+		await getTwitterID(isWidget, origin);
 	  };
 	  const handleOnRequestTwitterClick = () => {
 		console.log("add ur logic here")
@@ -180,20 +125,30 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	  const responseFacebook = async (response: any) => {
 		console.log(response);
-		//TODO: Start a loader here
 		if (response.accessToken) {
+			showLoading();
 			const interests = getFacebookInterests(response);
 			const username = "some username";
 			const description = 'some description';
-			//const reputationalAssetData = ["random interest 1", "random interest 2"];
-			await createProfile(	process.env.REACT_APP_FACEBOOK!, 
-										process.env.REACT_APP_FACEBOOK_GROUP_ID!,
-										username,
-										description,
-										AssetType.INTEREST,
-										interests
-									);
-			setFacebookConnected(true);
+			try {
+			const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!, 
+									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
+									username,
+									description,
+									AssetType.INTEREST,
+									interests
+								);
+			if (isProfileCreated) 
+				setFacebookConnected(true);
+			else
+				console.log("Profile could not be created. Please try again");
+
+			hideLoading();
+			}
+			catch (error) {
+				console.log(error);
+				hideLoading();
+			}
 		}
 	};	
 	
@@ -203,15 +158,28 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
 			if (twitter == true) setTwitterConnected(twitter);
 			if (facebook == true) setFacebookConnected(facebook);
-
-			if (facebook && twitter) {
-				// close the browser tab
-				//alert("All required profiles have been connected. Closing the widget");
-				//window.open("about:blank", "_self");
-				//window.close();
-			}
 		}
 	}
+
+	const sendDataToDApp = async () => {
+		if (isFacebookConnected && isTwitterConnected) {
+			showLoading();
+			const dataToSend = await shareDataWithDApp(address!.toString());
+				const urlParams = new URLSearchParams(window.location.search);
+        		const originURL = urlParams.get('origin');
+
+				if (originURL) {
+					console.log("Sending to dApp: ");
+					console.log(dataToSend);
+					window.opener.postMessage(dataToSend, originURL);
+					window.close();
+				}
+			hideLoading();
+		}
+	}
+	useEffect(() => {
+		sendDataToDApp().catch(console.error);
+	}, [isTwitterConnected, isFacebookConnected])
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
@@ -226,25 +194,34 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if ((widget=="false" || !widget) && state.installedSnap) {
 			navigate(`/?isWidget=false`);
 		} 
-	}, [isMetaMaskReady,state])
+	}, [state])
 	
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const idPlatform = params.get('id_platform')!;
-		if (idPlatform == "twitter" ) {
+		if (idPlatform == "twitter" && state.installedSnap) {
 			const params = new URLSearchParams(window.location.search);
 			const username = params.get('username')!;
 			const description = 'some description';
-			//TODO: Start a loader here
+			showLoading();
 			createProfile(process.env.REACT_APP_TWITTER!, 
 						process.env.REACT_APP_TWITTER_GROUP_ID!,
 						username,
 						description,
 						AssetType.INTEREST,
-						getTwitterInterests({})).catch(console.error);
-			setTwitterConnected(true);
+						getTwitterInterests({})).then(isProfileCreated => {
+							if (isProfileCreated) 
+							// Add condition for making sure that the user has indeed connected
+								setTwitterConnected(true);
+							else 
+								console.log("Profile could not be created. Please try again");
+							hideLoading();
+						}).catch(error => {
+							console.log(error);
+							hideLoading();
+						})
 		}
-	}, [])
+	}, [state])
 
 
 	return (

@@ -149,26 +149,30 @@ const ProductsGridPage = () => {
 		if ( !isTwitterConnected ) {  
 			const params = new URLSearchParams(window.location.search)
 			const idPlatform = params.get('id_platform')!;
-			if (idPlatform == "twitter") { 
+			if (idPlatform == "twitter" && state.installedSnap) { 
 				showLoading();
 				const params = new URLSearchParams(window.location.search);
 				const username = params.get('username')!;
 				const description = 'some description';
-				//TODO: Start a loader here
 				createProfile(process.env.REACT_APP_TWITTER!, 
 							process.env.REACT_APP_TWITTER_GROUP_ID!,
 							username,
 							description,
 							AssetType.INTEREST,
-							getTwitterInterests({})	//TODO: Fetch more information from twitter
-							).then(res => {
-								hideLoading();
+							getTwitterInterests({})).then(isProfileCreated => {
+								if (isProfileCreated) 
 								// Add condition for making sure that the user has indeed connected
-								setTwitterConnected(true);
+									setTwitterConnected(true);
+								else 
+									console.log("Profile could not be created. Please try again");
+								hideLoading();
+							}).catch(error => {
+								console.log(error);
+								hideLoading();
 							})		
 			}
 		}
-	  }, [])
+	  }, [state])
 
 	  const checkConnectProfilesOnPageLoad = async () => {
 		const params = new URLSearchParams(window.location.search)
@@ -196,30 +200,37 @@ const ProductsGridPage = () => {
 	}
 
 	const loginTwitter = async () => {
-		const params = new URLSearchParams(window.location.search)
-		const isWidget = params.get('isWidget')!;
-		await getTwitterID(isWidget);
+		await getTwitterID("false", "plurality-dashboard");
 	  };
 	
-	const responseFacebook = async (response: any) => {
+	  const responseFacebook = async (response: any) => {
+		console.log(response);
 		if (response.accessToken) {
 			showLoading();
 			const interests = getFacebookInterests(response);
 			const username = "some username";
 			const description = 'some description';
-			//const reputationalAssetData = ["random interest 1", "random interest 2"];
-			await createProfile(	process.env.REACT_APP_FACEBOOK!, 
-										process.env.REACT_APP_FACEBOOK_GROUP_ID!,
-										username,
-										description,
-										AssetType.INTEREST,
-										interests
-									);
-			setFacebookConnected(true);
+			try {
+			const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!, 
+									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
+									username,
+									description,
+									AssetType.INTEREST,
+									interests
+								);
+			if (isProfileCreated) 
+				setFacebookConnected(true);
+			else
+				console.log("Profile could not be created. Please try again");
+
+			hideLoading();
+			}
+			catch (error) {
+				console.log(error);
+				hideLoading();
+			}
 		}
-		hideLoading();
-		console.log(response);
-	};
+	};	
 	
 	const buttonTheme = () => {
 		return "w-100 mb-4 shadow-3d-up-hover shadow-3d-dark"
@@ -244,7 +255,7 @@ const ProductsGridPage = () => {
 	}
 
 	const getSocialMediaDetails = async (platform: string) => {
-		const socialMediaDetails = await getProfileData(address || "")
+		const socialMediaDetails = await getProfileData(address || "", platform)
 		console.log(socialMediaDetails)
 		for (let detail of socialMediaDetails) {
 			if (detail.dataFetchedFrom === platform)
