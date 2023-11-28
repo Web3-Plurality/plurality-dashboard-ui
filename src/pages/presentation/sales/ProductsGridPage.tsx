@@ -262,13 +262,11 @@ const ProductsGridPage = () => {
 
 	const getSocialMediaDetails = async (platform: string) => {
 		const socialMediaDetails = await getProfileData(address || "", platform)
-		console.log(socialMediaDetails)
-		for (let detail of socialMediaDetails) {
-			if (detail.dataFetchedFrom === platform)
-			{
-				return detail
-			}
+		if (socialMediaDetails) {
+			console.log(socialMediaDetails)
+			return socialMediaDetails;
 		}
+
 	}
 	
 	const facebookLoginButton = () => {

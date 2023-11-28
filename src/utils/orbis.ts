@@ -111,21 +111,32 @@ import {
 		return "did:pkh:eip155:1:"+connectedAddress;
 	}
 
-	export const getProfileData = async (connectedAddress: string, profileType: string) : Promise<ProfileData[]> => {
+	export const getProfileData = async (connectedAddress: string, profileType: string) : Promise<ProfileData | undefined> => {
+		try {
+
 		const did = getDid(connectedAddress);
+
 		const { data, error } = await orbis.getProfile(did);
 		  if (error) {
 			console.log(error);
-			return [];
+			return undefined;
 		  }
+		let profileDataObj: ProfileData = {
+			dataFetchedFrom: "",
+			assetType: AssetType.REPUTATION,
+			assetData: undefined,
+			profileData: undefined
+		};
+
+		console.log(data.details);
 		let profileDataObjects: ProfileData[] = data.details.profile?.data.web2ProfilesData;
-		if (!profileDataObjects) return [];
 
 		  //todo: simplify this workflow and use a better encryption mechanism
 		  // todo: ideally implement ceramic's encrypted data streams
 		  // IMPORTANT: This is a workaround for testing - not production ready
-		  try {
 			for (let i=0;i<profileDataObjects.length;i++) {
+				console.log("Loop started");
+				console.log(profileDataObjects[i]);
 				if (profileDataObjects[i].dataFetchedFrom == profileType) {
 				const secret = await getCommitment(profileType);
 				console.log("Secret is" + secret);
@@ -138,19 +149,19 @@ import {
 
 				var assetDataArray = new Array();
 				assetDataArray = decryptedAssetData.split(",");
-				profileDataObjects[i].assetData = assetDataArray;
-				profileDataObjects[i].profileData = decryptedProfileData;
-
-				console.log(profileDataObjects[i].assetData);
-
+				profileDataObj.assetData = assetDataArray;
+				profileDataObj.profileData = decryptedProfileData;
+				profileDataObj.dataFetchedFrom = profileDataObjects[i].dataFetchedFrom;
+				profileDataObj.assetType = profileDataObjects[i].assetType;
+				console.log(profileDataObj);
+				return profileDataObj;
 				}
 			}
 		}
 		catch(err) {
 			console.log(err);
-			return [];
+			return undefined;
 		}
-		return profileDataObjects;
 	}
 	async function createOrbisPost(zkproof: string, platform: string) {
 		const postContent = "Gm folks! \n"+
@@ -180,7 +191,7 @@ import {
 		else {
 			const did = await orbisConnect();
 			if (did == "") {
-				console.log("Orbis connect request was rejected");
+				alert("Orbis connect request was rejected");
 				return false;
 			}
 
@@ -193,7 +204,7 @@ import {
 				
 				const res = await addDataToOrbis(profileType, did, username, description, reputationalAssetType, reputationalAssetData, profileData);
 				if (res == -1) {
-					console.log("Could not add profile data to ceramic. Returning");
+					alert("Could not add profile data to ceramic. Returning");
 					return false;
 				}
 				const zkProofTx = await getZkProof(profileType, groupId);
@@ -233,7 +244,7 @@ import {
 
 			const [res, commitment] =  await saveProfile(profileType, groupId);
 			if (!res) {
-				alert("User rejected the authentication request.");
+				console.log("User rejected the authentication request.");
 				return false;
 			}
 			else {
@@ -244,6 +255,7 @@ import {
 					return false;
 				}
 				else {
+					console.log("Profile created");
 					return true;
 				}
 			}

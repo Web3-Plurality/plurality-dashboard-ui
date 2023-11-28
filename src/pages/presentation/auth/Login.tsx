@@ -16,7 +16,7 @@ import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { checkIfProfileSaved, createProfile, AssetType, getProfileData, createProfileTwitterPopup, createZKProofTwitterPopup } from '../../../utils/orbis';
+import { checkIfProfileSaved, createProfile, AssetType, getProfileData, createProfileTwitterPopup, createZKProofTwitterPopup, ProfileData } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
@@ -165,9 +165,33 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const checkConnectProfilesOnPageLoad = async () => {
 		if (isMetaMaskReady && state.installedSnap) {
 			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
-			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
-			if (twitter == true) setTwitterConnected(twitter);
-			if (facebook == true) setFacebookConnected(facebook);
+			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!);
+			await ensureMetamaskConnection();
+			const urlParams = new URLSearchParams(window.location.search);
+			const originURL = urlParams.get('origin');
+			if (twitter == true)  { 
+				showLoading();
+				setTwitterConnected(twitter); 
+				getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObj => {
+					console.log(profileDataObj);
+					if (profileDataObj) {
+						window.opener.postMessage(profileDataObj, originURL);
+						window.close();
+					}
+				});
+			}
+			if (facebook == true) { 
+				showLoading();
+				setFacebookConnected(facebook);
+				getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(profileDataObj => {
+					console.log(profileDataObj);
+					if (profileDataObj) {
+						window.opener.postMessage(profileDataObj, originURL);
+						window.close();
+					}
+				});
+			
+			}
 		}
 	}
 
@@ -209,12 +233,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			}
 		}
 		return true;
+		//todo: check how to handle this - social already conected (commitments in snap), but metamask not connected
+		/*const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
+		while (!address) {
+			if (address)
+				return true;
+			else 
+				await wait();
+		}
+		return false;*/
+
 	}
+
 	const openTwitterOAuthPopup = async () => {
 		const params = new URLSearchParams(window.location.search)
 		const isWidget = params.get('isWidget')!;
 		const origin = params.get('origin')!;
-		const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
+		//const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
+		//TODO: Change it back
+		const apiUrl = "http://localhost:3000/auth-pages/login?isWidget=true&origin=http://localhost:3001/&id_platform=twitter&username=hirasiddiqui199&display_name=HiraSiddiqui&picture_url=https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"; // Replace with your Twitter API endpoint
 	
 		// Define the dimensions for the popup window
 		const popupWidth = 600;
@@ -223,51 +260,44 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const popupTop = (window.innerHeight - popupHeight) / 2;
 	
 		// Open the popup window
-		window.open(
+		const childWindow = window.open(
 		  apiUrl,
 		  '_blank',
 		  `width=${popupWidth}, height=${popupHeight}, top=${popupTop}, left=${popupLeft}`
 		);
+		console.log("Child window: ");
+		console.log(childWindow);
 
 		ensureMetamaskConnection().then(res=> {
 			if (res) console.log("address connected");
 			else console.log("Address not connected");
 		});
 
-		// Add a loop after opening the popup window
-		const intervalId = setInterval(() => {
-			getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObjects => {
+		const wait = () => new Promise(resolve => setTimeout(resolve, 10000));
 
-				if (profileDataObjects.length >= 1) {
-					for (let i=0;i<profileDataObjects.length;i++) {
-						if (profileDataObjects[i].dataFetchedFrom == process.env.REACT_APP_TWITTER!) {
-							console.log(profileDataObjects[i]);
-							//end this loop
-							createZKProofTwitterPopup(process.env.REACT_APP_TWITTER!, process.env.REACT_APP_TWITTER_GROUP_ID!).then(res => {
-								if (res) {
-									console.log("Added twitter verification post to orbis");
-									window.opener.postMessage(profileDataObjects[i], origin);
-									clearInterval(intervalId); // Clear the interval if got data from ceramic
-									setTwitterConnected(true);
-									window.close();
-
-								}
-								else {
-									console.log("Could not add twitter verification post to orbis");	
-									window.close();								
-								}
-							}).catch(err => {
-								console.log(err);
-							});
-
-
-						}
-					}
-
+		while (!isTwitterConnected) {
+			showLoading();
+			console.log("Twitter not yet connected, so waiting");
+			const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+			if (profileDataObj) {
+				childWindow!.close();
+				const res = await createZKProofTwitterPopup(process.env.REACT_APP_TWITTER!, process.env.REACT_APP_TWITTER_GROUP_ID!);
+				if (res) {
+					console.log("Added twitter verification post to orbis");
+					window.opener.postMessage(profileDataObj, origin);
+					setTwitterConnected(true);
+					window.close();
 				}
-			});
-
-		}, 1000); // Run the loop every second (1000 milliseconds)
+				else {
+					console.log("Could not add twitter verification post to orbis");	
+					window.close();								
+				}
+			}
+			else {
+				console.log("waiting");
+				await wait();
+			}
+		}
 
 	  };
 	 
@@ -287,7 +317,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}, [state])
 	
 	useEffect(() => {
-		//ensureMetamaskConnection().then(res=>{console.log(res)});
+		const wait = () => new Promise(resolve => setTimeout(resolve, 3000));
+
 		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
 		if (idPlatform == "twitter" && state.installedSnap && !renderBlocker) {
@@ -309,16 +340,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 							if (isProfileCreated) {
 								// Add condition for making sure that the user has indeed connected
 								//setTwitterConnected(true);
-								alert("Twitter is successfully connected");
+								console.log("Twitter is successfully connected");
+								wait().then(res=>{
+									window.close();
+								}).catch(console.error);
 							}
 							else 
-								alert("Profile could not be created. Please try again");
-							hideLoading();
-							window.close();
+								console.log("Profile could not be created. Please try again");
+							
 						}).catch(error => {
 							console.log(error);
 							hideLoading();
-							window.close();
+							//window.close();
 						})
 		}
 	}, [state])
