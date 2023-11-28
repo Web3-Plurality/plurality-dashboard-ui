@@ -373,65 +373,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													</Button>
 													)}
 												/>
+												<div className='text-center col-12 mt-3'>
+												<a href='mailto:hirasiddiqui95@gmail.com'>
+														<br />
+													* Please contact <u>devs</u> to request access for facebook
+												</a>
+												</div>
 											</div>
-											{/* <div className='col-12 mt-3'>
-												{ !isTwitterConnected ? (<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomTwitter'
-													onClick={handleOnTwitterClick}>
-															Connect Twitter
-												</Button>) : (<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomTwitter'
-													onClick={handleOnRequestTwitterClick}>
-															Request Twitter access
-												</Button>)}
-											</div>
-											<div className='col-12 mt-3'>
-												{ !isFacebookConnected ? (<FacebookLogin
-													appId="696970245672784"
-													autoLoad={false}
-													fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
-													callback={responseFacebook}
-													cssClass='shadow-3d-container'
-													scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
-													render={renderProps => (
-														<Button
-														isOutline
-														isDisable= {isFacebookConnected==true ? true: false}
-														color={darkModeStatus ? 'light' : 'dark'}
-														className={classNames('w-100 py-3', {
-															'border-light': !darkModeStatus,
-															'border-dark': darkModeStatus,
-														})}
-														icon='CustomFacebook'
-														onClick={renderProps.onClick}
-														>
-																Connect Facebook
-													</Button>
-													)}
-												/>) : (<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomFacebook'
-													onClick={handleOnRequestFacebookClick}>
-															Request Facebook access
-												</Button>)}
-											</div> */}
 											</form>
 										</>
 									)}
