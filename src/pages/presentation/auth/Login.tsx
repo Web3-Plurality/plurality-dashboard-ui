@@ -16,12 +16,14 @@ import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { checkIfProfileSaved, createProfile, AssetType } from '../../../utils/orbis';
+import { checkIfProfileSaved, createProfile, AssetType, getProfileData } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
 import { shareDataWithDApp } from '../../../utils/shareData';
 import { useAccount } from 'wagmi';
+import TwitterOAuthPopup from '../../../components/social/TwitterOAuthPopup';
+import ReactDOM from 'react-dom';
 
 
 
@@ -116,12 +118,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const origin = params.get('origin')!;
 		await getTwitterID(isWidget, origin);
 	  };
-	  const handleOnRequestTwitterClick = () => {
-		console.log("add ur logic here")
-	  }
-	  const handleOnRequestFacebookClick = () => {
-		console.log("add ur logic here")
-	  }
 
 	  const responseFacebook = async (response: any) => {
 		console.log(response);
@@ -141,8 +137,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									interests,
 									JSON.stringify(profile)
 								);
-			if (isProfileCreated) 
+			if (isProfileCreated) {
 				setFacebookConnected(true);
+				await sendDataToDApp();
+			}
 			else
 				console.log("Profile could not be created. Please try again");
 
@@ -165,9 +163,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}
 
 	const sendDataToDApp = async () => {
-		if (isFacebookConnected && isTwitterConnected) {
+		//if (isFacebookConnected && isTwitterConnected) {
 			try {
 			showLoading();
+			console.log("Address is: "+ address);
 			const dataToSend = await shareDataWithDApp(address!.toString());
 				const urlParams = new URLSearchParams(window.location.search);
         		const originURL = urlParams.get('origin');
@@ -175,6 +174,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				if (originURL) {
 					console.log("Sending to dApp: ");
 					console.log(dataToSend);
+					console.log(window.opener);
 					window.opener.postMessage(dataToSend, originURL);
 					window.close();
 				}
@@ -184,12 +184,51 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				console.log(err);
 				hideLoading();
 			}
-		}
+		//}
 	}
-	useEffect(() => {
-		sendDataToDApp().catch(console.error);
-	}, [isTwitterConnected, isFacebookConnected])
 
+	const openTwitterOAuthPopup = () => {
+		const params = new URLSearchParams(window.location.search)
+		const isWidget = params.get('isWidget')!;
+		const origin = params.get('origin')!;
+		const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
+	
+		// Define the dimensions for the popup window
+		const popupWidth = 600;
+		const popupHeight = 400;
+		const popupLeft = (window.innerWidth - popupWidth) / 2;
+		const popupTop = (window.innerHeight - popupHeight) / 2;
+	
+		// Open the popup window
+		window.open(
+		  apiUrl,
+		  '_blank',
+		  `width=${popupWidth}, height=${popupHeight}, top=${popupTop}, left=${popupLeft}`
+		);
+
+		// Add a loop after opening the popup window
+		const intervalId = setInterval(() => {
+			getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObjects => {
+
+				if (profileDataObjects.length >= 1) {
+					for (let i=0;i<profileDataObjects.length;i++) {
+						if (profileDataObjects[i].dataFetchedFrom == process.env.REACT_APP_TWITTER!) {
+							console.log(profileDataObjects[i]);
+							//end this loop
+							window.opener.postMessage(profileDataObjects[i], origin);
+							clearInterval(intervalId); // Clear the interval if got data from ceramic
+							setTwitterConnected(true);
+							window.close();
+						}
+					}
+
+				}
+			});
+
+		}, 1000); // Run the loop every second (1000 milliseconds)
+
+	  };
+	 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const widget = params.get('isWidget')!;
@@ -206,7 +245,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}, [state])
 	
 	useEffect(() => {
-		const params = new URLSearchParams(window.location.search)
+		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
 		if (idPlatform == "twitter" && state.installedSnap) {
 			const params = new URLSearchParams(window.location.search);
@@ -223,15 +262,19 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						description,
 						AssetType.INTEREST,
 						getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
-							if (isProfileCreated) 
-							// Add condition for making sure that the user has indeed connected
+							/*if (isProfileCreated) {
+								// Add condition for making sure that the user has indeed connected
 								setTwitterConnected(true);
+								sendDataToDApp().then(result => {console.log("Data sent to dApp? ")}).catch(console.error);
+							}
 							else 
-								console.log("Profile could not be created. Please try again");
+								console.log("Profile could not be created. Please try again");*/
 							hideLoading();
+							window.close();
 						}).catch(error => {
 							console.log(error);
 							hideLoading();
+							window.close();
 						})
 		}
 	}, [state])
@@ -327,7 +370,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-dark': darkModeStatus,
 													})}
 													icon='CustomTwitter'
-													onClick={handleOnTwitterClick}>
+													onClick={openTwitterOAuthPopup}>
 													{!isTwitterConnected && (
 															<>
 															Connect Twitter
