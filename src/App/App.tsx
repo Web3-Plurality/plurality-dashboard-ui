@@ -17,8 +17,7 @@ import steps, { styles } from '../steps';
 import AsideRoutes from '../layout/Aside/AsideRoutes';
 import { ToastCloseButton } from '../components/bootstrap/Toasts';
 import { MetaMaskProvider } from '../hooks';
-import { polygonMumbai, polygon } from "wagmi/chains";
-import { configureChains, createConfig, WagmiConfig } from "wagmi";
+import { configureChains, createConfig, WagmiConfig, mainnet  } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import LoadingProvider from '../utils/LoadingProvider';
@@ -66,8 +65,8 @@ const App = () => {
 		onClose: () => setFullScreenStatus(false),
 	});
 
-	const { publicClient, webSocketPublicClient } = configureChains(
-		[polygonMumbai, polygon],
+	const { chains, publicClient, webSocketPublicClient } = configureChains(
+		[mainnet],
 		[publicProvider()]
 	  );
 
@@ -88,6 +87,7 @@ const App = () => {
 		webSocketPublicClient,
 		connectors: [
 		  new InjectedConnector({
+			chains,
 			options: {
 			  shimDisconnect: false,
 			},

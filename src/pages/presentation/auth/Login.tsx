@@ -10,18 +10,16 @@ import Button from '../../../components/bootstrap/Button';
 import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
-//import USERS, { getUserDataWithUsername } from '../../../common/data/userDummyData';
 import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { checkIfProfileSaved, createProfile, AssetType } from '../../../utils/orbis';
+import { checkIfProfileSaved, createProfile, AssetType, getProfileData, createProfileTwitterPopup, createZKProofTwitterPopup, ProfileData } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
-import { shareDataWithDApp } from '../../../utils/shareData';
-import { useAccount } from 'wagmi';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 
 
 
@@ -76,11 +74,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 	const [callingDApp, setCallingDApp] = useState<String>("");
 	const { showLoading, hideLoading } = useContext(LoadingContext);
-	const { address, connector, isConnected } = useAccount();
 
+
+	// wagmi connectors and disconnectors
+	const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
+	const { address, connector, isConnected } = useAccount();
+	const { disconnect } = useDisconnect()
+
+	const [renderBlocker, setRenderBlocker] = useState(false);
 
 	const handleSnapConnect = async () => {
-		try {
+		
+		try {	
 		  await connectSnap();
 		  const installedSnap = await getSnap();
 		  dispatch({
@@ -89,6 +94,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  });
 		  if (setUser) setUser("user");
 		  console.log(state.installedSnap);
+		  const res = await ensureMetamaskConnection();
+
 		  const params = new URLSearchParams(window.location.search)
 		  const isWidget = params.get('isWidget')!;
 		  if (!isWidget || isWidget == "false")
@@ -110,36 +117,36 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
 		}
 	  };
-	  const handleOnTwitterClick = async () => {
-		const params = new URLSearchParams(window.location.search)
-		const isWidget = params.get('isWidget')!;
-		const origin = params.get('origin')!;
-		await getTwitterID(isWidget, origin);
-	  };
-	  const handleOnRequestTwitterClick = () => {
-		console.log("add ur logic here")
-	  }
-	  const handleOnRequestFacebookClick = () => {
-		console.log("add ur logic here")
-	  }
 
-	  const responseFacebook = async (response: any) => {
+	const responseFacebook = async (response: any) => {
 		console.log(response);
 		if (response.accessToken) {
 			showLoading();
+			console.log(response);
 			const interests = getFacebookInterests(response);
-			const username = "some username";
+			const username = response.name;
 			const description = 'some description';
+			const profile = {name: username, profileUrl: ""};
 			try {
 			const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!, 
 									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
 									username,
 									description,
 									AssetType.INTEREST,
-									interests
+									interests,
+									JSON.stringify(profile)
 								);
-			if (isProfileCreated) 
+			if (isProfileCreated) {
 				setFacebookConnected(true);
+				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
+				if (profileDataObj) {
+					const params = new URLSearchParams(window.location.search)
+					const origin = params.get('origin')!;
+					window.opener.postMessage(profileDataObj, origin);
+					window.close();
+				}
+				//await sendDataToDApp();
+			}
 			else
 				console.log("Profile could not be created. Please try again");
 
@@ -155,32 +162,116 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const checkConnectProfilesOnPageLoad = async () => {
 		if (isMetaMaskReady && state.installedSnap) {
 			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
-			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!)
-			if (twitter == true) setTwitterConnected(twitter);
-			if (facebook == true) setFacebookConnected(facebook);
+			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!);
+			await ensureMetamaskConnection();
+			const urlParams = new URLSearchParams(window.location.search);
+			const originURL = urlParams.get('origin');
+			if (twitter == true)  { 
+				showLoading();
+				setTwitterConnected(twitter); 
+				getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObj => {
+					console.log(profileDataObj);
+					if (profileDataObj) {
+						window.opener.postMessage(profileDataObj, originURL);
+						window.close();
+					}
+				});
+			}
+			if (facebook == true) { 
+				showLoading();
+				setFacebookConnected(facebook);
+				getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(profileDataObj => {
+					console.log(profileDataObj);
+					if (profileDataObj) {
+						window.opener.postMessage(profileDataObj, originURL);
+						window.close();
+					}
+				});
+			
+			}
 		}
 	}
 
-	const sendDataToDApp = async () => {
-		if (isFacebookConnected && isTwitterConnected) {
-			showLoading();
-			const dataToSend = await shareDataWithDApp(address!.toString());
-				const urlParams = new URLSearchParams(window.location.search);
-        		const originURL = urlParams.get('origin');
+	const ensureMetamaskConnection = async (): Promise<Boolean> => {
+		console.log("Ensure metamask connection called");
+		if (!address || !isConnected) {
+			for (let i=0; i < connectors.length; i++) {
+				let connector = connectors[i];
+				console.log("Trying to connect with connector: "+connectors[i].name);
+				connect({ connector});
+			}
+		}
+		return true;
+		//todo: check how to handle this - social already conected (commitments in snap), but metamask not connected
+		/*const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
+		while (!address) {
+			if (address)
+				return true;
+			else 
+				await wait();
+		}
+		return false;*/
 
-				if (originURL) {
-					console.log("Sending to dApp: ");
-					console.log(dataToSend);
-					window.opener.postMessage(dataToSend, originURL);
+	}
+
+	const openTwitterOAuthPopup = async () => {
+		const params = new URLSearchParams(window.location.search)
+		const isWidget = params.get('isWidget')!;
+		const origin = params.get('origin')!;
+		const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
+		//TODO: Change it back
+		//const apiUrl = "http://localhost:3000/auth-pages/login?isWidget=true&origin=http://localhost:3001/&id_platform=twitter&username=hirasiddiqui199&display_name=HiraSiddiqui&picture_url=https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"; // Replace with your Twitter API endpoint
+	
+		// Define the dimensions for the popup window
+		const popupWidth = 450;
+		const popupHeight = 600;
+		//const popupLeft = (window.innerWidth - popupWidth) / 2;
+		//const popupTop = (window.innerHeight - popupHeight) / 2;
+		const popupLeft = 500;
+		const popupTop = 100;
+
+		// Open the popup window
+		const childWindow = window.open(
+		  apiUrl,
+		  '_blank',
+		  `width=${popupWidth}, height=${popupHeight}, top=${popupTop}, left=${popupLeft}`
+		);
+		console.log("Child window: ");
+		console.log(childWindow);
+
+		ensureMetamaskConnection().then(res=> {
+			if (res) console.log("address connected");
+			else console.log("Address not connected");
+		});
+
+		const wait = () => new Promise(resolve => setTimeout(resolve, 10000));
+
+		while (!isTwitterConnected) {
+			showLoading();
+			console.log("Twitter not yet connected, so waiting");
+			const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+			if (profileDataObj) {
+				childWindow!.close();
+				const res = await createZKProofTwitterPopup(process.env.REACT_APP_TWITTER!, process.env.REACT_APP_TWITTER_GROUP_ID!);
+				if (res) {
+					console.log("Added twitter verification post to orbis");
+					window.opener.postMessage(profileDataObj, origin);
+					setTwitterConnected(true);
 					window.close();
 				}
-			hideLoading();
+				else {
+					console.log("Could not add twitter verification post to orbis");	
+					window.close();								
+				}
+			}
+			else {
+				console.log("waiting");
+				await wait();
+			}
 		}
-	}
-	useEffect(() => {
-		sendDataToDApp().catch(console.error);
-	}, [isTwitterConnected, isFacebookConnected])
 
+	  };
+	 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const widget = params.get('isWidget')!;
@@ -197,28 +288,41 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}, [state])
 	
 	useEffect(() => {
-		const params = new URLSearchParams(window.location.search)
+		const wait = () => new Promise(resolve => setTimeout(resolve, 5000));
+
+		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
-		if (idPlatform == "twitter" && state.installedSnap) {
+		if (idPlatform == "twitter" && state.installedSnap && !renderBlocker) {
+			setRenderBlocker(true);
 			const params = new URLSearchParams(window.location.search);
 			const username = params.get('username')!;
+			const displayName = params.get('display_name')!;
+			const profileUrl = params.get('picture_url')!;
+
 			const description = 'some description';
+			const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
 			showLoading();
-			createProfile(process.env.REACT_APP_TWITTER!, 
+			createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
 						process.env.REACT_APP_TWITTER_GROUP_ID!,
 						username,
 						description,
 						AssetType.INTEREST,
-						getTwitterInterests({})).then(isProfileCreated => {
-							if (isProfileCreated) 
-							// Add condition for making sure that the user has indeed connected
-								setTwitterConnected(true);
+						getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
+							if (isProfileCreated) {
+								// Add condition for making sure that the user has indeed connected
+								//setTwitterConnected(true);
+								console.log("Twitter is successfully connected");
+								wait().then(res=>{
+									window.close();
+								}).catch(console.error);
+							}
 							else 
 								console.log("Profile could not be created. Please try again");
-							hideLoading();
+							
 						}).catch(error => {
 							console.log(error);
 							hideLoading();
+							//window.close();
 						})
 		}
 	}, [state])
@@ -230,6 +334,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			title={singUpStatus ? 'Sign Up' : 'Login'}
 			className={classNames({ 'bg-dark': !singUpStatus, 'bg-light': singUpStatus })}>
 			<Page className='p-0'>
+				{ !renderBlocker && (
 				<div className='row h-100 align-items-center justify-content-center'>
 					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
 						<Card className='shadow-3d-dark' data-tour='login-page'>
@@ -299,7 +404,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									)}
 									{/* END :: Snap install */}
 									{/* BEGIN :: Social Login */}
-									{isMetaMaskReady && state.installedSnap && isWidget && (
+									{isMetaMaskReady && state.installedSnap && isWidget && isConnected &&(
 										<>
 										<LoginHeader isSnap={false} callingDApp={callingDApp} />
 
@@ -314,7 +419,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-dark': darkModeStatus,
 													})}
 													icon='CustomTwitter'
-													onClick={handleOnTwitterClick}>
+													onClick={openTwitterOAuthPopup}>
 													{!isTwitterConnected && (
 															<>
 															Connect Twitter
@@ -360,65 +465,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													</Button>
 													)}
 												/>
+												<div className='text-center col-12 mt-3'>
+												<a href='mailto:hirasiddiqui95@gmail.com'>
+														<br />
+													Please contact <u>devs</u> to request access for facebook
+												</a>
+												</div>
 											</div>
-											{/* <div className='col-12 mt-3'>
-												{ !isTwitterConnected ? (<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomTwitter'
-													onClick={handleOnTwitterClick}>
-															Connect Twitter
-												</Button>) : (<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomTwitter'
-													onClick={handleOnRequestTwitterClick}>
-															Request Twitter access
-												</Button>)}
-											</div>
-											<div className='col-12 mt-3'>
-												{ !isFacebookConnected ? (<FacebookLogin
-													appId="696970245672784"
-													autoLoad={false}
-													fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
-													callback={responseFacebook}
-													cssClass='shadow-3d-container'
-													scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
-													render={renderProps => (
-														<Button
-														isOutline
-														isDisable= {isFacebookConnected==true ? true: false}
-														color={darkModeStatus ? 'light' : 'dark'}
-														className={classNames('w-100 py-3', {
-															'border-light': !darkModeStatus,
-															'border-dark': darkModeStatus,
-														})}
-														icon='CustomFacebook'
-														onClick={renderProps.onClick}
-														>
-																Connect Facebook
-													</Button>
-													)}
-												/>) : (<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomFacebook'
-													onClick={handleOnRequestFacebookClick}>
-															Request Facebook access
-												</Button>)}
-											</div> */}
 											</form>
 										</>
 									)}
@@ -445,6 +498,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						</div>
 					</div>
 				</div>
+				)}
 			</Page>
 		</PageWrapper>
 	);
