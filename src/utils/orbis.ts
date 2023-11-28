@@ -151,6 +151,18 @@ import {
 		}
 		return profileDataObjects;
 	}
+	async function createOrbisPost(zkproof: string, platform: string, username: string) {
+		const postContent = "Gm folks! \n"+
+		"I just connected my " + platform + " with username "+ username + " \n" +
+		"View my zk proof verification on etherscan: " + zkproof +" \n" + 
+		"Let's make social media sovereign!";
+		/** Add the results in a media array used when sharing the post (the media object must be an array) */
+		const res = await orbis.createPost({
+		  body: postContent,
+		});
+		console.log(res);
+	  }
+
 	export const createProfile = async (profileType: string, 
 												groupId: string,
 												username: string,
@@ -183,9 +195,10 @@ import {
 					console.log("Could not add profile data to ceramic. Returning");
 					return false;
 				}
-				const result = await getZkProof(profileType, groupId);
-				if (result !== "") {
+				const zkProofTx = await getZkProof(profileType, groupId);
+				if (zkProofTx !== "") {
 					console.log("Reputation ownership proved");
+					createOrbisPost(zkProofTx,profileType,username);
 					return true;
 				}
 				else {
