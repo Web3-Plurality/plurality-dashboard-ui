@@ -223,11 +223,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		//const apiUrl = "http://localhost:3000/auth-pages/login?isWidget=true&origin=http://localhost:3001/&id_platform=twitter&username=hirasiddiqui199&display_name=HiraSiddiqui&picture_url=https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"; // Replace with your Twitter API endpoint
 	
 		// Define the dimensions for the popup window
-		const popupWidth = 600;
-		const popupHeight = 400;
-		const popupLeft = (window.innerWidth - popupWidth) / 2;
-		const popupTop = (window.innerHeight - popupHeight) / 2;
-	
+		const popupWidth = 450;
+		const popupHeight = 600;
+		//const popupLeft = (window.innerWidth - popupWidth) / 2;
+		//const popupTop = (window.innerHeight - popupHeight) / 2;
+		const popupLeft = 500;
+		const popupTop = 100;
+
 		// Open the popup window
 		const childWindow = window.open(
 		  apiUrl,
@@ -466,7 +468,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												<div className='text-center col-12 mt-3'>
 												<a href='mailto:hirasiddiqui95@gmail.com'>
 														<br />
-													* Please contact <u>devs</u> to request access for facebook
+													Please contact <u>devs</u> to request access for facebook
 												</a>
 												</div>
 											</div>
