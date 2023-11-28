@@ -20,6 +20,7 @@ import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import PLogo from '../../../assets/img/logo-no-bg.png';
 
 
 
@@ -349,7 +350,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											},
 										)}
 										aria-label='Facit'>
-										<Logo width={200}/>
+										{/* <Logo width={200}/> */}
+										<img src={PLogo} alt="Logo" style={{height: "100px"}}/>
 									</div>
 								</div>
 								<div
