@@ -18,7 +18,8 @@ import {
 	dataFetchedFrom: string,
 	assetType: AssetType 
 	assetData: any,
-	profileData: any
+	profileData: any,
+	did: string
   }
 
     /** Calls the Orbis SDK and handles the results */
@@ -56,7 +57,7 @@ import {
 
 
 		  // the data fetched from web2 profile to be pushed to ceramic
-		  let newData:ProfileData = {dataFetchedFrom: profileType, assetType: repAssetType, assetData: encryptedString, profileData: encryptedProfileData};
+		  let newData:ProfileData = {dataFetchedFrom: profileType, assetType: repAssetType, assetData: encryptedString, profileData: encryptedProfileData, did: did};
 		  //console.log(JSON.stringify(data));
 		  //console.log(data.details);
 		  //console.log(data.details.profile?.data);
@@ -125,7 +126,8 @@ import {
 			dataFetchedFrom: "",
 			assetType: AssetType.REPUTATION,
 			assetData: undefined,
-			profileData: undefined
+			profileData: undefined,
+			did: ""
 		};
 
 		console.log(data.details);
@@ -153,6 +155,7 @@ import {
 				profileDataObj.profileData = decryptedProfileData;
 				profileDataObj.dataFetchedFrom = profileDataObjects[i].dataFetchedFrom;
 				profileDataObj.assetType = profileDataObjects[i].assetType;
+				profileDataObj.did = did;
 				console.log(profileDataObj);
 				return profileDataObj;
 				}

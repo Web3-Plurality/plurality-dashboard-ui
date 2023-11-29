@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/icon/Icon';
 import Logo from '../../components/Logo';
+import PLogo from '../../assets/img/logo-no-bg.png';
 
 interface IBrandProps {
 	asideStatus: boolean;
@@ -11,13 +12,13 @@ interface IBrandProps {
 const Brand: FC<IBrandProps> = ({ asideStatus, setAsideStatus }) => {
 	return (
 		<div className='brand'>
-			<div className='brand-logo'>
+			{/* <div className='brand-logo'>
 				<h1 className='brand-title '>
 					<Link to='/' aria-label='Logo'>
-						<Logo height={32} />
+					<img src={PLogo} alt="Logo" style={{height: "45px", width: "30px"}}/>
 					</Link>
 				</h1>
-			</div>
+			</div> */}
 			<button
 				type='button'
 				className='btn brand-aside-toggle'

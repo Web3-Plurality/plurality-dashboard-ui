@@ -36,6 +36,7 @@ import { defaultSnapOrigin } from '../../../config';
 import { useAccount } from 'wagmi';
 import { useNavigate } from 'react-router-dom';
 import LoadingContext from '../../../utils/LoadingContext'
+import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
 
 interface IValues {
 	name: string;
@@ -88,6 +89,7 @@ const ProductsGridPage = () => {
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 	const [sidePanelData, setSidePanelData] = useState<any>();
+	const [checked, setChecked] = useState<any>(false);
 	const [state, dispatch] = useContext(MetaMaskContext);
 	const { address, connector, isConnected } = useAccount()
 	const { showLoading, hideLoading } = useContext(LoadingContext)
@@ -293,6 +295,10 @@ const ProductsGridPage = () => {
 		)	
 	}
 
+	const handleCheck = () => {
+		setChecked(!checked)
+	}
+
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.productsGrid.text}>
 			<Page>
@@ -434,11 +440,21 @@ const ProductsGridPage = () => {
 						<CardBody>
 							<div>
 								<h3>Profile</h3>
-								<img src={sidePanelData? JSON.parse(sidePanelData?.profileData).profileUrl: ""}/>
+								<img src={sidePanelData? JSON.parse(sidePanelData?.profileData).profileUrl: ""} style={{height: "220px", width: "220px", marginBottom: "10px"}}/>
 								<p>Name: {sidePanelData? JSON.parse(sidePanelData?.profileData).name: ""}</p>
 
 								<h3>Interests</h3>
-								{sidePanelData?.assetData.map((interest: any) =><li key={interest}>{interest}</li>)}							
+								{sidePanelData?.assetData.map((interest: any) =><li key={interest}>{interest}</li>)}
+								<div style={{marginBottom: "20px"}}></div>
+								<Checks
+									type='switch'
+									id='inlineCheckOne'
+									label='Share your profile to those dapps'
+									name='checkOne'
+									onChange={handleCheck}
+									checked={checked}
+								/>
+								<img src="https://avatars.githubusercontent.com/u/105918252?s=200&v=4" alt="" style={{width: "20px", height: "20px"}}/>	Orbis				
 							</div>
 							{/* <div className='row g-4'>
 								<div className='col-12'>
