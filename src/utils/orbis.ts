@@ -166,7 +166,7 @@ import {
 			return undefined;
 		}
 	}
-	async function createOrbisPost(zkproof: string, platform: string) {
+	const createOrbisPost = async (zkproof: string, platform: string): Promise<string> => {
 		const postContent = "Gm folks! \n"+
 		"I just connected my " + platform + " \n" +
 		"View my zk proof verification on etherscan: " + zkproof +" \n" + 
@@ -176,6 +176,7 @@ import {
 		  body: postContent,
 		});
 		console.log(res);
+		return res;
 	  }
 
 	export const createProfile = async (profileType: string, 
@@ -213,7 +214,8 @@ import {
 				const zkProofTx = await getZkProof(profileType, groupId);
 				if (zkProofTx !== "") {
 					console.log("Reputation ownership proved");
-					createOrbisPost(zkProofTx,profileType);
+					const res = await createOrbisPost(zkProofTx,profileType);
+					console.log(res);
 					return true;
 				}
 				else {
@@ -274,7 +276,13 @@ import {
 			const zkProofTx = await getZkProof(profileType, groupId);
 			if (zkProofTx !== "") {
 				console.log("Reputation ownership proved");
-				createOrbisPost(zkProofTx,profileType);
+				const did = await orbisConnect();
+				if (did == "") {
+					alert("Orbis connect request was rejected");
+					return false;
+				}
+				const res = await createOrbisPost(zkProofTx,profileType);
+				console.log(res);
 				return true;
 			}
 			else {
