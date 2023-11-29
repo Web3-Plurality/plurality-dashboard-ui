@@ -37,6 +37,7 @@ import { useAccount } from 'wagmi';
 import { useNavigate } from 'react-router-dom';
 import LoadingContext from '../../../utils/LoadingContext'
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
+import PLogo from '../../../assets/img/favicon5.png';
 
 interface IValues {
 	name: string;
@@ -299,6 +300,13 @@ const ProductsGridPage = () => {
 		setChecked(!checked)
 	}
 
+	const imgSrc = () => {
+		if(sidePanelData) {
+			return JSON.parse(sidePanelData?.profileData).profileUrl ? JSON.parse(sidePanelData?.profileData).profileUrl : PLogo
+		}
+		return PLogo
+	}
+
 	return (
 		<PageWrapper title={demoPagesMenu.sales.subMenu.productsGrid.text}>
 			<Page>
@@ -440,7 +448,7 @@ const ProductsGridPage = () => {
 						<CardBody>
 							<div>
 								<h3>Profile</h3>
-								<img src={sidePanelData? JSON.parse(sidePanelData?.profileData).profileUrl: ""} style={{height: "220px", width: "220px", marginBottom: "10px"}}/>
+								<img src={imgSrc()} style={{height: "80px", width: "80px", marginBottom: "10px"}}/>
 								<p>Name: {sidePanelData? JSON.parse(sidePanelData?.profileData).name: ""}</p>
 
 								<h3>Interests</h3>

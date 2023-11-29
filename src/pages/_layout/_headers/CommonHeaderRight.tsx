@@ -122,7 +122,7 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 
 				<div className='col-auto'>
 					<Popovers trigger='hover' desc='Connected address'>
-						<p>{address}</p>
+						<p style={{marginTop: "1rem"}}>{address}</p>
 						</Popovers>
 					</div>
 				)}
