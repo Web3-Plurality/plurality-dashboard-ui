@@ -90,7 +90,7 @@ const ProductsGridPage = () => {
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 	const [sidePanelData, setSidePanelData] = useState<any>();
-	const [checked, setChecked] = useState<any>(false);
+	const [checked, setChecked] = useState<any>(true);
 	const [state, dispatch] = useContext(MetaMaskContext);
 	const { address, connector, isConnected } = useAccount()
 	const { showLoading, hideLoading } = useContext(LoadingContext)
