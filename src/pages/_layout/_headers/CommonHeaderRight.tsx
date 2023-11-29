@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useContext, useLayoutEffect, useState } from 'react';
+import React, { FC, ReactNode, useContext, useEffect, useLayoutEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
@@ -24,6 +24,8 @@ import useDarkMode from '../../../hooks/useDarkMode';
 import Popovers from '../../../components/bootstrap/Popovers';
 import Spinner from '../../../components/bootstrap/Spinner';
 import { HashLink } from 'react-router-hash-link'
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useNavigate } from 'react-router';
 
 interface ICommonHeaderRightProps {
 	beforeChildren?: ReactNode;
@@ -64,6 +66,13 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 
 	const { setIsOpen } = useTour();
 
+	//wagmi connectors and disconnectors
+	const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
+	const { address, connector, isConnected } = useAccount();
+	const { disconnect } = useDisconnect()
+	const navigate = useNavigate();
+
+	
 	return (
 		<HeaderRight>
 			<div className='row g-3'>
@@ -109,19 +118,38 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 						</Button>
 					</Popovers>
 				</div>
+				{isConnected && (
 
-				{/*	Disconnect */}
 				<div className='col-auto'>
+					<Popovers trigger='hover' desc='Connected address'>
+						<p>{address}</p>
+						</Popovers>
+					</div>
+				)}
+				
+				{/*	Disconnect */}
+				{isConnected && (
+					
+				<div className='col-auto'>
+
+
 					<Popovers trigger='hover' desc='Disconnect'>
+
 						<Button
 							// eslint-disable-next-line react/jsx-props-no-spreading
 							{...styledBtn}
 							icon={'Cancel'}
-							onClick={() => {console.log("disconnect logic here")}}
+							onClick={() => {
+								disconnect();
+								navigate('/auth-pages/login/?isWidget=false');
+								alert("Navigated");
+
+							}}
 							aria-label='Disconnect'
 						/>
 					</Popovers>
 				</div>
+				)}
 
 				{/*	Full Screen */}
 				{/* <div className='col-auto'>
