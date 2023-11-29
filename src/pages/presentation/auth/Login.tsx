@@ -335,7 +335,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			title={singUpStatus ? 'Sign Up' : 'Login'}
 			className={classNames({ 'bg-dark': !singUpStatus, 'bg-light': singUpStatus })}>
 			<Page className='p-0'>
-				{ !renderBlocker && (
+				{/*{ !renderBlocker && (*/
 				<div className='row h-100 align-items-center justify-content-center'>
 					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
 						<Card className='shadow-3d-dark' data-tour='login-page'>
@@ -500,7 +500,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						</div>
 					</div>
 				</div>
-				)}
+				/*)}*/}
 			</Page>
 		</PageWrapper>
 	);
