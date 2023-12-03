@@ -144,6 +144,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					const params = new URLSearchParams(window.location.search)
 					const origin = params.get('origin')!;
 					window.opener.postMessage(profileDataObj, origin);
+					wait(5000).then(res=>{
+						window.close();
+					}).catch(console.error);
 					window.close();
 				}
 				//await sendDataToDApp();
@@ -245,8 +248,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			else console.log("Address not connected");
 		});
 
-		const wait = () => new Promise(resolve => setTimeout(resolve, 10000));
-
 		while (!isTwitterConnected) {
 			showLoading();
 			console.log("Twitter not yet connected, so waiting");
@@ -258,6 +259,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					console.log("Added twitter verification post to orbis");
 					window.opener.postMessage(profileDataObj, origin);
 					setTwitterConnected(true);
+					await wait(5000);
 					window.close();
 				}
 				else {
@@ -267,7 +269,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			}
 			else {
 				console.log("waiting");
-				await wait();
+				await wait(5000);
 			}
 		}
 
@@ -287,9 +289,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			navigate(`/?isWidget=false`);
 		} 
 	}, [state])
-	
+
+	const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
+
 	useEffect(() => {
-		const wait = () => new Promise(resolve => setTimeout(resolve, 5000));
 
 		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
@@ -313,7 +316,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								// Add condition for making sure that the user has indeed connected
 								//setTwitterConnected(true);
 								console.log("Twitter is successfully connected");
-								wait().then(res=>{
+								wait(5000).then(res=>{
 									window.close();
 								}).catch(console.error);
 							}
