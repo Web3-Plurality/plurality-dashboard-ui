@@ -461,3 +461,6 @@ $RECYCLE.BIN/
 # .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/storybookjs,windows,macos,webstorm+all,visualstudiocode,openframeworks+visualstudio,intellij+all,git,yarn,node
+
+# proxy files
+docker/traefik
