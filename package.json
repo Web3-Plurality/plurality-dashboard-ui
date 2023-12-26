@@ -1,6 +1,6 @@
 {
-	"name": "facit",
-	"version": "4.3.1",
+	"name": "plurality-dashboard",
+	"version": "0.0.0",
 	"private": true,
 	"scripts": {
 		"start": "cross-env GENERATE_SOURCEMAP=false react-app-rewired start",
@@ -58,6 +58,10 @@
 		"@orbisclub/orbis-sdk": "^0.4.89",
 		"@popperjs/core": "^2.11.8",
 		"@reactour/tour": "^3.5.0",
+		"@semantic-release/exec": "^6.0.3",
+		"@semantic-release/git": "^10.0.1",
+		"@semantic-release/github": "^9.2.6",
+		"@semantic-release/npm": "^11.0.2",
 		"@semaphore-protocol/data": "^3.11.1",
 		"@semaphore-protocol/group": "^3.11.1",
 		"@semaphore-protocol/identity": "^3.11.1",
