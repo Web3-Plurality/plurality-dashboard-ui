@@ -78,7 +78,6 @@
 		"cryptr": "^6.3.0",
 		"date-fns": "^2.30.0",
 		"dayjs": "^1.11.9",
-		"facebook-sdk": "^0.3.3",
 		"formik": "^2.4.3",
 		"framer-motion": "^10.15.2",
 		"i18next": "^23.4.4",
