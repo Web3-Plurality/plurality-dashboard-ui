@@ -31,8 +31,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g yarn@3.2.1
-          yarn install --ignore-engines
+          yarn install
 
       - name: Semantic Release
         run: npx semantic-release
