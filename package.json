@@ -210,8 +210,7 @@
 		"nth-check": ">=2.1.1",
 		"trim": "^1.0.1"
 	},
-	"packageManager": "yarn@3.2.1",
 	"engines": {
-		"node": ">=16.0.0"
+		"node": ">=18.0.0"
 	}
 }
