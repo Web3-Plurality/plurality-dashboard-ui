@@ -29,11 +29,11 @@ Depending on your mood for the day, there are two ways you can test it:
 If you want to run the setup locally you need to:
 
 * Pull all submodules
-* `cd` into each submodule and run using yarn or npm 
+* `cd` into each submodule and run using npm 
 
   ```plaintext
-  yarn install
-  yarn start 
+  npm install
+  npm run start 
   ```
 
 ## Run using Docker
