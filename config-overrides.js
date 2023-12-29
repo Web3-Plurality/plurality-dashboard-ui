@@ -1,4 +1,6 @@
 const webpack = require('webpack');
+const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
+
 
 module.exports = function override(config) {
     const fallback = config.resolve.fallback || {};
@@ -21,6 +23,8 @@ module.exports = function override(config) {
             Buffer: ['buffer', 'Buffer']
         })
     ])
+    config.resolve.plugins = config.resolve.plugins.filter(plugin => !(plugin instanceof ModuleScopePlugin));
+
     config.module.rules.unshift({
         test: /\.m?js$/,
         resolve: {

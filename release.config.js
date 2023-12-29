@@ -12,8 +12,7 @@ module.exports = {
             && docker push ghcr.io/web3-plurality/plurality-dashboard-ui:latest \\
             && docker tag ghcr.io/web3-plurality/plurality-dashboard-ui:latest ghcr.io/web3-plurality/plurality-dashboard-ui:\${nextRelease.version} \\
             && docker push ghcr.io/web3-plurality/plurality-dashboard-ui:\${nextRelease.version}
-           `,
-          'npmPublish': false
+           `
         }
       ],
       '@semantic-release/git',
