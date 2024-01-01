@@ -2,7 +2,7 @@ name: pre-commit
 
 on:
   pull_request:
-    branches: [master]
+    branches: [test-main]
     types: [opened, edited, synchronize]
 
 jobs:
