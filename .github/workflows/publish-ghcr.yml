@@ -32,6 +32,13 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
+      
+      # These values are here on experimental basis - only for testnet for production we would move to a secure backend signer service
+      - name: Prepare Environment files
+        run: |
+          cp .env.production.example .env.production
+          echo "REACT_APP_INFURA_API_KEY=${{ secrets.INFURA_API_KEY_SECRET }}" >> .env.production
+          echo "REACT_APP_SIGNER_PRIVATE_KEY=${{ secrets.SIGNER_PRIVATE_KEY_SECRET }}" >> .env.production
 
       - name: Semantic Release
         run: npx semantic-release
