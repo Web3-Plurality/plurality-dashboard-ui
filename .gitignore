@@ -465,3 +465,7 @@ $RECYCLE.BIN/
 
 # proxy files
 docker/traefik
+
+# env files
+.env.development
+.env.production
