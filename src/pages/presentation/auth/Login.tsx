@@ -143,6 +143,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				if (profileDataObj) {
 					const params = new URLSearchParams(window.location.search)
 					const origin = params.get('origin')!;
+					// If the user accidently opens the widget login in browser, we redirect to our homepage
+					if (!window.opener && isWidget) {
+						window.location.href =process.env.REACT_APP_HOMEPAGE!
+					}
 					window.opener.postMessage(profileDataObj, origin);
 					wait(5000).then(res=>{
 						window.close();
@@ -176,6 +180,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObj => {
 					console.log(profileDataObj);
 					if (profileDataObj) {
+						// If the user accidently opens the widget login in browser, we redirect to our homepage
+						if (!window.opener && isWidget) {
+							window.location.href =process.env.REACT_APP_HOMEPAGE!
+						}
 						window.opener.postMessage(profileDataObj, originURL);
 						window.close();
 					}
@@ -187,6 +195,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(profileDataObj => {
 					console.log(profileDataObj);
 					if (profileDataObj) {
+						// If the user accidently opens the widget login in browser, we redirect to our homepage
+						if (!window.opener && isWidget) {
+							window.location.href =process.env.REACT_APP_HOMEPAGE!
+						}
 						window.opener.postMessage(profileDataObj, originURL);
 						window.close();
 					}
@@ -257,6 +269,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				const res = await createZKProofTwitterPopup(process.env.REACT_APP_TWITTER!, process.env.REACT_APP_TWITTER_GROUP_ID!);
 				if (res) {
 					console.log("Added twitter verification post to orbis");
+					// If the user accidently opens the widget login in browser, we redirect to our homepage
+					if (!window.opener && isWidget) {
+						window.location.href =process.env.REACT_APP_HOMEPAGE!
+					}
 					window.opener.postMessage(profileDataObj, origin);
 					setTwitterConnected(true);
 					await wait(5000);
