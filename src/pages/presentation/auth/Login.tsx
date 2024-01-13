@@ -332,6 +332,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}, [state])
 
 
+	useEffect(() => {
+		// If the user accidently opens the widget login in browser, we redirect to our homepage
+		if (!window.opener && isWidget) {
+			window.location.href =process.env.REACT_APP_UI_BASE_URL!
+		}
+	})
+
+
 	return (
 		<PageWrapper
 			isProtected={false}
