@@ -53,6 +53,18 @@ LoginHeader.defaultProps = {
 interface ILoginProps {
 	isSignUp?: boolean;
 }
+
+const modalStyle = {
+	width: '300px',
+	height: '500px',
+	top: '45%',
+	left: '50%',
+	right: 'auto',
+	bottom: 'auto',
+	marginRight: '-50%',
+	transform: 'translate(-50%, -50%)',
+}
+
 const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { setUser } = useContext(AuthContext);
 	const { darkModeStatus } = useDarkMode();
@@ -83,6 +95,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { disconnect } = useDisconnect()
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
+
+	const [makeConsentFor, setMakeConsentFor] = useState("");
 
 	const handleSnapConnect = async () => {
 		
@@ -171,29 +185,42 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const urlParams = new URLSearchParams(window.location.search);
 			const originURL = urlParams.get('origin');
 			if (twitter == true)  { 
-				showLoading();
-				setTwitterConnected(twitter); 
-				getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObj => {
-					console.log(profileDataObj);
-					if (profileDataObj) {
-						window.opener.postMessage(profileDataObj, originURL);
-						window.close();
-					}
-				});
+				setTwitterConnected(twitter); 	
+				setMakeConsentFor("twitter");	
 			}
 			if (facebook == true) { 
-				showLoading();
-				setFacebookConnected(facebook);
-				getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(profileDataObj => {
-					console.log(profileDataObj);
-					if (profileDataObj) {
-						window.opener.postMessage(profileDataObj, originURL);
-						window.close();
-					}
-				});
-			
+				setFacebookConnected(facebook);	
+				setMakeConsentFor("facebook");	
 			}
 		}
+	}
+
+	const twitterConsent = () => {
+		console.log("user is making consent for twitter");
+		const urlParams = new URLSearchParams(window.location.search);
+		const originURL = urlParams.get('origin');
+		getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObj => {
+			console.log(profileDataObj);
+			if (profileDataObj) {
+				hideLoading();
+				window.opener.postMessage(profileDataObj, originURL);
+				window.close();
+			}
+		});
+	}
+
+	const FacebookConsent = () => {
+		console.log("user is making consent for facebook");
+		const urlParams = new URLSearchParams(window.location.search);
+		const originURL = urlParams.get('origin');
+		getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(profileDataObj => {
+			console.log(profileDataObj);
+			if (profileDataObj) {
+				hideLoading();
+				window.opener.postMessage(profileDataObj, originURL);
+				window.close();
+			}
+		});
 	}
 
 	const ensureMetamaskConnection = async (): Promise<Boolean> => {
@@ -331,6 +358,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [state])
 
+	const consent = () => {
+		console.log("user made consent");
+		showLoading();
+		switch(makeConsentFor){
+			case "twitter": {
+				twitterConsent(); 
+				break;
+			}
+			case "facebook": {
+				FacebookConsent();
+				break;
+			}
+		}
+	}
+
+	const decline = () => {
+		console.log("user declined");
+		window.close();
+	}
 
 	return (
 		<PageWrapper
@@ -501,6 +547,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								Terms of use
 							</a>
 						</div>
+
+						(<dialog id="modal" open = {makeConsentFor.length !== 0} style={modalStyle}>
+  							<p>...</p>
+							<div >
+								<button id="closeModal" onClick={consent} >I consent</button>
+								<button id="closeModal" onClick={decline} >decline</button>
+							</div>
+						</dialog>
+						)
+						
 					</div>
 				</div>
 				/*)}*/}
