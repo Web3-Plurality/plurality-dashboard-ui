@@ -52,18 +52,18 @@ LoginHeader.defaultProps = {
 
 interface ILoginProps {
 	isSignUp?: boolean;
-}
+};
 
 const modalStyle = {
 	width: '300px',
-	height: '500px',
-	top: '45%',
+	height: '280px',
+	top: '49%',
 	left: '50%',
 	right: 'auto',
 	bottom: 'auto',
 	marginRight: '-50%',
 	transform: 'translate(-50%, -50%)',
-}
+};
 
 const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { setUser } = useContext(AuthContext);
@@ -549,8 +549,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						</div>
 
 						(<dialog id="modal" open = {makeConsentFor.length !== 0} style={modalStyle}>
-  							<p>...</p>
-							<div >
+  							<p className='mb-5'>Do you agree to share your {makeConsentFor} data with {callingDApp} </p>
+							<div className="d-flex justify-content-evenly">
 								<button id="closeModal" onClick={consent} >I consent</button>
 								<button id="closeModal" onClick={decline} >decline</button>
 							</div>
