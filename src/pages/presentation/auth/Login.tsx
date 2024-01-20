@@ -74,6 +74,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
 	const [callingDApp, setCallingDApp] = useState<String>("");
+	const [isFacebookSelected, setIsFacebookSelected] = useState<Boolean>(false);
+	const [isTwitterSelected, setIsTwitterSelected] = useState<Boolean>(false);
 	const { showLoading, hideLoading } = useContext(LoadingContext);
 
 
@@ -170,7 +172,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			await ensureMetamaskConnection();
 			const urlParams = new URLSearchParams(window.location.search);
 			const originURL = urlParams.get('origin');
-			if (twitter == true)  { 
+			if (twitter == true && isTwitterSelected)  { 
 				showLoading();
 				setTwitterConnected(twitter); 
 				getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObj => {
@@ -181,7 +183,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					}
 				});
 			}
-			if (facebook == true) { 
+			if (facebook == true && isFacebookSelected) { 
 				showLoading();
 				setFacebookConnected(facebook);
 				getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(profileDataObj => {
@@ -280,16 +282,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const widget = params.get('isWidget')!;
 		const dAppName = params.get('origin')!; 
 		const idPlatform = params.get('id_platform')!;
+		const apps = params.get('apps')!;
+
 		if (widget == "true") {
 			if(!idPlatform && !window.opener){
 				navigate(`/?isWidget=false`);
 			}
 			else{
+                for(let app of apps.split(",")) {
+				    if(app === "twitter"){
+					    setIsTwitterSelected(true)
+				    }
+				    if(app === "facebook"){
+					    setIsFacebookSelected(true)
+                    }
+			    }
 				setCallingDApp(dAppName);
 				setIsWidget(true);
 				checkConnectProfilesOnPageLoad().catch(console.error);
 			}
-			
 		}
 		else {
 			navigate(`/?isWidget=false`);
@@ -419,7 +430,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										<LoginHeader isSnap={false} callingDApp={callingDApp} />
 
 											<form className='row g-4'>
-											<div className='col-12 mt-3'>
+											{isTwitterSelected && (<div className='col-12 mt-3'>
 												<Button
 													isOutline
 													isDisable= {isTwitterConnected==true ? true: false}
@@ -441,8 +452,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 															</>
 														)}
 												</Button>
-											</div>
-											<div className='col-12 mt-3'>
+											</div>)}
+											{isFacebookSelected && (<div className='col-12 mt-3'>
 												<FacebookLogin
 													appId="696970245672784"
 													autoLoad={false}
@@ -481,7 +492,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													Please contact <u>devs</u> to request access for facebook
 												</a>
 												</div>
-											</div>
+											</div>)}
 											</form>
 										</>
 									)}
