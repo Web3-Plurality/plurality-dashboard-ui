@@ -28,6 +28,18 @@ interface ILoginHeaderProps {
 	isSnap?: boolean;
 	callingDApp?: String;
 }
+interface IConsentHeaderProps {
+	socialMedia?: String;
+	callingDApp?: String;
+}
+const ConsentHeader: FC<IConsentHeaderProps> = ({ socialMedia, callingDApp }) => {
+	return (
+		<>
+			<div className='text-center h1 fw-bold mt-5'>Reputation Connect</div>
+			<div className='text-center h4 text-muted mb-5'>Do you agree to share your {socialMedia} data with {callingDApp} ?</div>
+		</>
+	);
+};
 const LoginHeader: FC<ILoginHeaderProps> = ({ isSnap, callingDApp }) => {
 	if (isSnap) {
 		return (
@@ -77,6 +89,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isFacebookSelected, setIsFacebookSelected] = useState<Boolean>(false);
 	const [isTwitterSelected, setIsTwitterSelected] = useState<Boolean>(false);
 	const { showLoading, hideLoading } = useContext(LoadingContext);
+	const [makeConsentFor, setMakeConsentFor] = useState("");
 
 
 	// wagmi connectors and disconnectors
@@ -172,30 +185,64 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			await ensureMetamaskConnection();
 			const urlParams = new URLSearchParams(window.location.search);
 			const originURL = urlParams.get('origin');
+			console.log(darkModeStatus)
 			if (twitter == true && isTwitterSelected)  { 
-				showLoading();
-				setTwitterConnected(twitter); 
-				getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObj => {
-					console.log(profileDataObj);
-					if (profileDataObj) {
-						window.opener?.postMessage(profileDataObj, originURL);
-						window.close();
-					}
-				});
+				setTwitterConnected(twitter); 	
+				setMakeConsentFor("twitter");
 			}
 			if (facebook == true && isFacebookSelected) { 
-				showLoading();
-				setFacebookConnected(facebook);
-				getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(profileDataObj => {
-					console.log(profileDataObj);
-					if (profileDataObj) {
-						window.opener?.postMessage(profileDataObj, originURL);
-						window.close();
-					}
-				});
-			
+				setFacebookConnected(facebook);	
+				setMakeConsentFor("facebook");		
 			}
 		}
+	}
+
+	const twitterConsent = () => {
+		console.log("user is making consent for twitter");
+		const urlParams = new URLSearchParams(window.location.search);
+		const originURL = urlParams.get('origin');
+		getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObj => {
+			console.log(profileDataObj);
+			if (profileDataObj) {
+				hideLoading();
+				window.opener.postMessage(profileDataObj, originURL);
+				window.close();
+			}
+		});
+	}
+
+	const FacebookConsent = () => {
+		console.log("user is making consent for facebook");
+		const urlParams = new URLSearchParams(window.location.search);
+		const originURL = urlParams.get('origin');
+		getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(profileDataObj => {
+			console.log(profileDataObj);
+			if (profileDataObj) {
+				hideLoading();
+				window.opener.postMessage(profileDataObj, originURL);
+				window.close();
+			}
+		});
+	}
+
+	const consent = () => {
+		console.log("user made consent");
+		showLoading();
+		switch(makeConsentFor){
+			case "twitter": {
+				twitterConsent(); 
+				break;
+			}
+			case "facebook": {
+				FacebookConsent();
+				break;
+			}
+		}
+	}
+
+	const decline = () => {
+		console.log("user declined");
+		window.close();
 	}
 
 	const ensureMetamaskConnection = async (): Promise<Boolean> => {
@@ -425,8 +472,38 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 									)}
 									{/* END :: Snap install */}
+
+									{/* BEGIN :: Consent page */}
+									{isMetaMaskReady && state.installedSnap && isWidget && isConnected && makeConsentFor &&(
+										<>
+										<ConsentHeader socialMedia={makeConsentFor} callingDApp={callingDApp}/>
+										<form className='row g-4'></form>
+											<div className='col-12 mt-3'>
+												<Button 
+													isOutline
+													color={darkModeStatus ? 'dark' : 'light'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													onClick={consent}>Consent</Button>
+											</div>
+											<div className='col-12 mt-3'>
+												<Button 
+													isOutline
+													color={darkModeStatus ? 'dark' : 'light'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													onClick={decline}>Decline</Button>
+											</div>
+										</>
+									)}
+									{/* END :: Consent page */}
+
 									{/* BEGIN :: Social Login */}
-									{isMetaMaskReady && state.installedSnap && isWidget && isConnected &&(
+									{isMetaMaskReady && state.installedSnap && isWidget && isConnected && !makeConsentFor &&(
 										<>
 										<LoginHeader isSnap={false} callingDApp={callingDApp} />
 
@@ -435,7 +512,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												<Button
 													isOutline
 													isDisable= {isTwitterConnected==true ? true: false}
-													color={darkModeStatus ? 'light' : 'dark'}
+													color={darkModeStatus ? 'dark' : 'light'}
 													className={classNames('w-100 py-3', {
 														'border-light': !darkModeStatus,
 														'border-dark': darkModeStatus,
@@ -466,7 +543,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														<Button
 														isOutline
 														isDisable= {isFacebookConnected==true ? true: false}
-														color={darkModeStatus ? 'light' : 'dark'}
+														color={darkModeStatus ? 'dark' : 'light'}
 														className={classNames('w-100 py-3', {
 															'border-light': !darkModeStatus,
 															'border-dark': darkModeStatus,
