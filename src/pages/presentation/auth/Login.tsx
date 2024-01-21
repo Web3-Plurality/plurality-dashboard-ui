@@ -224,7 +224,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const params = new URLSearchParams(window.location.search)
 		const isWidget = params.get('isWidget')!;
 		const origin = params.get('origin')!;
-		const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
+		const apps = params.get('apps')!;
+		const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?apps=${apps}&isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
 		//TODO: Change it back
 		//const apiUrl = "http://localhost:3000/auth-pages/login?isWidget=true&origin=http://localhost:3001/&id_platform=twitter&username=hirasiddiqui199&display_name=HiraSiddiqui&picture_url=https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"; // Replace with your Twitter API endpoint
 	
