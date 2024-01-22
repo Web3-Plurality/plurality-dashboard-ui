@@ -1,6 +1,6 @@
 # Plurality
 
-We have created a “Reputation Connect“ widget which can be used to personalize your web3 account and give you a better UX on dApps.
+We have created a Plurality Connect“ widget which can be used to personalize your web3 account and give you a better UX on dApps.
 
 ## Video Demo
 

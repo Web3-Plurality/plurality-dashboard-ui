@@ -32,14 +32,14 @@ const LoginHeader: FC<ILoginHeaderProps> = ({ isSnap, callingDApp }) => {
 	if (isSnap) {
 		return (
 			<>
-			<div className='text-center h1 fw-bold mt-5'>Reputation Connect</div>
+			<div className='text-center h1 fw-bold mt-5'>Plurality Connect</div>
 			<div className='text-center h4 text-muted mb-5'>Sign in to continue!</div>
 			</>
 		);
 	}
 	return (
 		<>
-			<div className='text-center h1 fw-bold mt-5'>Reputation Connect</div>
+			<div className='text-center h1 fw-bold mt-5'>Plurality Connect</div>
 			<div className='text-center h4 text-muted mb-5'>Connect your social profiles to:</div>
 			<div className='text-center h5 text-muted mb-5'>{callingDApp}</div>
 		</>
@@ -143,7 +143,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				if (profileDataObj) {
 					const params = new URLSearchParams(window.location.search)
 					const origin = params.get('origin')!;
-					window.opener.postMessage(profileDataObj, origin);
+					window.opener?.postMessage(profileDataObj, origin);
 					wait(5000).then(res=>{
 						window.close();
 					}).catch(console.error);
@@ -176,7 +176,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObj => {
 					console.log(profileDataObj);
 					if (profileDataObj) {
-						window.opener.postMessage(profileDataObj, originURL);
+						window.opener?.postMessage(profileDataObj, originURL);
 						window.close();
 					}
 				});
@@ -187,7 +187,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(profileDataObj => {
 					console.log(profileDataObj);
 					if (profileDataObj) {
-						window.opener.postMessage(profileDataObj, originURL);
+						window.opener?.postMessage(profileDataObj, originURL);
 						window.close();
 					}
 				});
@@ -257,7 +257,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				const res = await createZKProofTwitterPopup(process.env.REACT_APP_TWITTER!, process.env.REACT_APP_TWITTER_GROUP_ID!);
 				if (res) {
 					console.log("Added twitter verification post to orbis");
-					window.opener.postMessage(profileDataObj, origin);
+					window.opener?.postMessage(profileDataObj, origin);
 					setTwitterConnected(true);
 					await wait(5000);
 					window.close();
@@ -279,13 +279,19 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const params = new URLSearchParams(window.location.search)
 		const widget = params.get('isWidget')!;
 		const dAppName = params.get('origin')!; 
-
+		const idPlatform = params.get('id_platform')!;
 		if (widget == "true") {
-			setCallingDApp(dAppName);
-			setIsWidget(true);
-			checkConnectProfilesOnPageLoad().catch(console.error);
+			if(!idPlatform && !window.opener){
+				navigate(`/?isWidget=false`);
+			}
+			else{
+				setCallingDApp(dAppName);
+				setIsWidget(true);
+				checkConnectProfilesOnPageLoad().catch(console.error);
+			}
+			
 		}
-		if ((widget=="false" || !widget) && state.installedSnap) {
+		else {
 			navigate(`/?isWidget=false`);
 		} 
 	}, [state])
@@ -330,15 +336,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						})
 		}
 	}, [state])
-
-
-	useEffect(() => {
-		// If the user accidently opens the widget login in browser, we redirect to our homepage
-		if (!window.opener && isWidget) {
-			window.location.href =process.env.REACT_APP_UI_BASE_URL!
-		}
-	})
-
 
 	return (
 		<PageWrapper
