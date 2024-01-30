@@ -21,6 +21,7 @@ import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import PLogo from '../../../assets/img/logo-no-bg.png';
+import { CheckBox } from '../../../components/icon/material-icons';
 
 
 
@@ -57,6 +58,19 @@ const LoginHeader: FC<ILoginHeaderProps> = ({ isSnap, callingDApp }) => {
 		</>
 	);
 };
+
+// Modal box styling
+const modalStyle = {
+	width: '300px',
+	height: '280px',
+	top: '49%',
+	left: '50%',
+	right: 'auto',
+	bottom: 'auto',
+	marginRight: '-50%',
+	transform: 'translate(-50%, -50%)',
+};
+
 LoginHeader.defaultProps = {
 	isSnap: true,
 	callingDApp: "http://some-dapp.com"
@@ -90,7 +104,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isTwitterSelected, setIsTwitterSelected] = useState<Boolean>(false);
 	const { showLoading, hideLoading } = useContext(LoadingContext);
 	const [makeConsentFor, setMakeConsentFor] = useState("");
-
+	const [isTwitterChecked, setIsTwitterChecked] = useState(false);
+	const [isFacebookChecked, setIsFacebookChecked] = useState(false);
+	const [isSocialThreeChecked, setIsSocialThreeChecked] = useState(false);
+	const [isModalBoxVisible, setIsModalBoxVisible] = useState(false);
 
 	// wagmi connectors and disconnectors
 	const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
@@ -98,6 +115,55 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { disconnect } = useDisconnect()
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
+
+	// Checkbox for social medias
+	const checkboxIsVisible = () => {
+		return ;
+	}
+
+	const checkboxTwitterHandleOnChange = async () => {
+		setIsTwitterChecked(!isTwitterChecked)
+	}
+
+	const checkboxFacebookHandleOnChange = async () => {
+		setIsFacebookChecked(!isFacebookChecked)
+	}
+
+	// Consent tooltip
+	const consentTooltip = () => {
+		if (isTwitterChecked || isFacebookChecked) {
+			return "connect your profile"
+		}
+		return "you need to select a social media first"
+	}
+
+	const setVisibilityOfModalBox = () => {
+		if(!isTwitterChecked || !isFacebookChecked){
+			setIsModalBoxVisible(true)
+		}
+	}
+
+	const ensureMetamaskConnection = async (): Promise<Boolean> => {
+		console.log("Ensure metamask connection called");
+		if (!address || !isConnected) {
+			for (let i=0; i < connectors.length; i++) {
+				let connector = connectors[i];
+				console.log("Trying to connect with connector: "+connectors[i].name);
+				connect({ connector});
+			}
+		}
+		return true;
+		//todo: check how to handle this - social already conected (commitments in snap), but metamask not connected
+		/*const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
+		while (!address) {
+			if (address)
+				return true;
+			else 
+				await wait();
+		}
+		return false;*/
+
+	}
 
 	const handleSnapConnect = async () => {
 		
@@ -160,9 +226,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					const origin = params.get('origin')!;
 					window.opener?.postMessage(profileDataObj, origin);
 					wait(5000).then(res=>{
-						window.close();
+						//window.close();
 					}).catch(console.error);
-					window.close();
+					//window.close();
 				}
 				//await sendDataToDApp();
 			}
@@ -185,7 +251,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			await ensureMetamaskConnection();
 			const urlParams = new URLSearchParams(window.location.search);
 			const originURL = urlParams.get('origin');
-			console.log(darkModeStatus)
 			if (twitter == true && isTwitterSelected)  { 
 				setTwitterConnected(twitter); 	
 				setMakeConsentFor("twitter");
@@ -206,12 +271,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			if (profileDataObj) {
 				hideLoading();
 				window.opener.postMessage(profileDataObj, originURL);
-				window.close();
+				// window.close();
 			}
 		});
 	}
 
-	const FacebookConsent = () => {
+	const facebookConsent = () => {
 		console.log("user is making consent for facebook");
 		const urlParams = new URLSearchParams(window.location.search);
 		const originURL = urlParams.get('origin');
@@ -220,52 +285,49 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			if (profileDataObj) {
 				hideLoading();
 				window.opener.postMessage(profileDataObj, originURL);
-				window.close();
+				console.log(window.opener)
+				console.log(profileDataObj)
+				//window.close();
 			}
 		});
 	}
 
-	const consent = () => {
+	const moveForward = () => {
+		// write the logic of how to share user profile data to dapp
 		console.log("user made consent");
-		showLoading();
-		switch(makeConsentFor){
-			case "twitter": {
-				twitterConsent(); 
-				break;
-			}
-			case "facebook": {
-				FacebookConsent();
-				break;
-			}
+	 	showLoading();
+		if (isTwitterChecked) {
+			twitterConsent()
+		} else if (isFacebookChecked) {
+			facebookConsent()
 		}
+		// TODO
+		// Need to find a way of asynchronizly close the widget
 	}
 
-	const decline = () => {
-		console.log("user declined");
-		window.close();
+	const moveBack = () => {
+		setIsModalBoxVisible(false)
 	}
 
-	const ensureMetamaskConnection = async (): Promise<Boolean> => {
-		console.log("Ensure metamask connection called");
-		if (!address || !isConnected) {
-			for (let i=0; i < connectors.length; i++) {
-				let connector = connectors[i];
-				console.log("Trying to connect with connector: "+connectors[i].name);
-				connect({ connector});
-			}
-		}
-		return true;
-		//todo: check how to handle this - social already conected (commitments in snap), but metamask not connected
-		/*const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
-		while (!address) {
-			if (address)
-				return true;
-			else 
-				await wait();
-		}
-		return false;*/
+	// const consent = () => {
+	// 	console.log("user made consent");
+	// 	showLoading();
+	// 	switch(makeConsentFor){
+	// 		case "twitter": {
+	// 			twitterConsent(); 
+	// 			break;
+	// 		}
+	// 		case "facebook": {
+	// 			FacebookConsent();
+	// 			break;
+	// 		}
+	// 	}
+	// }
 
-	}
+	// const decline = () => {
+	// 	console.log("user declined");
+	// 	window.close();
+	// }
 
 	const openTwitterOAuthPopup = async () => {
 		const params = new URLSearchParams(window.location.search)
@@ -310,11 +372,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					window.opener?.postMessage(profileDataObj, origin);
 					setTwitterConnected(true);
 					await wait(5000);
-					window.close();
+					//window.close();
 				}
 				else {
 					console.log("Could not add twitter verification post to orbis");	
-					window.close();								
+					//window.close();								
 				}
 			}
 			else {
@@ -474,7 +536,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									{/* END :: Snap install */}
 
 									{/* BEGIN :: Consent page */}
-									{isMetaMaskReady && state.installedSnap && isWidget && isConnected && makeConsentFor &&(
+									{/* {isMetaMaskReady && state.installedSnap && isWidget && isConnected && makeConsentFor &&(
 										<>
 										<ConsentHeader socialMedia={makeConsentFor} callingDApp={callingDApp}/>
 										<form className='row g-4'></form>
@@ -499,79 +561,120 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													onClick={decline}>Decline</Button>
 											</div>
 										</>
-									)}
+									)} */}
 									{/* END :: Consent page */}
 
 									{/* BEGIN :: Social Login */}
-									{isMetaMaskReady && state.installedSnap && isWidget && isConnected && !makeConsentFor &&(
+									{isMetaMaskReady && state.installedSnap && isWidget && isConnected &&(
 										<>
 										<LoginHeader isSnap={false} callingDApp={callingDApp} />
-
 											<form className='row g-4'>
-											{isTwitterSelected && (<div className='col-12 mt-3'>
-												<Button
-													isOutline
-													isDisable= {isTwitterConnected==true ? true: false}
-													color={darkModeStatus ? 'dark' : 'light'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomTwitter'
-													onClick={openTwitterOAuthPopup}>
-													{!isTwitterConnected && (
-															<>
-															Connect Twitter
-															</>
-														)}
-														{isTwitterConnected && (
-															<>
-															Connected
-															</>
-														)}
-												</Button>
-											</div>)}
-											{isFacebookSelected && (<div className='col-12 mt-3'>
-												<FacebookLogin
-													appId="696970245672784"
-													autoLoad={false}
-													fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
-													callback={responseFacebook}
-													cssClass='shadow-3d-container'
-													scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
-													render={renderProps => (
+												<div style={{"display": "flex", "justifyContent": "space-between"}}>
+													{ (isTwitterConnected || isFacebookConnected) && (<input
+														style={{"height": "35px", "width": "35px", marginTop:"7px"}}
+														type="checkbox"
+														id="socialOne"
+														checked={isTwitterChecked}
+														disabled={!isTwitterConnected}
+														onChange={checkboxTwitterHandleOnChange}/>) }
+													<div style={{"flex": "0 0 auto", "width": "90%"}}>
+														{isTwitterSelected && (<div>
 														<Button
-														isOutline
-														isDisable= {isFacebookConnected==true ? true: false}
-														color={darkModeStatus ? 'dark' : 'light'}
-														className={classNames('w-100 py-3', {
-															'border-light': !darkModeStatus,
-															'border-dark': darkModeStatus,
-														})}
-														icon='CustomFacebook'
-														onClick={renderProps.onClick}
-														>
-															{!isFacebookConnected && (
-																<>
-																Connect Facebook
-																</>
+															isOutline
+															isDisable= {isTwitterConnected==true ? true: false}
+															color={darkModeStatus ? 'dark' : 'light'}
+															className={classNames('w-100 py-3', {
+																'border-light': !darkModeStatus,
+																'border-dark': darkModeStatus,
+															})}
+															icon='CustomTwitter'
+															onClick={openTwitterOAuthPopup}>
+																{!isTwitterConnected && (
+																	<>
+																	Connect Twitter
+																	</>
+																)}
+																{isTwitterConnected && (
+																	<>
+																	Connected
+																	</>
+																)}
+														</Button>
+														</div>)}
+													</div>
+												</div>
+
+												<div style={{"display": "flex", "justifyContent": "space-between"}}>
+													{ (isTwitterConnected || isFacebookConnected) && (<input
+														style={{"height": "35px", "width": "35px", marginTop:"7px"}}
+														type="checkbox"
+														id="socialTwo"
+														checked={isFacebookChecked}
+														disabled={!isFacebookConnected}
+														onChange={checkboxFacebookHandleOnChange}/>) }
+													<div style={{"flex": "0 0 auto", "width": "90%"}}>	
+														{isFacebookSelected && (<div>
+														<FacebookLogin
+															appId="696970245672784"
+															autoLoad={false}
+															fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
+															callback={responseFacebook}
+															cssClass='shadow-3d-container'
+															scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
+															render={renderProps => (
+																<Button
+																isOutline
+																isDisable= {isFacebookConnected==true ? true: false}
+																color={darkModeStatus ? 'dark' : 'light'}
+																className={classNames('w-100 py-3', {
+																	'border-light': !darkModeStatus,
+																	'border-dark': darkModeStatus,
+																})}
+																icon='CustomFacebook'
+																onClick={renderProps.onClick}
+																>
+																	{!isFacebookConnected && (
+																		<>
+																		Connect Facebook
+																		</>
+																	)}
+																	{isFacebookConnected && (
+																		<>
+																		Connected
+																		</>
+																	)}
+															</Button>
 															)}
-															{isFacebookConnected && (
-																<>
-																Connected
-																</>
-															)}
-													</Button>
-													)}
-												/>
-												<div className='text-center col-12 mt-3'>
+														/>			
+														</div>)}
+													</div>
+												</div>
+
+												<div style={{"display": "flex", "justifyContent": "space-between"}}>
+													<div style={{"flex": "0 0 auto", "width": "100%"}}>
+														{isTwitterSelected && (<div title={consentTooltip()}>
+														<Button
+															isOutline
+															isDisable= {!isTwitterChecked && !isFacebookChecked}
+															color={darkModeStatus ? 'dark' : 'light'}
+															className={classNames('w-100 py-3', {
+																'border-light': !darkModeStatus,
+																'border-dark': darkModeStatus,
+															})}
+															onClick={setVisibilityOfModalBox}>
+															I consent to share my data with {callingDApp} 
+														</Button>
+														</div>)}
+													</div>
+												</div>
+
+											</form>
+											<div className='text-center col-12 mt-3'>
 												<a href='mailto:hirasiddiqui95@gmail.com'>
 														<br />
 													Please contact <u>devs</u> to request access for facebook
 												</a>
-												</div>
-											</div>)}
-											</form>
+											</div>
 										</>
 									)}
 									{/* END :: Social Login */}
@@ -595,6 +698,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								Terms of use
 							</a>
 						</div>
+						(<dialog id="modal" open = {isModalBoxVisible} style={modalStyle}>
+  							<p className='mb-5'>Actually you can share more social media data to {callingDApp}, are you sure to move forward?</p>
+							<a href="">Learn more about the benefits of sharing more data</a>
+							<div className="d-flex justify-content-evenly">
+								<button id="moveFoward" onClick={moveForward}>Yes</button>
+								<button id="moveBack" onClick={moveBack}>Back</button>
+							</div>
+						</dialog>)
 					</div>
 				</div>
 				/*)}*/}
