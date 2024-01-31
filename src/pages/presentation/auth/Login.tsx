@@ -103,7 +103,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isFacebookSelected, setIsFacebookSelected] = useState<Boolean>(false);
 	const [isTwitterSelected, setIsTwitterSelected] = useState<Boolean>(false);
 	const { showLoading, hideLoading } = useContext(LoadingContext);
-	const [makeConsentFor, setMakeConsentFor] = useState("");
+	// const [makeConsentFor, setMakeConsentFor] = useState("");
 	const [isTwitterChecked, setIsTwitterChecked] = useState(false);
 	const [isFacebookChecked, setIsFacebookChecked] = useState(false);
 	const [isSocialThreeChecked, setIsSocialThreeChecked] = useState(false);
@@ -220,17 +220,17 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								);
 			if (isProfileCreated) {
 				setFacebookConnected(true);
-				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
-				if (profileDataObj) {
-					const params = new URLSearchParams(window.location.search)
-					const origin = params.get('origin')!;
-					window.opener?.postMessage(profileDataObj, origin);
-					wait(5000).then(res=>{
-						//window.close();
-					}).catch(console.error);
-					//window.close();
-				}
-				//await sendDataToDApp();
+				// const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
+				// if (profileDataObj) {
+				// 	const params = new URLSearchParams(window.location.search)
+				// 	const origin = params.get('origin')!;
+				// 	window.opener?.postMessage(profileDataObj, origin);
+				// 	wait(5000).then(res=>{
+				// 		//window.close();
+				// 	}).catch(console.error);
+				// 	//window.close();
+				// }
+				// //await sendDataToDApp();
 			}
 			else
 				console.log("Profile could not be created. Please try again");
@@ -243,24 +243,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			}
 		}
 	};	
-	
-	const checkConnectProfilesOnPageLoad = async () => {
-		if (isMetaMaskReady && state.installedSnap) {
-			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
-			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!);
-			await ensureMetamaskConnection();
-			const urlParams = new URLSearchParams(window.location.search);
-			const originURL = urlParams.get('origin');
-			if (twitter == true && isTwitterSelected)  { 
-				setTwitterConnected(twitter); 	
-				setMakeConsentFor("twitter");
-			}
-			if (facebook == true && isFacebookSelected) { 
-				setFacebookConnected(facebook);	
-				setMakeConsentFor("facebook");		
-			}
-		}
-	}
 
 	const twitterConsent = () => {
 		console.log("user is making consent for twitter");
@@ -285,8 +267,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			if (profileDataObj) {
 				hideLoading();
 				window.opener.postMessage(profileDataObj, originURL);
-				console.log(window.opener)
-				console.log(profileDataObj)
 				//window.close();
 			}
 		});
@@ -386,6 +366,22 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 
 	  };
+
+	  const checkConnectProfilesOnPageLoad = async () => {
+		if (isMetaMaskReady && state.installedSnap) {
+			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
+			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!);
+			await ensureMetamaskConnection();
+			const urlParams = new URLSearchParams(window.location.search);
+			const originURL = urlParams.get('origin');
+			if (twitter == true && isTwitterSelected)  { 
+				setTwitterConnected(twitter); 	
+			}
+			if (facebook == true && isFacebookSelected) { 
+				setFacebookConnected(facebook);		
+			}
+		}
+	}
 	 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
@@ -399,6 +395,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				navigate(`/?isWidget=false`);
 			}
 			else{
+				//TODO verifiy if we still need this?
                 for(let app of apps.split(",")) {
 				    if(app === "twitter"){
 					    setIsTwitterSelected(true)
@@ -419,44 +416,44 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 
-	useEffect(() => {
+	// useEffect(() => {
 
-		const params = new URLSearchParams(window.location.search);
-		const idPlatform = params.get('id_platform')!;
-		if (idPlatform == "twitter" && state.installedSnap && !renderBlocker) {
-			setRenderBlocker(true);
-			const params = new URLSearchParams(window.location.search);
-			const username = params.get('username')!;
-			const displayName = params.get('display_name')!;
-			const profileUrl = params.get('picture_url')!;
+	// 	const params = new URLSearchParams(window.location.search);
+	// 	const idPlatform = params.get('id_platform')!;
+	// 	if (idPlatform == "twitter" && state.installedSnap && !renderBlocker) {
+	// 		setRenderBlocker(true);
+	// 		const params = new URLSearchParams(window.location.search);
+	// 		const username = params.get('username')!;
+	// 		const displayName = params.get('display_name')!;
+	// 		const profileUrl = params.get('picture_url')!;
 
-			const description = 'some description';
-			const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
-			showLoading();
-			createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
-						process.env.REACT_APP_TWITTER_GROUP_ID!,
-						username,
-						description,
-						AssetType.INTEREST,
-						getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
-							if (isProfileCreated) {
-								// Add condition for making sure that the user has indeed connected
-								//setTwitterConnected(true);
-								console.log("Twitter is successfully connected");
-								wait(5000).then(res=>{
-									window.close();
-								}).catch(console.error);
-							}
-							else 
-								console.log("Profile could not be created. Please try again");
+	// 		const description = 'some description';
+	// 		const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
+	// 		showLoading();
+	// 		createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
+	// 					process.env.REACT_APP_TWITTER_GROUP_ID!,
+	// 					username,
+	// 					description,
+	// 					AssetType.INTEREST,
+	// 					getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
+	// 						if (isProfileCreated) {
+	// 							// Add condition for making sure that the user has indeed connected
+	// 							//setTwitterConnected(true);
+	// 							console.log("Twitter is successfully connected");
+	// 							wait(5000).then(res=>{
+	// 								window.close();
+	// 							}).catch(console.error);
+	// 						}
+	// 						else 
+	// 							console.log("Profile could not be created. Please try again");
 							
-						}).catch(error => {
-							console.log(error);
-							hideLoading();
-							//window.close();
-						})
-		}
-	}, [state])
+	// 					}).catch(error => {
+	// 						console.log(error);
+	// 						hideLoading();
+	// 						//window.close();
+	// 					})
+	// 	}
+	// }, [state])
 
 	return (
 		<PageWrapper
@@ -699,7 +696,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 							</a>
 						</div>
 						(<dialog id="modal" open = {isModalBoxVisible} style={modalStyle}>
-  							<p className='mb-5'>Actually you can share more social media data to {callingDApp}, are you sure to move forward?</p>
+  							<p style={{marginBottom: "130px"}}>Actually you can share more social media data to {callingDApp}, are you sure to move forward?</p>
 							<a href="">Learn more about the benefits of sharing more data</a>
 							<div className="d-flex justify-content-evenly">
 								<button id="moveFoward" onClick={moveForward}>Yes</button>
