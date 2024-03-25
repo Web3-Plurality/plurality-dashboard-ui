@@ -1,10 +1,4 @@
 import { Orbis } from "@orbisclub/orbis-sdk";
-import {
-	checkProfile,
-	saveProfile,
-	getZkProof,
-	getCommitment,
-  } from './snap';
 
   const Cryptr = require('cryptr');
   const orbis = new Orbis();
@@ -48,8 +42,8 @@ import {
 		  }
 		  console.log("PROFILE DATA: ");
 		  console.log(profileData);
-
-		  const secret = await getCommitment(profileType);
+		  //TODO the data should be encrpted using the user wallet
+		  const secret = "123456";
 
 		  const cryptr = new Cryptr(secret);
 		  const encryptedString = cryptr.encrypt(repAssetData);
@@ -102,11 +96,6 @@ import {
 		}
 	  }	
 
-	export const checkIfProfileSaved = async (profileType: string): Promise<Boolean> =>{
-		const isStored =  await checkProfile(profileType);
-		return isStored;
-	}
-
 	export const getDid = (connectedAddress: string) : string => {
 		//TODO : this is just a hacky workaround for now
 		return "did:pkh:eip155:1:"+connectedAddress;
@@ -140,7 +129,8 @@ import {
 				console.log("Loop started");
 				console.log(profileDataObjects[i]);
 				if (profileDataObjects[i].dataFetchedFrom == profileType) {
-				const secret = await getCommitment(profileType);
+				//TODO the data should be encrpted using the user wallet
+				const secret = "123456"
 				console.log("Secret is" + secret);
 				const cryptr = new Cryptr(secret);
 				const decryptedAssetData = cryptr.decrypt(profileDataObjects[i].assetData);
@@ -166,10 +156,9 @@ import {
 			return undefined;
 		}
 	}
-	const createOrbisPost = async (zkproof: string, platform: string): Promise<string> => {
+	const createOrbisPost = async (platform: string): Promise<string> => {
 		const postContent = "Gm folks! \n"+
 		"I just connected my " + platform + " \n" +
-		"View my zk proof verification on etherscan: " + zkproof +" \n" + 
 		"Let's make social media sovereign!";
 		/** Add the results in a media array used when sharing the post (the media object must be an array) */
 		const res = await orbis.createPost({
@@ -187,44 +176,24 @@ import {
 												reputationalAssetData: string[],
 												profileData: string): Promise<Boolean> => {
 													
-		const isStored =  await checkIfProfileSaved(profileType);
-		if (isStored) {
-			console.log("Your profile has already been linked. Nothing more to do :) ");
-			return true;
-		}
-		else {
+
+			//TODO: We should only push the social data when it is not already pushed
 			const did = await orbisConnect();
 			if (did == "") {
 				alert("Orbis connect request was rejected");
 				return false;
-			}
-
-			const [res, commitment] =  await saveProfile(profileType, groupId);
-			if (!res) {
-				alert("User rejected the authentication request.");
+			}	
+			const res = await addDataToOrbis(profileType, did, username, description, reputationalAssetType, reputationalAssetData, profileData);
+			if (res == -1) {
+				alert("Could not add profile data to ceramic. Returning");
 				return false;
 			}
-			else {
-				
-				const res = await addDataToOrbis(profileType, did, username, description, reputationalAssetType, reputationalAssetData, profileData);
-				if (res == -1) {
-					alert("Could not add profile data to ceramic. Returning");
-					return false;
-				}
-				const zkProofTx = await getZkProof(profileType, groupId);
-				if (zkProofTx !== "") {
-					console.log("Reputation ownership proved");
-					const res = await createOrbisPost(zkProofTx,profileType);
-					console.log(res);
-					return true;
-				}
-				else {
-					alert("Reputation invalid" );
-					return false;
-				}
+			const orbisPost = await createOrbisPost(profileType);
+			console.log(orbisPost);
+			return true;
 			}
-		}
-	}
+		
+	
 
 	//TODO: The above function has overlaps with the following two functions, need to cleanup
 	export const createProfileTwitterPopup = async (profileType: string, 
@@ -235,60 +204,37 @@ import {
 											reputationalAssetData: string[],
 											profileData: string): Promise<Boolean> => {
 													
-		const isStored =  await checkIfProfileSaved(profileType);
-		if (isStored) {
-			console.log("Your profile has already been linked. Nothing more to do :) ");
-			return true;
-		}
-		else {
+			//TODO: We should only push the social data when it is not already pushed
 			const did = await orbisConnect();
 			if (did == "") {
 				console.log("Orbis connect request was rejected");
 				return false;
 			}
-
-			const [res, commitment] =  await saveProfile(profileType, groupId);
-			if (!res) {
-				console.log("User rejected the authentication request.");
+			const res = await addDataToOrbis(profileType, did, username, description, reputationalAssetType, reputationalAssetData, profileData);
+			if (res == -1) {
+				console.log("Could not add profile data to ceramic. Returning");
 				return false;
 			}
 			else {
-				
-				const res = await addDataToOrbis(profileType, did, username, description, reputationalAssetType, reputationalAssetData, profileData);
-				if (res == -1) {
-					console.log("Could not add profile data to ceramic. Returning");
-					return false;
-				}
-				else {
-					console.log("Profile created");
-					return true;
-				}
+				console.log("Profile created");
+				return true;
 			}
 		}
-	}
 
 
 	
 		export const createZKProofTwitterPopup = async (profileType: string, 
 											groupId: string,
 											): Promise<Boolean> => {
-													
-			const zkProofTx = await getZkProof(profileType, groupId);
-			if (zkProofTx !== "") {
-				console.log("Reputation ownership proved");
-				const did = await orbisConnect();
-				if (did == "") {
-					alert("Orbis connect request was rejected");
-					return false;
-				}
-				const res = await createOrbisPost(zkProofTx,profileType);
-				console.log(res);
-				return true;
-			}
-			else {
-				alert("Reputation invalid" );
+
+			const did = await orbisConnect();
+			if (did == "") {
+				alert("Orbis connect request was rejected");
 				return false;
 			}
+			const res = await createOrbisPost(profileType);
+			console.log(res);
+			return true;
 	}
 
 

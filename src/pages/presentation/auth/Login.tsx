@@ -10,12 +10,10 @@ import Button from '../../../components/bootstrap/Button';
 import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
-import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
-import { defaultSnapOrigin } from '../../../config';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { checkIfProfileSaved, createProfile, AssetType, getProfileData, createProfileTwitterPopup, createZKProofTwitterPopup, ProfileData } from '../../../utils/orbis';
+import { createProfile, AssetType, getProfileData, createProfileTwitterPopup, createZKProofTwitterPopup, ProfileData } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
@@ -58,7 +56,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { darkModeStatus } = useDarkMode();
 
 	const [isWidget, setIsWidget] = useState(false);  
-	const [signInPassword, setSignInPassword] = useState<boolean>(false);
+	const [showLoginScreen, setShowLoginScreen] = useState<boolean>(true);
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
 	
 	const navigate = useNavigate();
@@ -66,9 +64,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	// metamask hooks
 	const [state, dispatch] = useContext(MetaMaskContext);
-	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
-	? state.isFlask
-	: state.snapsDetected;
 
 	// social logins connection hooks
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
@@ -78,25 +73,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isTwitterSelected, setIsTwitterSelected] = useState<Boolean>(false);
 	const { showLoading, hideLoading } = useContext(LoadingContext);
 
-
-	// wagmi connectors and disconnectors
-	const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
-	const { address, connector, isConnected } = useAccount();
-	const { disconnect } = useDisconnect()
-
-	const [renderBlocker, setRenderBlocker] = useState(false);
-
-	const handleSnapConnect = async () => {
+	const handleMetamaskConnect = async () => {
 		
 		try {	
-		  await connectSnap();
-		  const installedSnap = await getSnap();
-		  dispatch({
-			type: MetamaskActions.SetInstalled,
-			payload: installedSnap,
-		  });
 		  if (setUser) setUser("user");
-		  console.log(state.installedSnap);
 		  const res = await ensureMetamaskConnection();
 
 		  const params = new URLSearchParams(window.location.search)
@@ -109,17 +89,20 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  }
 		  else
 		  	throw new Error("Something went wrong while parsing the isWidget parameter");
+		  setShowLoginScreen(false);
 		} catch (e: any) {
 		  console.error(e);
-		  if (e.message == "Fetching local snaps is disabled.") {
-			alert("Please install flask which is the development version of Metamask from here: https://metamask.io/flask/");
-		  }
-		  else {
-			alert("Snap installation failed, please make sure you are using Metamask Flask (can be downloaded from https://metamask.io/flask/) and try again");
-		  }
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
 		}
 	  };
+
+
+	// wagmi connectors and disconnectors
+	const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
+	const { address, connector, isConnected } = useAccount();
+	const { disconnect } = useDisconnect()
+
+	const [renderBlocker, setRenderBlocker] = useState(false);
 
 	const responseFacebook = async (response: any) => {
 		console.log(response);
@@ -164,39 +147,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			}
 		}
 	};	
-	
-	const checkConnectProfilesOnPageLoad = async () => {
-		if (isMetaMaskReady && state.installedSnap) {
-			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
-			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!);
-			await ensureMetamaskConnection();
-			const urlParams = new URLSearchParams(window.location.search);
-			const originURL = urlParams.get('origin');
-			if (twitter == true && isTwitterSelected)  { 
-				showLoading();
-				setTwitterConnected(twitter); 
-				getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(profileDataObj => {
-					console.log(profileDataObj);
-					if (profileDataObj) {
-						window.opener?.postMessage(profileDataObj, originURL);
-						window.close();
-					}
-				});
-			}
-			if (facebook == true && isFacebookSelected) { 
-				showLoading();
-				setFacebookConnected(facebook);
-				getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(profileDataObj => {
-					console.log(profileDataObj);
-					if (profileDataObj) {
-						window.opener?.postMessage(profileDataObj, originURL);
-						window.close();
-					}
-				});
-			
-			}
-		}
-	}
 
 	const ensureMetamaskConnection = async (): Promise<Boolean> => {
 		console.log("Ensure metamask connection called");
@@ -300,7 +250,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			    }
 				setCallingDApp(dAppName);
 				setIsWidget(true);
-				checkConnectProfilesOnPageLoad().catch(console.error);
 			}
 		}
 		else {
@@ -314,7 +263,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
-		if (idPlatform == "twitter" && state.installedSnap && !renderBlocker) {
+		if (idPlatform == "twitter" && !renderBlocker) {
 			setRenderBlocker(true);
 			const params = new URLSearchParams(window.location.search);
 			const username = params.get('username')!;
@@ -382,10 +331,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								
 								</div>
 
-
-									{/* BEGIN :: Snap install */}
-
-									{!signInPassword && (!isMetaMaskReady || !state.installedSnap) && (
+									{showLoginScreen && (
 										<>
 											<LoginHeader isSnap={true} callingDApp={callingDApp}/>
 
@@ -399,7 +345,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-dark': darkModeStatus,
 													})}
 													icon='CustomMetamask'
-													onClick={handleSnapConnect}>
+													onClick={handleMetamaskConnect}>
 													Sign in with MetaMask
 												</Button>
 											</div>
@@ -424,9 +370,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										</>
 
 									)}
-									{/* END :: Snap install */}
+
 									{/* BEGIN :: Social Login */}
-									{isMetaMaskReady && state.installedSnap && isWidget && isConnected &&(
+									{!showLoginScreen && isWidget && isConnected &&(
 										<>
 										<LoginHeader isSnap={false} callingDApp={callingDApp} />
 
