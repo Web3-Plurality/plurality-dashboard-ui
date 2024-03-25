@@ -23,11 +23,11 @@ import PLogo from '../../../assets/img/logo-no-bg.png';
 
 
 interface ILoginHeaderProps {
-	isSnap?: boolean;
+	isMetamaskConnected?: boolean;
 	callingDApp?: String;
 }
-const LoginHeader: FC<ILoginHeaderProps> = ({ isSnap, callingDApp }) => {
-	if (isSnap) {
+const LoginHeader: FC<ILoginHeaderProps> = ({ isMetamaskConnected, callingDApp }) => {
+	if (!isMetamaskConnected) {
 		return (
 			<>
 			<div className='text-center h1 fw-bold mt-5'>Plurality Connect</div>
@@ -44,7 +44,7 @@ const LoginHeader: FC<ILoginHeaderProps> = ({ isSnap, callingDApp }) => {
 	);
 };
 LoginHeader.defaultProps = {
-	isSnap: true,
+	isMetamaskConnected: false,
 	callingDApp: "http://some-dapp.com"
 };
 
@@ -74,7 +74,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { showLoading, hideLoading } = useContext(LoadingContext);
 
 	const handleMetamaskConnect = async () => {
-		
 		try {	
 		  if (setUser) setUser("user");
 		  const res = await ensureMetamaskConnection();
@@ -331,10 +330,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								
 								</div>
 
+									{/* BEGIN :: Metamask Login or Google Login */}
 									{showLoginScreen && (
 										<>
-											<LoginHeader isSnap={true} callingDApp={callingDApp}/>
-
+											<LoginHeader isMetamaskConnected={false} callingDApp={callingDApp}/>
 											<form className='row g-4'>
 											<div className='col-12 mt-3'>
 												<Button
@@ -368,13 +367,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											</div>
 											</form>
 										</>
-
+										
 									)}
+									{/* END :: Metamask Login or Google Login */}
 
 									{/* BEGIN :: Social Login */}
 									{!showLoginScreen && isWidget && isConnected &&(
 										<>
-										<LoginHeader isSnap={false} callingDApp={callingDApp} />
+										<LoginHeader isMetamaskConnected={true} callingDApp={callingDApp} />
 
 											<form className='row g-4'>
 											{isTwitterSelected && (<div className='col-12 mt-3'>
