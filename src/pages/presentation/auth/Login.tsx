@@ -56,7 +56,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { darkModeStatus } = useDarkMode();
 
 	const [isWidget, setIsWidget] = useState(false);  
-	const [showLoginScreen, setShowLoginScreen] = useState<boolean>(true);
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
 	
 	const navigate = useNavigate();
@@ -88,7 +87,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  }
 		  else
 		  	throw new Error("Something went wrong while parsing the isWidget parameter");
-		  setShowLoginScreen(false);
+		  setIsMetamaskConnected(true)
+		  localStorage.setItem('is_metamask_connected', "true");
 		} catch (e: any) {
 		  console.error(e);
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -102,6 +102,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { disconnect } = useDisconnect()
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
+	const [isMetamaskConnected, setIsMetamaskConnected] = useState(localStorage.getItem('is_metamask_connected')==="true"? true : false);
 
 	const responseFacebook = async (response: any) => {
 		console.log(response);
@@ -331,7 +332,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</div>
 
 									{/* BEGIN :: Metamask Login or Google Login */}
-									{showLoginScreen && (
+									{!isMetamaskConnected && (
 										<>
 											<LoginHeader isMetamaskConnected={false} callingDApp={callingDApp}/>
 											<form className='row g-4'>
@@ -372,7 +373,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									{/* END :: Metamask Login or Google Login */}
 
 									{/* BEGIN :: Social Login */}
-									{!showLoginScreen && isWidget && isConnected &&(
+									{isMetamaskConnected && isWidget &&(
 										<>
 										<LoginHeader isMetamaskConnected={true} callingDApp={callingDApp} />
 
