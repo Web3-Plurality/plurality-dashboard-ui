@@ -177,7 +177,7 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 												profileData: string): Promise<Boolean> => {
 													
 
-			//TODO: We should only push the social data when it is not already pushed
+			//TODO: We should only push the social data when it is not already pushed => controll this logic in actual usage instead of here??
 			const did = await orbisConnect();
 			if (did == "") {
 				alert("Orbis connect request was rejected");

@@ -106,9 +106,22 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const responseFacebook = async (response: any) => {
 		console.log(response);
+		
 		if (response.accessToken) {
 			showLoading();
-			console.log(response);
+			const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
+			// If we already get the profile data obj, we just use it
+			if(profileDataObj) {
+				setFacebookConnected(true);
+				const params = new URLSearchParams(window.location.search)
+					const origin = params.get('origin')!;
+					window.opener?.postMessage(profileDataObj, origin);
+					// block the user for 1s lol
+					wait(1000).then(res=>{
+						window.close();
+					}).catch(console.error);
+			} else {
+			// Otherwise we try to get the profile data
 			const interests = getFacebookInterests(response);
 			const username = response.name;
 			const description = 'some description';
@@ -144,6 +157,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			catch (error) {
 				console.log(error);
 				hideLoading();
+			}
 			}
 		}
 	};	
