@@ -218,26 +218,66 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		while (!isTwitterConnected) {
 			showLoading();
 			console.log("Twitter not yet connected, so waiting");
-			const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+			let profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 			if (profileDataObj) {
-				childWindow!.close();
-				const res = await createZKProofTwitterPopup(process.env.REACT_APP_TWITTER!, process.env.REACT_APP_TWITTER_GROUP_ID!);
-				if (res) {
-					console.log("Added twitter verification post to orbis");
-					window.opener?.postMessage(profileDataObj, origin);
-					setTwitterConnected(true);
-					await wait(5000);
-					window.close();
-				}
-				else {
-					console.log("Could not add twitter verification post to orbis");	
-					window.close();								
-				}
+				childWindow!.close();		
 			}
 			else {
-				console.log("waiting");
-				await wait(5000);
+				const params = new URLSearchParams(window.location.search);
+				if (!renderBlocker) {
+					setRenderBlocker(true);
+					const params = new URLSearchParams(window.location.search);
+					const username = params.get('username')!;
+					const displayName = params.get('display_name')!;
+					const profileUrl = params.get('picture_url')!;
+
+					const description = 'some description';
+					const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
+					showLoading();
+					createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
+								process.env.REACT_APP_TWITTER_GROUP_ID!,
+								username,
+								description,
+								AssetType.INTEREST,
+								getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
+									if (isProfileCreated) {
+										// Add condition for making sure that the user has indeed connected
+										//setTwitterConnected(true);
+										console.log("Twitter is successfully connected");
+										wait(5000).then(res=>{
+											window.close();
+										}).catch(console.error);
+									}
+									else 
+										console.log("Profile could not be created. Please try again");
+									
+								}).catch(error => {
+									console.log(error);
+									hideLoading();
+									//window.close();
+								})
+				}
+				// console.log("waiting");
+				// await wait(5000);
 			}
+			// Then we make an orbis post -> can be removed
+			const res = await createZKProofTwitterPopup(process.env.REACT_APP_TWITTER!, process.env.REACT_APP_TWITTER_GROUP_ID!);
+			if (res) {
+				console.log("Added twitter verification post to orbis");
+				// if still no profile data
+				if(!profileDataObj) {
+					profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+				}
+				window.opener?.postMessage(profileDataObj, origin);
+				setTwitterConnected(true);
+				await wait(5000);
+				window.close();
+			}
+			else {
+				console.log("Could not add twitter verification post to orbis");	
+				window.close();								
+			}
+
 		}
 
 	  };
@@ -254,7 +294,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				navigate(`/?isWidget=false`);
 			}
 			else{
-                for(let app of apps.split(",")) {
+                for(let app of apps?.split(",")) {
 				    if(app === "twitter"){
 					    setIsTwitterSelected(true)
 				    }
@@ -273,44 +313,44 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 
-	useEffect(() => {
+	// useEffect(() => {
 
-		const params = new URLSearchParams(window.location.search);
-		const idPlatform = params.get('id_platform')!;
-		if (idPlatform == "twitter" && !renderBlocker) {
-			setRenderBlocker(true);
-			const params = new URLSearchParams(window.location.search);
-			const username = params.get('username')!;
-			const displayName = params.get('display_name')!;
-			const profileUrl = params.get('picture_url')!;
+	// 	const params = new URLSearchParams(window.location.search);
+	// 	const idPlatform = params.get('id_platform')!;
+	// 	if (idPlatform == "twitter" && !renderBlocker) {
+	// 		setRenderBlocker(true);
+	// 		const params = new URLSearchParams(window.location.search);
+	// 		const username = params.get('username')!;
+	// 		const displayName = params.get('display_name')!;
+	// 		const profileUrl = params.get('picture_url')!;
 
-			const description = 'some description';
-			const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
-			showLoading();
-			createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
-						process.env.REACT_APP_TWITTER_GROUP_ID!,
-						username,
-						description,
-						AssetType.INTEREST,
-						getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
-							if (isProfileCreated) {
-								// Add condition for making sure that the user has indeed connected
-								//setTwitterConnected(true);
-								console.log("Twitter is successfully connected");
-								wait(5000).then(res=>{
-									window.close();
-								}).catch(console.error);
-							}
-							else 
-								console.log("Profile could not be created. Please try again");
+	// 		const description = 'some description';
+	// 		const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
+	// 		showLoading();
+	// 		createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
+	// 					process.env.REACT_APP_TWITTER_GROUP_ID!,
+	// 					username,
+	// 					description,
+	// 					AssetType.INTEREST,
+	// 					getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
+	// 						if (isProfileCreated) {
+	// 							// Add condition for making sure that the user has indeed connected
+	// 							//setTwitterConnected(true);
+	// 							console.log("Twitter is successfully connected");
+	// 							wait(5000).then(res=>{
+	// 								window.close();
+	// 							}).catch(console.error);
+	// 						}
+	// 						else 
+	// 							console.log("Profile could not be created. Please try again");
 							
-						}).catch(error => {
-							console.log(error);
-							hideLoading();
-							//window.close();
-						})
-		}
-	}, [state])
+	// 					}).catch(error => {
+	// 						console.log(error);
+	// 						hideLoading();
+	// 						//window.close();
+	// 					})
+	// 	}
+	// }, [state])
 
 	return (
 		<PageWrapper
