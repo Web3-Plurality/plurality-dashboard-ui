@@ -219,23 +219,4 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 				console.log("Profile created");
 				return true;
 			}
-		}
-
-
-	
-		export const createZKProofTwitterPopup = async (profileType: string, 
-											groupId: string,
-											): Promise<Boolean> => {
-
-			const did = await orbisConnect();
-			if (did == "") {
-				alert("Orbis connect request was rejected");
-				return false;
-			}
-			const res = await createOrbisPost(profileType);
-			console.log(res);
-			return true;
-	}
-
-
-	
+		}	

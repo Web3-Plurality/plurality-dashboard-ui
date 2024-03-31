@@ -13,7 +13,7 @@ import AuthContext from '../../../contexts/authContext';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { createProfile, AssetType, getProfileData, createProfileTwitterPopup, createZKProofTwitterPopup, ProfileData } from '../../../utils/orbis';
+import { createProfile, AssetType, getProfileData, createProfileTwitterPopup, ProfileData } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
@@ -192,7 +192,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?apps=${apps}&isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
 		//TODO: Change it back
 		//const apiUrl = "http://localhost:3000/auth-pages/login?isWidget=true&origin=http://localhost:3001/&id_platform=twitter&username=hirasiddiqui199&display_name=HiraSiddiqui&picture_url=https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"; // Replace with your Twitter API endpoint
-	
+
 		// Define the dimensions for the popup window
 		const popupWidth = 450;
 		const popupHeight = 600;
@@ -218,68 +218,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		while (!isTwitterConnected) {
 			showLoading();
 			console.log("Twitter not yet connected, so waiting");
-			let profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+			const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 			if (profileDataObj) {
-				childWindow!.close();		
-			}
-			else {
-				const params = new URLSearchParams(window.location.search);
-				if (!renderBlocker) {
-					setRenderBlocker(true);
-					const params = new URLSearchParams(window.location.search);
-					const username = params.get('username')!;
-					const displayName = params.get('display_name')!;
-					const profileUrl = params.get('picture_url')!;
-
-					const description = 'some description';
-					const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
-					showLoading();
-					createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
-								process.env.REACT_APP_TWITTER_GROUP_ID!,
-								username,
-								description,
-								AssetType.INTEREST,
-								getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
-									if (isProfileCreated) {
-										// Add condition for making sure that the user has indeed connected
-										//setTwitterConnected(true);
-										console.log("Twitter is successfully connected");
-										wait(5000).then(res=>{
-											window.close();
-										}).catch(console.error);
-									}
-									else 
-										console.log("Profile could not be created. Please try again");
-									
-								}).catch(error => {
-									console.log(error);
-									hideLoading();
-									//window.close();
-								})
-				}
-				// console.log("waiting");
-				// await wait(5000);
-			}
-			// Then we make an orbis post -> can be removed
-			const res = await createZKProofTwitterPopup(process.env.REACT_APP_TWITTER!, process.env.REACT_APP_TWITTER_GROUP_ID!);
-			if (res) {
-				console.log("Added twitter verification post to orbis");
-				// if still no profile data
-				if(!profileDataObj) {
-					profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
-				}
+				childWindow!.close();
 				window.opener?.postMessage(profileDataObj, origin);
 				setTwitterConnected(true);
-				await wait(5000);
 				window.close();
 			}
 			else {
-				console.log("Could not add twitter verification post to orbis");	
-				window.close();								
+				console.log("waiting");
+				await wait(5000);
 			}
-
 		}
-
 	  };
 	 
 	useEffect(() => {
@@ -294,16 +244,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				navigate(`/?isWidget=false`);
 			}
 			else{
-                for(let app of apps?.split(",")) {
-				    if(app === "twitter"){
-					    setIsTwitterSelected(true)
-				    }
-				    if(app === "facebook"){
-					    setIsFacebookSelected(true)
-                    }
-			    }
-				setCallingDApp(dAppName);
-				setIsWidget(true);
+				if (apps?.split(",")) {
+					for(let app of apps?.split(",")) {
+						if(app === "twitter"){
+							setIsTwitterSelected(true)
+						}
+						if(app === "facebook"){
+							setIsFacebookSelected(true)
+						}
+					}
+					setCallingDApp(dAppName);
+					setIsWidget(true);
+				}
 			}
 		}
 		else {
@@ -313,44 +265,43 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 
-	// useEffect(() => {
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		const idPlatform = params.get('id_platform')!;
+		if (idPlatform == "twitter" && !renderBlocker) {
+			setRenderBlocker(true);
+			const params = new URLSearchParams(window.location.search);
+			const username = params.get('username')!;
+			const displayName = params.get('display_name')!;
+			const profileUrl = params.get('picture_url')!;
 
-	// 	const params = new URLSearchParams(window.location.search);
-	// 	const idPlatform = params.get('id_platform')!;
-	// 	if (idPlatform == "twitter" && !renderBlocker) {
-	// 		setRenderBlocker(true);
-	// 		const params = new URLSearchParams(window.location.search);
-	// 		const username = params.get('username')!;
-	// 		const displayName = params.get('display_name')!;
-	// 		const profileUrl = params.get('picture_url')!;
-
-	// 		const description = 'some description';
-	// 		const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
-	// 		showLoading();
-	// 		createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
-	// 					process.env.REACT_APP_TWITTER_GROUP_ID!,
-	// 					username,
-	// 					description,
-	// 					AssetType.INTEREST,
-	// 					getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
-	// 						if (isProfileCreated) {
-	// 							// Add condition for making sure that the user has indeed connected
-	// 							//setTwitterConnected(true);
-	// 							console.log("Twitter is successfully connected");
-	// 							wait(5000).then(res=>{
-	// 								window.close();
-	// 							}).catch(console.error);
-	// 						}
-	// 						else 
-	// 							console.log("Profile could not be created. Please try again");
+			const description = 'some description';
+			const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
+			showLoading();
+			createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
+						process.env.REACT_APP_TWITTER_GROUP_ID!,
+						username,
+						description,
+						AssetType.INTEREST,
+						getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
+							if (isProfileCreated) {
+								// Add condition for making sure that the user has indeed connected
+								//setTwitterConnected(true);
+								console.log("Twitter is successfully connected");
+								wait(5000).then(res=>{
+									window.close();
+								}).catch(console.error);
+							}
+							else 
+								console.log("Profile could not be created. Please try again");
 							
-	// 					}).catch(error => {
-	// 						console.log(error);
-	// 						hideLoading();
-	// 						//window.close();
-	// 					})
-	// 	}
-	// }, [state])
+						}).catch(error => {
+							console.log(error);
+							hideLoading();
+							//window.close();
+						})
+		}
+	}, [state])
 
 	return (
 		<PageWrapper
