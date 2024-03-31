@@ -75,7 +75,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const handleMetamaskConnect = async () => {
 		try {	
 		  if (setUser) setUser("user");
-		  const res = await ensureMetamaskConnection();
+		  //TODO need to find a way of how to selectivly connect
+		  await ensureMetamaskConnection();
 
 		  const params = new URLSearchParams(window.location.search)
 		  const isWidget = params.get('isWidget')!;
@@ -88,7 +89,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  else
 		  	throw new Error("Something went wrong while parsing the isWidget parameter");
 		  setIsMetamaskConnected(true)
-		  localStorage.setItem('is_metamask_connected', "true");
 		} catch (e: any) {
 		  console.error(e);
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -102,7 +102,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { disconnect } = useDisconnect()
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
-	const [isMetamaskConnected, setIsMetamaskConnected] = useState(localStorage.getItem('is_metamask_connected')==="true"? true : false);
+	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false)
 
 	const responseFacebook = async (response: any) => {
 		console.log(response);
@@ -210,10 +210,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		console.log("Child window: ");
 		console.log(childWindow);
 
-		ensureMetamaskConnection().then(res=> {
-			if (res) console.log("address connected");
-			else console.log("Address not connected");
-		});
+		await ensureMetamaskConnection()
 
 		while (!isTwitterConnected) {
 			showLoading();
