@@ -217,6 +217,27 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			}
 		}
 	  };
+
+	  const checkConnectProfilesOnPageLoad = async () => {
+			showLoading();
+			await ensureMetamaskConnection();
+			const twitterProfileData = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+			console.log("twitter profile data", twitterProfileData)
+			const facebookProfileData = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
+			console.log("facebook profile data", facebookProfileData)
+			const urlParams = new URLSearchParams(window.location.search);
+			const originURL = urlParams.get('origin');
+			if (twitterProfileData !== undefined)  { 	
+				setTwitterConnected(true); 
+				window.opener?.postMessage(twitterProfileData, originURL);
+				window.close();
+			}
+			if (facebookProfileData !== undefined) { 
+				setFacebookConnected(true);
+				window.opener?.postMessage(facebookProfileData, originURL);
+				window.close();
+			}
+	}
 	 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
@@ -241,6 +262,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					}
 					setCallingDApp(dAppName);
 					setIsWidget(true);
+					checkConnectProfilesOnPageLoad();
 				}
 			}
 		}
@@ -248,6 +270,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			navigate(`/?isWidget=false`);
 		} 
 	}, [state])
+
+	useEffect(() => {
+		checkConnectProfilesOnPageLoad(); 
+	}, [])
 
 	const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 
@@ -323,7 +349,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</div>
 
 									{/* BEGIN :: Metamask Login or Google Login */}
-									{!isMetamaskConnected && (
+									{!address && (
 										<>
 											<LoginHeader isMetamaskConnected={false} callingDApp={callingDApp}/>
 											<form className='row g-4'>
