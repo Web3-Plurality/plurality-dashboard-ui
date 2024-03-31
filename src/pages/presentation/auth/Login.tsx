@@ -72,6 +72,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isTwitterSelected, setIsTwitterSelected] = useState<Boolean>(false);
 	const { showLoading, hideLoading } = useContext(LoadingContext);
 
+	// wagmi connectors and disconnectors
+	const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
+	const { address, connector, isConnected } = useAccount();
+	const { disconnect } = useDisconnect()
+
+	const [renderBlocker, setRenderBlocker] = useState(false);
+	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
+
 	const handleMetamaskConnect = async () => {
 		try {	
 		  if (setUser) setUser("user");
@@ -94,15 +102,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
 		}
 	  };
-
-
-	// wagmi connectors and disconnectors
-	const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
-	const { address, connector, isConnected } = useAccount();
-	const { disconnect } = useDisconnect()
-
-	const [renderBlocker, setRenderBlocker] = useState(false);
-	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false)
 
 	const responseFacebook = async (response: any) => {
 		console.log(response);
@@ -172,16 +171,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			}
 		}
 		return true;
-		//todo: check how to handle this - social already conected (commitments in snap), but metamask not connected
-		/*const wait = () => new Promise(resolve => setTimeout(resolve, 1000));
-		while (!address) {
-			if (address)
-				return true;
-			else 
-				await wait();
-		}
-		return false;*/
-
 	}
 
 	const openTwitterOAuthPopup = async () => {
