@@ -149,6 +149,20 @@ const ProductsGridPage = () => {
 	// }, [state])
 
 	useEffect(() => {
+		checkConnectProfilesOnPageLoad(); 
+	}, [])
+
+	const checkConnectProfilesOnPageLoad = async () => {
+		showLoading();
+		const twitterProfileData = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+		if (twitterProfileData) setTwitterConnected(true)
+		const facebookProfileData = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
+		if (facebookProfileData) setFacebookConnected(true)
+		hideLoading();
+}
+
+	//TODO verify what this useEffect is used for??
+	useEffect(() => {
 		if ( !isTwitterConnected ) {  
 			const params = new URLSearchParams(window.location.search)
 			const idPlatform = params.get('id_platform')!;
