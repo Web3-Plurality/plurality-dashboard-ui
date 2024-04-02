@@ -168,7 +168,7 @@ const ProductsGridPage = () => {
 		if ( !isTwitterConnected ) {  
 			const params = new URLSearchParams(window.location.search)
 			const idPlatform = params.get('id_platform')!;
-			if (idPlatform == "twitter" && state.installedSnap) { 
+			if (idPlatform == "twitter") { 
 				showLoading();
 				const params = new URLSearchParams(window.location.search);
 				const username = params.get('username')!;
