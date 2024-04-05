@@ -142,8 +142,12 @@ const ProductsGridPage = () => {
 	// 	checkConnectProfilesOnPageLoad().catch(console.error);
 	// }, [state])
 
-		useEffect(() => {
-		checkConnectProfilesOnPageLoad(); 
+	useEffect(() => {
+		if (address) {
+			checkConnectProfilesOnPageLoad(); 
+		} else {
+			navigate(`/auth-pages/login?isWidget=false`);
+		}
 	}, [address])
 
 	const checkConnectProfilesOnPageLoad = async () => {

@@ -85,18 +85,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		  if (setUser) setUser("user");
 		  //TODO need to find a way of how to selectivly connect
 		  await ensureMetamaskConnection();
-
-		  const params = new URLSearchParams(window.location.search)
-		  const isWidget = params.get('isWidget')!;
-		  if (!isWidget || isWidget == "false")
-		  	navigate(`/?isWidget=false`);
-		  else if (isWidget == "true") {
-		  	// update widget state
-			  setIsWidget(true);
-		  }
-		  else
-		  	throw new Error("Something went wrong while parsing the isWidget parameter");
-		  setIsMetamaskConnected(true)
 		} catch (e: any) {
 		  console.error(e);
 		  dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -311,6 +299,22 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						})
 		}
 	}, [state])
+
+	useEffect(() => {
+		if(address) {
+			const params = new URLSearchParams(window.location.search)
+			const isWidget = params.get('isWidget')!;
+			if (!isWidget || isWidget == "false")
+				navigate(`/?isWidget=false`);
+			else if (isWidget == "true") {
+				// update widget state
+				setIsWidget(true);
+			}
+			else
+				throw new Error("Something went wrong while parsing the isWidget parameter");
+			setIsMetamaskConnected(true)
+		}
+	}, [address])
 
 	return (
 		<PageWrapper
