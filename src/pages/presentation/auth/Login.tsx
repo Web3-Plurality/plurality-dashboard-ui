@@ -113,12 +113,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			if(profileDataObj) {
 				setFacebookConnected(true);
 				const params = new URLSearchParams(window.location.search)
-					const origin = params.get('origin')!;
-					window.opener?.postMessage(profileDataObj, origin);
-					// block the user for 1s lol
-					wait(1000).then(res=>{
-						window.close();
-					}).catch(console.error);
+				const origin = params.get('origin')!;
+				window.opener?.postMessage(profileDataObj, origin);
+				// block the user for 1s lol
+				wait(1000).then(res=>{
+					window.close();
+				}).catch(console.error);
 			} else {
 			// Otherwise we try to get the profile data
 			const interests = getFacebookInterests(response);
@@ -146,7 +146,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					}).catch(console.error);
 					window.close();
 				}
-				//await sendDataToDApp();
 			}
 			else
 				console.log("Profile could not be created. Please try again");
@@ -190,33 +189,57 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const popupLeft = 500;
 		const popupTop = 100;
 
-		// Open the popup window
-		const childWindow = window.open(
-		  apiUrl,
-		  '_blank',
-		  `width=${popupWidth}, height=${popupHeight}, top=${popupTop}, left=${popupLeft}`
-		);
-		console.log("Child window: ");
-		console.log(childWindow);
-
 		await ensureMetamaskConnection()
-
-		while (!isTwitterConnected) {
-			showLoading();
-			console.log("Twitter not yet connected, so waiting");
-			const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
-			if (profileDataObj) {
-				childWindow!.close();
-				window.opener?.postMessage(profileDataObj, origin);
-				setTwitterConnected(true);
-				window.close();
-			}
-			else {
-				console.log("waiting");
-				await wait(5000);
+		
+		// Check if twitter profile already exists at orbis
+		showLoading();
+		const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+		if (profileDataObj) {
+			window.opener?.postMessage(profileDataObj, origin);
+			setTwitterConnected(true);
+			window.close();
+		}
+		else {
+			// Open the popup window
+			const childWindow = window.open(
+				apiUrl,
+				'_blank',
+				`width=${popupWidth}, height=${popupHeight}, top=${popupTop}, left=${popupLeft}`
+			);
+			console.log("Child window: ");
+			console.log(childWindow);
+			// Loop in main window	
+			while (!isTwitterConnected) {
+				console.log("Twitter not yet connected, so waiting");
+				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+				if (profileDataObj) {
+					childWindow!.close();
+					window.opener?.postMessage(profileDataObj, origin);
+					setTwitterConnected(true);
+					window.close();
+				}
+				else {
+					console.log("waiting");
+					await wait(5000);
+				}
 			}
 		}
 	  };
+
+	// Function to call before the Facebook popup
+	const handleBeforeFacebookPopup = async () => {
+		await ensureMetamaskConnection()
+		// Check if twitter profile already exists at orbis
+		showLoading();
+		const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
+		if (profileDataObj) {
+			const params = new URLSearchParams(window.location.search)
+			const origin = params.get('origin')!;
+			window.opener?.postMessage(profileDataObj, origin);
+			setFacebookConnected(true);
+			window.close();
+		}
+	}
 	 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
@@ -244,9 +267,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				}
 			}
 		}
-		else {
-			navigate(`/?isWidget=false`);
-		} 
+		//else {
+		//	navigate(`/?isWidget=false`);
+		//} 
 	}, [state])
 
 	const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
@@ -410,7 +433,17 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 															'border-dark': darkModeStatus,
 														})}
 														icon='CustomFacebook'
-														onClick={renderProps.onClick}
+														onClick={() => {
+															 // Define an async inner function to await handleBeforeFacebookPopup
+															const onClickAsync = async () => {
+																// Check if Facebook is already connected before invoking renderProps.onClick()
+																await handleBeforeFacebookPopup();
+																// Then trigger the Facebook popup
+																renderProps.onClick();
+															};
+															// Call the async inner function
+															onClickAsync();
+														  }}
 														>
 															{!isFacebookConnected && (
 																<>

@@ -16,7 +16,6 @@ import Card, {
 	CardLabel,
 	CardTitle,
 } from '../../../components/bootstrap/Card';
-import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { demoPagesMenu } from '../../../menu';
 import Facebook from '../../../assets/img/abstract/facebook.png';
 import Twitter from '../../../assets/img/abstract/twitter.png';
@@ -95,11 +94,6 @@ const ProductsGridPage = () => {
 	const { address, connector, isConnected } = useAccount()
 	const { showLoading, hideLoading } = useContext(LoadingContext)
 	const navigate = useNavigate();
-
-	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
-	? state.isFlask
-	: state.snapsDetected;
-
 	function handleRemove(id: number) {
 		const newData = data.filter((item) => item.id !== id);
 		setData(newData);
@@ -148,11 +142,18 @@ const ProductsGridPage = () => {
 	// 	checkConnectProfilesOnPageLoad().catch(console.error);
 	// }, [state])
 
-	useEffect(() => {
+		useEffect(() => {
 		checkConnectProfilesOnPageLoad(); 
 	}, [address])
 
 	const checkConnectProfilesOnPageLoad = async () => {
+
+		// Added navigation to the dashboard
+		const params = new URLSearchParams(window.location.search);
+		const widget = params.get('isWidget')!;
+		if ((widget=="false" || !widget) && !address) {
+			navigate(`/auth-pages/login?isWidget=false`);
+		} 
 		if(address) {
 			showLoading();
 			const twitterProfileData = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
@@ -161,7 +162,7 @@ const ProductsGridPage = () => {
 			if (facebookProfileData) setFacebookConnected(true)
 			hideLoading();
 		}
-}
+	}
 
 	//TODO verify what this useEffect is used for??
 	useEffect(() => {
