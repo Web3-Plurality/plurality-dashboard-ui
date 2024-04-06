@@ -215,8 +215,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	  };
 
 	// Function to call before the Facebook popup
-	const handleBeforeFacebookPopup = async () => {
-		await ensureMetamaskConnection()
+	const handleBeforeFacebookPopup = async (rednerPropsOnclick: Function) => {
+		//If metamask is somehow not connected
+		if (!address) {
+			await ensureMetamaskConnection()
+		}
 		// Check if twitter profile already exists at orbis
 		showLoading();
 		const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
@@ -226,6 +229,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			window.opener?.postMessage(profileDataObj, origin);
 			setFacebookConnected(true);
 			window.close();
+		} else {
+			// if there is no profile yet, we connect facebook
+			rednerPropsOnclick();
 		}
 	}
 	 
@@ -440,10 +446,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														onClick={() => {
 															 // Define an async inner function to await handleBeforeFacebookPopup
 															const onClickAsync = async () => {
-																// Check if Facebook is already connected before invoking renderProps.onClick()
-																await handleBeforeFacebookPopup();
-																// Then trigger the Facebook popup
-																renderProps.onClick();
+																// Let it judge if we need to login facebook
+																await handleBeforeFacebookPopup(renderProps.onClick);
+													
 															};
 															// Call the async inner function
 															onClickAsync();
