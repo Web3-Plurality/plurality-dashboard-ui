@@ -15,6 +15,7 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 	profileData: any,
 	did: string
   }
+  const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 
     /** Calls the Orbis SDK and handles the results */
 	const orbisConnect = async (): Promise<string> => {
@@ -175,48 +176,17 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 												reputationalAssetType: AssetType,
 												reputationalAssetData: string[],
 												profileData: string): Promise<Boolean> => {
-													
-
-			//TODO: We should only push the social data when it is not already pushed => controll this logic in actual usage instead of here??
 			const did = await orbisConnect();
 			if (did == "") {
 				alert("Orbis connect request was rejected");
 				return false;
 			}	
+			// Wait a little bit otherwise Orbis can not add data
+			await wait(5000);
 			const res = await addDataToOrbis(profileType, did, username, description, reputationalAssetType, reputationalAssetData, profileData);
 			if (res == -1) {
 				alert("Could not add profile data to ceramic. Returning");
 				return false;
 			}
-			const orbisPost = await createOrbisPost(profileType);
-			console.log(orbisPost);
 			return true;
 			}
-		
-	
-
-	//TODO: The above function has overlaps with the following two functions, need to cleanup
-	export const createProfileTwitterPopup = async (profileType: string, 
-											groupId: string,
-											username: string,
-											description: string,
-											reputationalAssetType: AssetType,
-											reputationalAssetData: string[],
-											profileData: string): Promise<Boolean> => {
-													
-			//TODO: We should only push the social data when it is not already pushed
-			const did = await orbisConnect();
-			if (did == "") {
-				console.log("Orbis connect request was rejected");
-				return false;
-			}
-			const res = await addDataToOrbis(profileType, did, username, description, reputationalAssetType, reputationalAssetData, profileData);
-			if (res == -1) {
-				console.log("Could not add profile data to ceramic. Returning");
-				return false;
-			}
-			else {
-				console.log("Profile created");
-				return true;
-			}
-		}	

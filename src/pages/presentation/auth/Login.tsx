@@ -13,12 +13,12 @@ import AuthContext from '../../../contexts/authContext';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { createProfile, AssetType, getProfileData, createProfileTwitterPopup, ProfileData } from '../../../utils/orbis';
+import { createProfile, AssetType, getProfileData } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import PLogo from '../../../assets/img/logo-no-bg.png';
+import PLogo from '../../../assets/img/new-logo.png';
 
 
 
@@ -30,15 +30,15 @@ const LoginHeader: FC<ILoginHeaderProps> = ({ isMetamaskConnected, callingDApp }
 	if (!isMetamaskConnected) {
 		return (
 			<>
-			<div className='text-center h1 fw-bold mt-5'>Plurality Connect</div>
+			<div className='text-center h1 fw-bold mt-5'>Social Connect</div>
 			<div className='text-center h4 text-muted mb-5'>Sign in to continue!</div>
 			</>
 		);
 	}
 	return (
 		<>
-			<div className='text-center h1 fw-bold mt-5'>Plurality Connect</div>
-			<div className='text-center h4 text-muted mb-5'>Connect your social profiles to:</div>
+			<div className='text-center h1 fw-bold mt-5'>Social Connect</div>
+			<div className='text-center h4 text-muted mb-5'>Connect your social profiles</div>
 			<div className='text-center h5 text-muted mb-5'>{callingDApp}</div>
 		</>
 	);
@@ -124,7 +124,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								);
 			if (isProfileCreated) {
 				setFacebookConnected(true);
-				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
+				// We can construct the profile data from user login data
+				const profileDataObj = constructProfileData(AssetType.INTEREST, interests, process.env.REACT_APP_FACEBOOK!, JSON.stringify(profile));
 				if (profileDataObj) {
 					const params = new URLSearchParams(window.location.search)
 					const origin = params.get('origin')!;
@@ -147,6 +148,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			}
 		}
 	};	
+
+	const constructProfileData = (assetData: any, assetType: any, dataFetchedFrom: any, profileData: any) => {
+		const profile = {
+			'assetData': assetData,
+			'assetType': assetType,
+			'dataFetchedFrom': dataFetchedFrom,
+			'profileData': profileData
+		}
+		return profile;
+	}
 
 	const ensureMetamaskConnection = async (): Promise<Boolean> => {
 		console.log("Ensure metamask connection called");
@@ -281,7 +292,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const description = 'some description';
 			const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
 			showLoading();
-			createProfileTwitterPopup(process.env.REACT_APP_TWITTER!, 
+			createProfile(process.env.REACT_APP_TWITTER!, 
 						process.env.REACT_APP_TWITTER_GROUP_ID!,
 						username,
 						description,
@@ -333,7 +344,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
 						<Card className='shadow-3d-dark' data-tour='login-page'>
 							<CardBody>
-								<div className='text-center my-5'>
+								<div className='text-center mt-4'>
 									<div
 										className={classNames(
 											'text-decoration-none  fw-bold display-2',
@@ -344,7 +355,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										)}
 										aria-label='Facit'>
 										{/* <Logo width={200}/> */}
-										<img src={PLogo} alt="Logo" style={{height: "100px"}}/>
+										<img src={PLogo} alt="Logo" style={{height: "140px"}}/>
 									</div>
 								</div>
 								<div
