@@ -149,10 +149,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	};	
 
-	const constructProfileData = (assetData: any, assetType: any, dataFetchedFrom: any, profileData: any) => {
+	const constructProfileData = (assetType: any, assetData: any, dataFetchedFrom: any, profileData: any) => {
 		const profile = {
-			'assetData': assetData,
 			'assetType': assetType,
+			'assetData': assetData,
 			'dataFetchedFrom': dataFetchedFrom,
 			'profileData': profileData
 		}
