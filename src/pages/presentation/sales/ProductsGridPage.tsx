@@ -16,7 +16,6 @@ import Card, {
 	CardLabel,
 	CardTitle,
 } from '../../../components/bootstrap/Card';
-import { connectSnap, getSnap, isLocalSnap } from '../../../utils';
 import { demoPagesMenu } from '../../../menu';
 import Facebook from '../../../assets/img/abstract/facebook.png';
 import Twitter from '../../../assets/img/abstract/twitter.png';
@@ -30,7 +29,7 @@ import { getTwitterID } from '../../../utils/oauth';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
-import { checkIfProfileSaved, createProfile, AssetType, getProfileData } from '../../../utils/orbis';
+import { createProfile, AssetType, getProfileData } from '../../../utils/orbis';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { defaultSnapOrigin } from '../../../config';
 import { useAccount } from 'wagmi';
@@ -95,11 +94,6 @@ const ProductsGridPage = () => {
 	const { address, connector, isConnected } = useAccount()
 	const { showLoading, hideLoading } = useContext(LoadingContext)
 	const navigate = useNavigate();
-
-	const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
-	? state.isFlask
-	: state.snapsDetected;
-
 	function handleRemove(id: number) {
 		const newData = data.filter((item) => item.id !== id);
 		setData(newData);
@@ -144,15 +138,42 @@ const ProductsGridPage = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [editItem]);
 
-	useEffect(() => {
-		checkConnectProfilesOnPageLoad().catch(console.error);
-	}, [state])
+	// useEffect(() => {
+	// 	checkConnectProfilesOnPageLoad().catch(console.error);
+	// }, [state])
 
+	useEffect(() => {
+		if (address) {
+			checkConnectProfilesOnPageLoad(); 
+		} else {
+			navigate(`/auth-pages/login?isWidget=false`);
+		}
+	}, [address])
+
+	const checkConnectProfilesOnPageLoad = async () => {
+
+		// Added navigation to the dashboard
+		const params = new URLSearchParams(window.location.search);
+		const widget = params.get('isWidget')!;
+		if ((widget=="false" || !widget) && !address) {
+			navigate(`/auth-pages/login?isWidget=false`);
+		} 
+		if(address) {
+			showLoading();
+			const twitterProfileData = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+			if (twitterProfileData) setTwitterConnected(true)
+			const facebookProfileData = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
+			if (facebookProfileData) setFacebookConnected(true)
+			hideLoading();
+		}
+	}
+
+	//TODO verify what this useEffect is used for??
 	useEffect(() => {
 		if ( !isTwitterConnected ) {  
 			const params = new URLSearchParams(window.location.search)
 			const idPlatform = params.get('id_platform')!;
-			if (idPlatform == "twitter" && state.installedSnap) { 
+			if (idPlatform == "twitter") { 
 				showLoading();
 				const params = new URLSearchParams(window.location.search);
 				const username = params.get('username')!;
@@ -181,20 +202,20 @@ const ProductsGridPage = () => {
 		}
 	  }, [state])
 
-	  const checkConnectProfilesOnPageLoad = async () => {
-		const params = new URLSearchParams(window.location.search)
-		const widget = params.get('isWidget')!;
-		const snap = await getSnap();
-		if ((widget=="false" || !widget) && !snap) {
-			navigate(`/auth-pages/login?isWidget=false`);
-		} 
-		else {
-			const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
-			const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!);
-			setTwitterConnected(twitter);
-			setFacebookConnected(facebook);
-		}
-	}
+	//   const checkConnectProfilesOnPageLoad = async () => {
+	// 	const params = new URLSearchParams(window.location.search)
+	// 	const widget = params.get('isWidget')!;
+	// 	const snap = await getSnap();
+	// 	if ((widget=="false" || !widget) && !snap) {
+	// 		navigate(`/auth-pages/login?isWidget=false`);
+	// 	} 
+	// 	else {
+	// 		const facebook = await checkIfProfileSaved(process.env.REACT_APP_FACEBOOK!);
+	// 		const twitter = await checkIfProfileSaved(process.env.REACT_APP_TWITTER!);
+	// 		setTwitterConnected(twitter);
+	// 		setFacebookConnected(facebook);
+	// 	}
+	// }
 
 	const twitter = async () => {
 		const params = new URLSearchParams(window.location.search)
