@@ -19,6 +19,7 @@ import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import PLogo from '../../../assets/img/new-logo.png';
+import StytchOTP from '../../../components/StytchOTP';
 
 
 
@@ -59,7 +60,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
 	
 	const navigate = useNavigate();
-	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
 
 	// metamask hooks
 	const [state, dispatch] = useContext(MetaMaskContext);
@@ -79,6 +79,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
 	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
+	const [isEmailLogin, setIsEmailLogin] = useState<boolean>(false);
 
 	const handleMetamaskConnect = async () => {
 		try {	
@@ -233,6 +234,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			rednerPropsOnclick();
 		}
 	}
+
+	const handleEmailOnClick = () => {
+		setIsEmailLogin(true)
+	  };
 	 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
@@ -355,7 +360,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</div>
 
 									{/* BEGIN :: Metamask Login or Google Login */}
-									{!address && (
+									{!address && !isEmailLogin && (
 										<>
 											<LoginHeader isMetamaskConnected={false} callingDApp={callingDApp}/>
 											<form className='row g-4'>
@@ -384,19 +389,26 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-dark': darkModeStatus,
 													})}
 													icon='CustomGoogle'
-													onClick={handleOnClick}
-													isDisable>
-													Coming Soon
+													onClick={handleEmailOnClick}
+													>
+													Email
 												</Button>
 											</div>
 											</form>
 										</>
 										
 									)}
+									{
+										isEmailLogin && (
+											<>
+											<StytchOTP/>
+											</>
+									)}
+
 									{/* END :: Metamask Login or Google Login */}
 
 									{/* BEGIN :: Social Login */}
-									{address && isWidget &&(
+									{address && isWidget &&!isEmailLogin &&(
 										<>
 										<LoginHeader isMetamaskConnected={true} callingDApp={callingDApp} />
 

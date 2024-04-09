@@ -64,6 +64,8 @@
 		"@semaphore-protocol/group": "^3.11.1",
 		"@semaphore-protocol/identity": "^3.11.1",
 		"@semaphore-protocol/proof": "^3.11.1",
+		"@stytch/react": "^16.0.0",
+		"@stytch/vanilla-js": "^4.7.7",
 		"@testing-library/jest-dom": "^6.0.0",
 		"@testing-library/react": "^14.0.0",
 		"@testing-library/user-event": "^14.4.3",
