@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { FC, useState } from 'react';
 import { useStytch, useStytchSession, useStytchUser } from '@stytch/react';
+import OtpInput from 'react-otp-input';
 
-type OtpStep = 'submit' | 'verify';
+interface ILoginProps {
+	moveBack: any;
+  sendCode: any;
+  tryAgain: any;
+  step: string;
+}
 
 /**
  * One-time passcodes can be sent via phone number through Stytch
  */
-const StytchOTP = () => {
+const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step }) => {
   const { user } = useStytchUser();
-
-  const [step, setStep] = useState<OtpStep>('submit');
   const [userId, setUserId] = useState<string>('');
   const [methodId, setMethodId] = useState<string>('');
   const [code, setCode] = useState<string>('');
@@ -26,7 +30,7 @@ const StytchOTP = () => {
       let response = await stytchClient.otps.email.loginOrCreate(userId);
       console.log(response);
       setMethodId(response.method_id);
-      setStep('verify');
+      sendCode();
     } catch (err: any) {
       setError(err);
     } finally {
@@ -47,11 +51,6 @@ const StytchOTP = () => {
         alert("Login successful for user with email: " + user?.emails[0].email + ". TODO: save it to your backend database");
         console.log(user);
       }
-
-      /*if (user) {
-        alert("Welcome, "+ user.name);
-      }*/
-
     } catch (err: any) {
       alert("Invalid code entered");
       setError(err);
@@ -59,6 +58,15 @@ const StytchOTP = () => {
       setLoading(false);
     }
   }
+
+  const onMoveBack = () => {
+    moveBack();
+  }
+
+  const onTryAgainClick = () => {
+    tryAgain();
+  }
+  
 
   return (
     <>
@@ -69,9 +77,11 @@ const StytchOTP = () => {
               <p>{error.message}</p>
             </div>
           )}
-          <h1>Enter your email</h1>
+          <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+            <h1>Enter your email</h1>
+          </div>
           <p>A verification code will be sent to your email.</p>
-          <div className="form-wrapper">
+          <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
             <form className="form" onSubmit={sendPasscode}>
               <input
                 id='email'
@@ -91,7 +101,7 @@ const StytchOTP = () => {
                 Send code
               </button>
               <button
-                onClick={() => setStep("submit")}
+                onClick={onMoveBack}
                 className="btn btn--link"
               >
                 Back
@@ -102,28 +112,25 @@ const StytchOTP = () => {
       )}
       {step === 'verify' && (
         <>
-          <h1>Check your email</h1>
-          <p>Enter the 6-digit verification code to {userId}</p>
-          <div className="form-wrapper">
+          <h1 style={{display: "flex", justifyContent: "center", alignItems: "center"}}>Check your email</h1>
+          <p style={{display: "flex", justifyContent: "center", alignItems: "center"}}>Enter the 6-digit verification code to {userId}</p>
+          <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
             <form className="form" onSubmit={authenticate}>
               <label htmlFor="code" className="sr-only">
                 Code
               </label>
-              <input
-                id="code"
+              <OtpInput
                 value={code}
-                onChange={e => setCode(e.target.value)}
-                type="code"
-                name="code"
-                className="form__input"
-                placeholder="Verification code"
-                autoComplete="off"
-              ></input>
+                onChange={setCode}
+                numInputs={6}
+                renderSeparator={<span>-</span>}
+                renderInput={(props) => <input {...props} />}
+              />
               <button type="submit" className="btn btn--primary">
                 Verify
               </button>
               <button
-                onClick={() => setStep('submit')}
+                onClick={onTryAgainClick}
                 className="btn btn--outline"
               >
                 Try again

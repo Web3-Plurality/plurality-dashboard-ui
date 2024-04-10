@@ -7,7 +7,6 @@ import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
 import Button from '../../../components/bootstrap/Button';
-import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
@@ -21,7 +20,7 @@ import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import PLogo from '../../../assets/img/new-logo.png';
 import StytchOTP from '../../../components/StytchOTP';
 
-
+type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit';
 
 interface ILoginHeaderProps {
 	isMetamaskConnected?: boolean;
@@ -73,13 +72,26 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { showLoading, hideLoading } = useContext(LoadingContext);
 
 	// wagmi connectors and disconnectors
-	const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
+	const { connect, connectors } = useConnect();
 	const { address, connector, isConnected } = useAccount();
-	const { disconnect } = useDisconnect()
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
 	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
-	const [isEmailLogin, setIsEmailLogin] = useState<boolean>(false);
+
+	// Stytch
+	const [step, setStep] = useState<OtpStep>("submit");
+	const moveBack = () => {
+		setStep("pre-submit")
+	}
+	const sendCode = () => {
+		setStep("verify")
+	}
+	const tryAgain = () => {
+		setStep("submit")
+	}
+	const handleEmailOnClick = () => {
+		setStep("submit")
+	};
 
 	const handleMetamaskConnect = async () => {
 		try {	
@@ -234,10 +246,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			rednerPropsOnclick();
 		}
 	}
-
-	const handleEmailOnClick = () => {
-		setIsEmailLogin(true)
-	  };
 	 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
@@ -360,7 +368,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</div>
 
 									{/* BEGIN :: Metamask Login or Google Login */}
-									{!address && !isEmailLogin && (
+									{!address && step === "pre-submit" && (
 										<>
 											<LoginHeader isMetamaskConnected={false} callingDApp={callingDApp}/>
 											<form className='row g-4'>
@@ -399,16 +407,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										
 									)}
 									{
-										isEmailLogin && (
+										(step === "submit" || step === "verify") && (
 											<>
-											<StytchOTP/>
+											<StytchOTP step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain}/>
 											</>
 									)}
 
 									{/* END :: Metamask Login or Google Login */}
 
 									{/* BEGIN :: Social Login */}
-									{address && isWidget &&!isEmailLogin &&(
+									{address && isWidget && step === "post-submit" &&(
 										<>
 										<LoginHeader isMetamaskConnected={true} callingDApp={callingDApp} />
 
