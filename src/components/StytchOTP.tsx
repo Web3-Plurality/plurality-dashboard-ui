@@ -1,6 +1,7 @@
 import { FC, useState } from 'react';
 import { useStytch, useStytchSession, useStytchUser } from '@stytch/react';
 import OtpInput from 'react-otp-input';
+import './otpCss.css'
 
 interface ILoginProps {
 	moveBack: any;
@@ -80,29 +81,34 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step }) => {
           <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
             <h1>Enter your email</h1>
           </div>
-          <p>A verification code will be sent to your email.</p>
-          <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-            <form className="form" onSubmit={sendPasscode}>
+          <div className="d-flex align-items-center mt-5 mx-5">
+            <p>A verification code will be sent to your email.</p>
+          </div>
+          <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "10px", marginLeft:"20px"}}>
+            <form className="form" onSubmit={sendPasscode} style={{width: "80%"}}>
               <input
                 id='email'
                 value={userId}
                 onChange={e => setUserId(e.target.value)}
                 type='email'
                 name='email'
-                className="form__input"
+                className="form__input mb-4"
                 placeholder='Your email'
                 autoComplete="off"
+                style={{width: "90%"}}
               ></input>
+              <br />
               <button
                 type="submit"
-                className="btn btn--primary"
+                className="btn btn--primary btn-outline-custom px-4"
                 disabled={loading}
               >
                 Send code
               </button>
               <button
                 onClick={onMoveBack}
-                className="btn btn--link"
+                className="btn btn--link btn-outline-custom px-5"
+                style={{marginLeft: "50px"}}
               >
                 Back
               </button>
@@ -113,28 +119,34 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step }) => {
       {step === 'verify' && (
         <>
           <h1 style={{display: "flex", justifyContent: "center", alignItems: "center"}}>Check your email</h1>
-          <p style={{display: "flex", justifyContent: "center", alignItems: "center"}}>Enter the 6-digit verification code to {userId}</p>
-          <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+          <div className="d-flex align-items-center mt-5 mx-5">
+            <p className="text-center">Enter the 6-digit verification code to {userId}</p>
+          </div>
+          <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "10px"}}>
             <form className="form" onSubmit={authenticate}>
-              <label htmlFor="code" className="sr-only">
-                Code
-              </label>
-              <OtpInput
-                value={code}
-                onChange={setCode}
-                numInputs={6}
-                renderSeparator={<span>-</span>}
-                renderInput={(props) => <input {...props} />}
-              />
-              <button type="submit" className="btn btn--primary">
-                Verify
-              </button>
-              <button
-                onClick={onTryAgainClick}
-                className="btn btn--outline"
-              >
-                Try again
-              </button>
+              <div style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "10px"}}>
+                <OtpInput
+                  value={code}
+                  onChange={setCode}
+                  numInputs={6}
+                  inputStyle={'customInputStyle'}
+                  renderSeparator={<span>-</span>}
+                  renderInput={(props) => <input {...props} 
+                  />}
+                />
+              </div>
+              <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+                <button type="submit" className="btn btn--primary btn-outline-custom px-4">
+                  Verify
+                </button>
+                <button
+                  onClick={onTryAgainClick}
+                  style={{marginLeft: "80px"}}
+                  className="btn btn--link btn-outline-custom px-3"
+                >
+                  Try again
+                </button>
+              </div>
             </form>
           </div>
         </>
