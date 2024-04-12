@@ -61,10 +61,12 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step }) => {
   }
 
   const onMoveBack = () => {
+    setUserId('')
     moveBack();
   }
 
   const onTryAgainClick = () => {
+    setCode('')
     tryAgain();
   }
   

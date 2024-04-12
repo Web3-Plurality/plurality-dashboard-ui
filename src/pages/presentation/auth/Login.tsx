@@ -79,7 +79,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
 
 	// Stytch
-	const [step, setStep] = useState<OtpStep>("submit");
+	const [step, setStep] = useState<OtpStep>("pre-submit");
 	const moveBack = () => {
 		setStep("pre-submit")
 	}
@@ -334,6 +334,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [address])
 
+	useEffect(() => {
+		if(address) {
+			setStep("submit");
+		}
+	}, [address])
+
 	return (
 		<PageWrapper
 			isProtected={false}
@@ -368,10 +374,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</div>
 
 									{/* BEGIN :: Metamask Login or Google Login */}
+									{step === "pre-submit" && (
+									<LoginHeader isMetamaskConnected={false} callingDApp={callingDApp}/>)}
 									{!address && step === "pre-submit" && (
 										<>
-											<LoginHeader isMetamaskConnected={false} callingDApp={callingDApp}/>
-											<form className='row g-4'>
+											{/* <div className='row g-4'> */}
 											<div className='col-12 mt-3'>
 												<Button
 													isOutline
@@ -388,6 +395,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											<div className='col-12 mt-3 text-center text-muted'>
 												OR
 											</div>
+										</>	
+										)}
+										{step === "pre-submit" && (
+										<>
 											<div className='col-12'>
 												<Button
 													isOutline
@@ -402,7 +413,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													Email
 												</Button>
 											</div>
-											</form>
+											{/* </div> */}
 										</>
 										
 									)}
