@@ -2,6 +2,7 @@ import { FC, useState } from 'react';
 import { useStytch, useStytchSession, useStytchUser } from '@stytch/react';
 import OtpInput from 'react-otp-input';
 import './otpCss.css'
+import axios from 'axios';
 
 interface ILoginProps {
 	moveBack: any;
@@ -51,6 +52,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step }) => {
       if (response.status_code == 200 && response.session_jwt) {
         alert("Login successful for user with email: " + user?.emails[0].email + ". TODO: save it to your backend database");
         console.log(user);
+        registerInBackend(response);
       }
     } catch (err: any) {
       alert("Invalid code entered");
@@ -70,6 +72,18 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step }) => {
     tryAgain();
   }
   
+  const registerInBackend = (response: any) => {
+    const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch'
+    axios.post(apiUrl, {
+      data: response
+    })
+    .then(function (response) {
+      console.log(response);
+    })
+    .catch(function (error) {
+      console.log(error);
+    })
+  }
 
   return (
     <>
