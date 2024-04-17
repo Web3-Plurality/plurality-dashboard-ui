@@ -9,12 +9,13 @@ interface ILoginProps {
   sendCode: any;
   tryAgain: any;
   step: string;
+  address: any;
 }
 
 /**
  * One-time passcodes can be sent via phone number through Stytch
  */
-const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step }) => {
+const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step, address }) => {
   const { user } = useStytchUser();
   const [userId, setUserId] = useState<string>('');
   const [methodId, setMethodId] = useState<string>('');
@@ -50,9 +51,8 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step }) => {
       });
       console.log(response);
       if (response.status_code == 200 && response.session_jwt) {
-        alert("Login successful for user with email: " + user?.emails[0].email + ". TODO: save it to your backend database");
-        console.log(user);
-        registerInBackend(response);
+        alert("Login successful for user with email: " + response?.user?.emails[0].email + ". TODO: save it to your backend database");
+        registerInBackend({email: response?.user?.emails[0].email, address: address});
       }
     } catch (err: any) {
       alert("Invalid code entered");
@@ -72,10 +72,10 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step }) => {
     tryAgain();
   }
   
-  const registerInBackend = (response: any) => {
+  const registerInBackend = (requestBody: any) => {
     const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch'
     axios.post(apiUrl, {
-      data: response
+      data: requestBody
     })
     .then(function (response) {
       console.log(response);

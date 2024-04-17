@@ -420,7 +420,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									{
 										(step === "submit" || step === "verify") && (
 											<>
-											<StytchOTP step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain}/>
+											<StytchOTP step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address}/>
 											</>
 									)}
 
