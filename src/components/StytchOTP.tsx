@@ -8,6 +8,7 @@ interface ILoginProps {
 	moveBack: any;
   sendCode: any;
   tryAgain: any;
+  showSuccess: any;
   step: string;
   address: any;
 }
@@ -15,7 +16,7 @@ interface ILoginProps {
 /**
  * One-time passcodes can be sent via phone number through Stytch
  */
-const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step, address }) => {
+const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess, step, address }) => {
   const { user } = useStytchUser();
   const [userId, setUserId] = useState<string>('');
   const [methodId, setMethodId] = useState<string>('');
@@ -51,7 +52,6 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step, addres
       });
       console.log(response);
       if (response.status_code == 200 && response.session_jwt) {
-        alert("Login successful for user with email: " + response?.user?.emails[0].email + ". TODO: save it to your backend database");
         registerInBackend({email: response?.user?.emails[0].email, address: address});
       }
     } catch (err: any) {
@@ -78,10 +78,12 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, step, addres
       data: requestBody
     })
     .then(function (response) {
-      console.log(response);
+      if(response.status === 200) {
+        showSuccess();
+      } 
     })
     .catch(function (error) {
-      console.log(error);
+      alert("Something goes wrong, please try again!")
     })
   }
 

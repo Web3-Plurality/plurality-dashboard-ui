@@ -19,8 +19,9 @@ import LoadingContext from '../../../utils/LoadingContext';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import PLogo from '../../../assets/img/new-logo.png';
 import StytchOTP from '../../../components/StytchOTP';
+import gifImage from '../../../assets/tada.gif';
 
-type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit';
+type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
 
 interface ILoginHeaderProps {
 	isMetamaskConnected?: boolean;
@@ -92,6 +93,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const handleEmailOnClick = () => {
 		setStep("submit")
 	};
+
+	const showSuccess = () => {
+		setStep("success")
+	}
 
 	const handleMetamaskConnect = async () => {
 		try {	
@@ -417,14 +422,31 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										</>
 										
 									)}
+									{/* END :: Metamask Login or Google Login */}
+
+									{/* BEGIN :: Stych workflow */}
 									{
 										(step === "submit" || step === "verify") && (
 											<>
-											<StytchOTP step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address}/>
+											<StytchOTP showSuccess={showSuccess} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address}/>
 											</>
 									)}
+									{/* END :: Stych workflow */}
 
-									{/* END :: Metamask Login or Google Login */}
+									{/* BEGIN :: Success page */}
+									{
+										(step === "success") && (
+											<>
+											<div className='d-flex align-items-center justify-content-center' >
+												<p>Register successfully! You can close this window.</p>
+											</div>
+											<div className='d-flex align-items-center justify-content-center' >
+												<img src={gifImage} alt="GIF Image" />
+											</div>
+											</>
+									)}
+									{/* END :: Success page */}
+									
 
 									{/* BEGIN :: Social Login */}
 									{address && isWidget && step === "post-submit" &&(
