@@ -20,30 +20,45 @@ import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import PLogo from '../../../assets/img/new-logo.png';
 import StytchOTP from '../../../components/StytchOTP';
 import gifImage from '../../../assets/tada.gif';
+import mvfwImage from '../../../assets/metaverse-fashion-week-2022.jpg';
 
 type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
 
-interface ILoginHeaderProps {
-	isMetamaskConnected?: boolean;
-	callingDApp?: String;
-}
-const LoginHeader: FC<ILoginHeaderProps> = ({ isMetamaskConnected, callingDApp }) => {
-	if (!isMetamaskConnected) {
-		return (
-			<>
-			<div className='text-center h1 fw-bold mt-5'>Social Connect</div>
-			<div className='text-center h4 text-muted mb-5'>Sign in to continue!</div>
-			</>
-		);
-	}
+// interface ILoginHeaderProps {
+// 	isMetamaskConnected?: boolean;
+// 	callingDApp?: String;
+// }
+
+const LoginHeader: FC<any> = ({step}) => {
 	return (
 		<>
-			<div className='text-center h1 fw-bold mt-5'>Social Connect</div>
-			<div className='text-center h4 text-muted mb-5'>Connect your social profiles</div>
-			<div className='text-center h5 text-muted mb-5'>{callingDApp}</div>
+			<div className='text-center h1 fw-bold mt-4'>Metaverse Fashion Week</div>
+			{step === "pre-submit" && (<div className='text-center h6 mb-5 mt-2'>Subscribe to access early bird benefits</div>)}
+			{step === "submit" && (<div className='text-center h6 mb-5 mt-2'>A verification code will be sent to your email</div>)}
+			{step === "verify" && (<div className='text-center h6 mb-5 mt-2'>Enter the 6 digit code sent to your email</div>)}
+			{step === "success" && (<div className='text-center h6 mb-5 mt-2'>Subscription successful. Congrats!</div>)}
 		</>
 	);
 };
+const LoginFooter: FC<any> = () => {
+	return (
+		<>
+			<div className="d-flex align-items-center justify-content-center" style={{marginTop: "60px"}}>
+				Powered by <img src={PLogo} alt="Logo" style={{width: "100px", height: "40px"}}/>
+			</div>
+		</>
+	);
+};
+const CenteredImage: FC<any> = ({imageSrc, width, height}) => {
+	return (
+		<>
+			<div className='d-flex align-items-center justify-content-center'>
+				<img src={imageSrc} alt="GIF Image"  style={{width: width, height: height}}/>
+			</div>
+		</>
+	);
+};
+
 LoginHeader.defaultProps = {
 	isMetamaskConnected: false,
 	callingDApp: "http://some-dapp.com"
@@ -366,8 +381,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											},
 										)}
 										aria-label='Facit'>
-										{/* <Logo width={200}/> */}
-										<img src={PLogo} alt="Logo" style={{height: "140px"}}/>
+										{/* Here goes logo */}
+										<CenteredImage imageSrc={mvfwImage} width={250} height={100}/>
 									</div>
 								</div>
 								<div
@@ -379,12 +394,31 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</div>
 
 									{/* BEGIN :: Metamask Login or Google Login */}
-									{step === "pre-submit" && (
-									<LoginHeader isMetamaskConnected={false} callingDApp={callingDApp}/>)}
-									{!address && step === "pre-submit" && (
+										<LoginHeader step={step} isMetamaskConnected={false} callingDApp={callingDApp}/>
+										{step === "pre-submit" && (
 										<>
-											{/* <div className='row g-4'> */}
-											<div className='col-12 mt-3'>
+											<div className='col-12'>
+												<Button
+													isOutline
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='CustomEmail'
+													onClick={handleEmailOnClick}
+													>
+													Email
+												</Button>
+											</div>
+											<div className='col-12 mt-4 text-center text-muted'>
+												OR
+											</div>
+										</>
+										)}
+										{!address && step === "pre-submit" && (
+										<>
+											<div className='col-12 mt-4'>
 												<Button
 													isOutline
 													color={darkModeStatus ? 'light' : 'dark'}
@@ -397,32 +431,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													Sign in with MetaMask
 												</Button>
 											</div>
-											<div className='col-12 mt-3 text-center text-muted'>
-												OR
-											</div>
 										</>	
 										)}
-										{step === "pre-submit" && (
-										<>
-											<div className='col-12'>
-												<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomGoogle'
-													onClick={handleEmailOnClick}
-													>
-													Email
-												</Button>
-											</div>
-											{/* </div> */}
-										</>
-										
-									)}
-									{/* END :: Metamask Login or Google Login */}
+									{/* END :: Metamask Login or Email Login */}
 
 									{/* BEGIN :: Stych workflow */}
 									{
@@ -530,6 +541,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										</>
 									)}
 									{/* END :: Social Login */}
+									{/* START:: Footer */}
+									<LoginFooter/>
+									{/* END :: Footer */}
 							</CardBody>
 						</Card>
 						<div className='text-center'>
