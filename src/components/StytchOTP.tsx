@@ -52,10 +52,19 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     setLoading(true);
     setError(undefined);
     try {
-      let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress);
-      console.log(response);
-      setMethodId(response.method_id);
-      sendCode();
+      let emailExistence: any = await checkEmailExistence(formik.values.emailAddress); //{exists, addressRegistered}
+      if(emailExistence.data.exists && emailExistence.data.addressRegistered){
+        alert("this email has already been registered, please use another one")
+      }
+      else if (emailExistence.data.exists && !emailExistence.data.addressRegistered && !address) {
+        alert("this email has already been registered, but you cans still update its metamask address")
+      }
+      else if (!emailExistence.data.exists || (emailExistence.data.exists && !emailExistence.data.addressRegistered && !!address)) {
+        let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress);
+        console.log(response);
+        setMethodId(response.method_id);
+        sendCode();
+      }
     } catch (err: any) {
       setError(err);
     } finally {
@@ -92,6 +101,15 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     tryAgain();
   }
   
+  const checkEmailExistence = (emailAddress: string) => {
+    const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-user'
+    return axios.get(apiUrl,{
+      params: {
+          email: emailAddress
+    }
+    })
+  }
+
   const registerInBackend = (requestBody: any) => {
     const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch'
     axios.post(apiUrl, {

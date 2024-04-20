@@ -415,13 +415,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													Continue with Email
 												</Button>
 											</div>
-											<div className='col-12 mt-4 text-center text-muted'>
-												OR
-											</div>
 										</>
 										)}
 										{!address && step === "pre-submit" && (
 										<>
+											<div className='col-12 mt-4 text-center text-muted'>
+												OR
+											</div>
 											<div className='col-12 mt-4'>
 												<Button
 													isOutline
