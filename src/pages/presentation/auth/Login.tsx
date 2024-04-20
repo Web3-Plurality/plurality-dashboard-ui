@@ -19,7 +19,8 @@ import LoadingContext from '../../../utils/LoadingContext';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import PLogo from '../../../assets/img/new-logo.png';
 import StytchOTP from '../../../components/StytchOTP';
-import gifImage from '../../../assets/tada.gif';
+import Instagram from '../../../assets/instagram.png';
+import Twitter from '../../../assets/twitter.png';
 import mvfwImage from '../../../assets/metaverse-fashion-week-2022.jpg';
 
 type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
@@ -44,7 +45,10 @@ const LoginFooter: FC<any> = () => {
 	return (
 		<>
 			<div className="d-flex align-items-center justify-content-center" style={{marginTop: "60px"}}>
-				Powered by <img src={PLogo} alt="Logo" style={{width: "100px", height: "40px"}}/>
+				Powered by 
+				<a href="https://twitter.com/PluralityWeb3" target="_blank" rel="noopener noreferrer">
+					<img src={PLogo} alt="Logo" style={{width: "100px", height: "40px"}}/>
+				</a>
 			</div>
 		</>
 	);
@@ -408,7 +412,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													icon='CustomEmail'
 													onClick={handleEmailOnClick}
 													>
-													Email
+													Continue with Email
 												</Button>
 											</div>
 											<div className='col-12 mt-4 text-center text-muted'>
@@ -428,7 +432,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													})}
 													icon='CustomMetamask'
 													onClick={handleMetamaskConnect}>
-													Sign in with MetaMask
+													Continue with MetaMask
 												</Button>
 											</div>
 										</>	
@@ -449,10 +453,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										(step === "success") && (
 											<>
 											<div className='d-flex align-items-center justify-content-center' >
-												<p>Register successfully! You can close this window.</p>
+												<p>Stay Connected with us!</p>
 											</div>
 											<div className='d-flex align-items-center justify-content-center' >
-												<img src={gifImage} alt="GIF Image" />
+												<img src={Twitter} style={{height: "45px", width: "45px"}} alt="Twitter" />
+												<img src={Instagram} style={{height: "50px", width: "50px"}} alt="Instagram" />
 											</div>
 											</>
 									)}

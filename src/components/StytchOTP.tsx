@@ -24,7 +24,6 @@ interface ILoginProps {
  */
 const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess, step, address }) => {
   const { user } = useStytchUser();
-  // const [userId, setUserId] = useState<string>('');
   const [methodId, setMethodId] = useState<string>('');
   const [code, setCode] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -42,9 +41,6 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
 			currentPassword: '',
 			newPassword: '',
 			confirmPassword: '',
-			checkOne: true,
-			checkTwo: false,
-			checkThree: true,
 		},
 		validate,
 		onSubmit: () => {
@@ -88,7 +84,6 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
   }
 
   const onMoveBack = () => {
-    // setUserId('')
     moveBack();
   }
 
@@ -140,17 +135,6 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                   validFeedback='Looks good!'
                 />
             </FormGroup>
-              {/* <input
-                id='email'
-                value={userId}
-                onChange={e => setUserId(e.target.value)}
-                type='email'
-                name='email'
-                className="form__input mb-4"
-                placeholder='Your email'
-                autoComplete="off"
-                style={{width: "90%"}}
-              ></input> */}
               <br />
               <Button
 								isOutline
@@ -162,8 +146,9 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
               </Button>
               <Button
 								isOutline
+                isDisable={!!formik.errors.emailAddress || !formik.values.emailAddress}
                 className="border-light"
-								color={'secondary'}
+								color={'success'}
                 style={{ marginLeft:"155px", width: "100px" }}
                 onClick={sendPasscode}>
                 Send code
@@ -190,7 +175,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
 
                 <Button
                   isOutline
-                  color={'dark'}
+                  color={'success'}
                   className={classNames('w-100 py-3', {
                     'border-light': true
                   })}
@@ -202,16 +187,6 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                     Didn’t get the code? Try again
                   </a>
                 </div>
-                {/* <button type="submit" className="btn btn--primary btn-outline-custom px-4">
-                  Verify
-                </button>
-                <button
-                  onClick={onTryAgainClick}
-                  style={{marginLeft: "80px"}}
-                  className="btn btn--link btn-outline-custom px-3"
-                >
-                  Try again
-                </button> */}
             </form>
           </div>
         </>
