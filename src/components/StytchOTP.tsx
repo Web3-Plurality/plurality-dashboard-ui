@@ -148,7 +148,8 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
 								isOutline
                 isDisable={!!formik.errors.emailAddress || !formik.values.emailAddress}
                 className="border-light"
-								color={'success'}
+                isLight
+								color={'info'}
                 style={{ marginLeft:"60px", height: "50px",  width: "140px", marginTop: "5px" }}
                 onClick={sendPasscode}>
                 Send code
@@ -175,7 +176,8 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
 
                 <Button
                   isOutline
-                  color={'success'}
+                  color={'info'}
+                  isLight
                   className={classNames('w-100 py-3', {
                     'border-light': true
                   })}
