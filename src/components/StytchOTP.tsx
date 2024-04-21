@@ -91,15 +91,6 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     setCode('')
     tryAgain();
   }
-  
-  const checkEmailExistence = (emailAddress: string) => {
-    const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-user'
-    return axios.get(apiUrl,{
-      params: {
-          email: emailAddress
-    }
-    })
-  }
 
   const registerInBackend = (requestBody: any) => {
     const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch'

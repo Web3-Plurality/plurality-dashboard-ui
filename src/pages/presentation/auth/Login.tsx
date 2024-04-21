@@ -22,6 +22,7 @@ import StytchOTP from '../../../components/StytchOTP';
 import Instagram from '../../../assets/instagram.png';
 import Twitter from '../../../assets/twitter.png';
 import mvfwImage from '../../../assets/metaverse-fashion-week-2022.jpg';
+import axios from 'axios';
 
 type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
 
@@ -116,6 +117,15 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const showSuccess = () => {
 		setStep("success")
 	}
+
+	const checkAddressExistence = (address: string) => {
+		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-user'
+		return axios.get(apiUrl,{
+		  params: {
+			  address: address
+		}
+		})
+	  }
 
 	const handleMetamaskConnect = async () => {
 		try {	
@@ -360,7 +370,15 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	useEffect(() => {
 		if(address) {
-			setStep("submit");
+			checkAddressExistence(address)
+			checkAddressExistence(address).then(res => {
+				if (!res.data.exists) {
+					setStep("pre-submit");
+				}
+				if(res.data.exists && res.data.emailRegistered){
+					setStep("success");
+				}
+			})		
 		}
 	}, [address])
 
@@ -412,7 +430,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													icon='Email'
 													onClick={handleEmailOnClick}
 													>
-													Continue with Email
+													{address ? "Register your Email" : "Continue with Email"}
 												</Button>
 											</div>
 										</>
