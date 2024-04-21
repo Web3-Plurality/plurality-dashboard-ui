@@ -52,19 +52,10 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     setLoading(true);
     setError(undefined);
     try {
-      let emailExistence: any = await checkEmailExistence(formik.values.emailAddress); //{exists, addressRegistered}
-      if(emailExistence.data.exists && emailExistence.data.addressRegistered){
-        alert("this email has already been registered, please use another one")
-      }
-      else if (emailExistence.data.exists && !emailExistence.data.addressRegistered && !address) {
-        alert("this email has already been registered, but you cans still update its metamask address")
-      }
-      else if (!emailExistence.data.exists || (emailExistence.data.exists && !emailExistence.data.addressRegistered && !!address)) {
-        let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress);
-        console.log(response);
-        setMethodId(response.method_id);
-        sendCode();
-      }
+      let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress);
+      console.log(response);
+      setMethodId(response.method_id);
+      sendCode();
     } catch (err: any) {
       setError(err);
     } finally {
@@ -134,7 +125,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
               <p>{error.message}</p>
             </div>
           )}
-          <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "100px", marginLeft:"20px", marginRight:"20px"}}>
+          <div className="form-wrapper mt-5" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "50px", marginLeft:"20px", marginRight:"20px"}}>
             <form className="form" onSubmit={sendPasscode} style={{width: "100%"}}>
             <FormGroup
                 id='emailAddress'
@@ -158,7 +149,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
 								isOutline
                 className="border-light"
 								color={'dark'}
-                style={{ width: "100px" }}
+                style={{ height: "50px", width: "140px", marginTop: "5px" }}
                 onClick={onMoveBack}>
                 Back
               </Button>
@@ -167,7 +158,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                 isDisable={!!formik.errors.emailAddress || !formik.values.emailAddress}
                 className="border-light"
 								color={'success'}
-                style={{ marginLeft:"155px", width: "100px" }}
+                style={{ marginLeft:"60px", height: "50px",  width: "140px", marginTop: "5px" }}
                 onClick={sendPasscode}>
                 Send code
               </Button>
@@ -177,7 +168,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
       )}
       {step === 'verify' && (
         <>
-          <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "60px"}}>
+          <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "50px"}}>
             <form className="form" onSubmit={authenticate}>
               <div style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "10px"}}>
                 <OtpInput
@@ -200,7 +191,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                   onClick={authenticate}>
                   verify
                 </Button>
-                <div className='d-flex align-items-center justify-content-center' style={{marginTop: "20px"}}>
+                <div className='d-flex align-items-center justify-content-center' style={{marginTop: "5px"}}>
                   <a href="#" className="hyperlink-button" onClick={onTryAgainClick}>
                     Didn’t get the code? Try again
                   </a>

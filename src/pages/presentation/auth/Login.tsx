@@ -33,18 +33,18 @@ type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
 const LoginHeader: FC<any> = ({step}) => {
 	return (
 		<>
-			<div className='text-center h1 fw-bold mt-4'>Metaverse Fashion Week</div>
-			{step === "pre-submit" && (<div className='text-center h6 mb-5 mt-2'>Subscribe to access early bird benefits</div>)}
-			{step === "submit" && (<div className='text-center h6 mb-5 mt-2'>A verification code will be sent to your email</div>)}
-			{step === "verify" && (<div className='text-center h6 mb-5 mt-2'>Enter the 6 digit code sent to your email</div>)}
-			{step === "success" && (<div className='text-center h6 mb-5 mt-2'>Subscription successful. Congrats!</div>)}
+			<div className='text-center h1 fw-bold' style={{marginTop: "50px"}}>Social Connect</div>
+			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Subscribe to access early bird benefits</div>)}
+			{step === "submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>A verification code will be sent to your email</div>)}
+			{step === "verify" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Enter the 6 digit code sent to your email</div>)}
+			{step === "success" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Subscription successful. Congrats!</div>)}
 		</>
 	);
 };
 const LoginFooter: FC<any> = () => {
 	return (
 		<>
-			<div className="d-flex align-items-center justify-content-center" style={{marginTop: "60px"}}>
+			<div className="d-flex align-items-center justify-content-center" style={{marginTop: "50px"}}>
 				Powered by 
 				<a href="https://twitter.com/PluralityWeb3" target="_blank" rel="noopener noreferrer">
 					<img src={PLogo} alt="Logo" style={{width: "100px", height: "40px"}}/>
@@ -375,7 +375,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
 						<Card className='shadow-3d-dark' data-tour='login-page'>
 							<CardBody>
-								<div className='text-center mt-4'>
+								<div className='text-center mt-5'>
 									<div
 										className={classNames(
 											'text-decoration-none  fw-bold display-2',
@@ -386,7 +386,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										)}
 										aria-label='Facit'>
 										{/* Here goes logo */}
-										<CenteredImage imageSrc={mvfwImage} width={250} height={100}/>
+										<CenteredImage imageSrc={mvfwImage} width={250} height={80}/>
 									</div>
 								</div>
 								<div
@@ -409,7 +409,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														'border-light': !darkModeStatus,
 														'border-dark': darkModeStatus,
 													})}
-													icon='CustomEmail'
+													icon='Email'
 													onClick={handleEmailOnClick}
 													>
 													Continue with Email
@@ -452,12 +452,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									{
 										(step === "success") && (
 											<>
-											<div className='d-flex align-items-center justify-content-center' >
+											<div className='d-flex align-items-center justify-content-center' style={{marginTop: "70px"}}>
 												<p>Stay Connected with us!</p>
 											</div>
-											<div className='d-flex align-items-center justify-content-center' >
+											<div className='d-flex align-items-center justify-content-center' style={{marginBottom: "90px"}}>
 												<img src={Twitter} style={{height: "45px", width: "45px"}} alt="Twitter" />
-												<img src={Instagram} style={{height: "50px", width: "50px"}} alt="Instagram" />
+												<img src={Instagram} style={{height: "50px", width: "50px", marginLeft: "10px"}} alt="Instagram" />
 											</div>
 											</>
 									)}
