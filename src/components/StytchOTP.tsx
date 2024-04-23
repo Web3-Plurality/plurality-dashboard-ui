@@ -136,24 +136,24 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                 />
             </FormGroup>
               <br />
-              <Button
-								isOutline
-                className="border-light"
-								color={'dark'}
-                style={{ height: "50px", width: "140px", marginTop: "5px" }}
-                onClick={onMoveBack}>
-                Back
-              </Button>
-              <Button
-								isOutline
-                isDisable={!!formik.errors.emailAddress || !formik.values.emailAddress}
-                className="border-light"
-                isLight
-								color={'info'}
-                style={{ marginLeft:"60px", height: "50px",  width: "140px", marginTop: "5px" }}
-                onClick={sendPasscode}>
-                Send code
-              </Button>
+              <div className="d-flex justify-content-between">
+                <Button
+                  isOutline
+                  className="border-light"
+                  color={'dark'}
+                  style={{ height: "50px", width: "140px", marginTop: "5px" }}
+                  onClick={onMoveBack}>
+                  Back
+                </Button>
+                <Button
+                  isOutline
+                  isDisable={!!formik.errors.emailAddress || !formik.values.emailAddress}
+                  className="border-light customized-button"
+                  style={{ height: "50px",  width: "140px", marginTop: "5px" }}
+                  onClick={sendPasscode}>
+                  Send code
+                </Button>
+              </div>       
             </form>
           </div>
         </>
@@ -162,7 +162,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
         <>
           <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "50px"}}>
             <form className="form" onSubmit={authenticate}>
-              <div style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "10px"}}>
+              <div style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "20px", marginTop: "10px"}}>
                 <OtpInput
                   value={code}
                   onChange={setCode}
@@ -176,13 +176,12 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
 
                 <Button
                   isOutline
-                  color={'info'}
-                  isLight
                   className={classNames('w-100 py-3', {
-                    'border-light': true
+                    'border-light': true,
+                    'customized-button': true
                   })}
                   onClick={authenticate}>
-                  verify
+                  Verify
                 </Button>
                 <div className='d-flex align-items-center justify-content-center' style={{marginTop: "5px"}}>
                   <a href="#" className="hyperlink-button" onClick={onTryAgainClick}>
