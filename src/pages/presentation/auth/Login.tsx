@@ -118,6 +118,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		setStep("success")
 	}
 
+	const skipEmailRegistration = () => {
+		// Call backend to register the current metamask address
+		showSuccess()
+	}
+
 	const checkAddressExistence = (address: string) => {
 		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-user'
 		return axios.get(apiUrl,{
@@ -368,19 +373,19 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [address])
 
-	useEffect(() => {
-		if(address) {
-			checkAddressExistence(address)
-			checkAddressExistence(address).then(res => {
-				if (!res.data.exists) {
-					setStep("pre-submit");
-				}
-				if(res.data.exists && res.data.emailRegistered){
-					setStep("success");
-				}
-			})		
-		}
-	}, [address])
+	// useEffect(() => {
+	// 	if(address) {
+	// 		checkAddressExistence(address)
+	// 		checkAddressExistence(address).then(res => {
+	// 			if (!res.data.exists) {
+	// 				setStep("pre-submit");
+	// 			}
+	// 			if(res.data.exists && res.data.emailRegistered){
+	// 				setStep("success");
+	// 			}
+	// 		})		
+	// 	}
+	// }, [address])
 
 	return (
 		<PageWrapper
@@ -433,6 +438,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													{address ? "Register your Email" : "Continue with Email"}
 												</Button>
 											</div>
+											{address && (
+												<div className="d-flex justify-content-center">
+													<a href="#" onClick={skipEmailRegistration}>Skip</a>
+												</div>	
+											)}
 										</>
 										)}
 										{!address && step === "pre-submit" && (
@@ -474,8 +484,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												<p>Stay Connected with us!</p>
 											</div>
 											<div className='d-flex align-items-center justify-content-center' style={{marginBottom: "90px"}}>
-												<img src={Twitter} style={{height: "45px", width: "45px"}} alt="Twitter" />
-												<img src={Instagram} style={{height: "50px", width: "50px", marginLeft: "10px"}} alt="Instagram" />
+												<a href="https://x.com/mvfwofficial?s=21&t=1GCSt3HPM8WcPENlVpgHfQ" target="_blank" rel="noopener noreferrer">
+													<img src={Twitter} style={{height: "45px", width: "45px"}} alt="Twitter" />
+												</a>
+												<a href="https://www.instagram.com/mvfwofficial?igsh=MW15MW5hem44MTR3dQ==" target="_blank" rel="noopener noreferrer">
+													<img src={Instagram} style={{height: "50px", width: "50px", marginLeft: "10px"}} alt="Instagram" />
+												</a>
 											</div>
 											</>
 									)}

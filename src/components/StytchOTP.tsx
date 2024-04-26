@@ -28,6 +28,8 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
   const [code, setCode] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [subscribe, setSubscribe] = useState(true);
 
   const stytchClient = useStytch();
 
@@ -73,7 +75,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
       });
       console.log(response);
       if (response.status_code == 200 && response.session_jwt) {
-        registerInBackend({email: response?.user?.emails[0].email, address: address});
+        registerInBackend({email: response?.user?.emails[0].email, address: address, subscribe: subscribe});
       }
     } catch (err: any) {
       alert("Invalid code entered");
@@ -107,6 +109,14 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     })
   }
 
+  const handleAcceptTermsChange = () => {
+    setAcceptTerms(!acceptTerms);
+  };
+
+  const handleSubscribeChange = () => {
+    setSubscribe(!subscribe);
+  };
+
   return (
     <>
       {step === 'submit' && (
@@ -116,7 +126,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
               <p>{error.message}</p>
             </div>
           )}
-          <div className="form-wrapper mt-5" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "50px", marginLeft:"20px", marginRight:"20px"}}>
+          <div className="form-wrapper mt-5" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "-50px", marginLeft:"20px", marginRight:"20px"}}>
             <form className="form" onSubmit={sendPasscode} style={{width: "100%"}}>
             <FormGroup
                 id='emailAddress'
@@ -135,25 +145,46 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                   validFeedback='Looks good!'
                 />
             </FormGroup>
-              <br />
-              <div className="d-flex justify-content-between">
-                <Button
-                  isOutline
-                  className="border-light"
-                  color={'dark'}
-                  style={{ height: "50px", width: "140px", marginTop: "5px" }}
-                  onClick={onMoveBack}>
-                  Back
-                </Button>
-                <Button
-                  isOutline
-                  isDisable={!!formik.errors.emailAddress || !formik.values.emailAddress}
-                  className="border-light customized-button"
-                  style={{ height: "50px",  width: "140px", marginTop: "5px" }}
-                  onClick={sendPasscode}>
-                  Send code
-                </Button>
-              </div>       
+            <br />
+            <div>
+              <label className="d-flex justify-content-left">
+                <input 
+                  type="checkbox" 
+                  checked={acceptTerms} 
+                  onChange={handleAcceptTermsChange} 
+                  style={{marginLeft: "5px"}}
+                />
+                <span style={{ marginLeft: '5px' }}>I accept terms of use</span>
+              </label>
+              <label className="d-flex justify-content-left">
+                <input 
+                  type="checkbox" 
+                  checked={subscribe} 
+                  onChange={handleSubscribeChange} 
+                  style={{marginLeft: "5px"}}
+                />
+                <span style={{ marginLeft: '5px' }}>Subscribe to get latest updates</span>
+              </label>
+            </div>
+            <br />
+            <div className="d-flex justify-content-between">
+              <Button
+                isOutline
+                className="border-light"
+                color={'dark'}
+                style={{ height: "50px", width: "140px", marginTop: "5px" }}
+                onClick={onMoveBack}>
+                Back
+              </Button>
+              <Button
+                isOutline
+                isDisable={!!formik.errors.emailAddress || !formik.values.emailAddress || !acceptTerms}
+                className="border-light customized-button"
+                style={{ height: "50px",  width: "140px", marginTop: "5px" }}
+                onClick={sendPasscode}>
+                Send code
+              </Button>
+            </div>       
             </form>
           </div>
         </>

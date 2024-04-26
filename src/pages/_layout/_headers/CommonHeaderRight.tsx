@@ -128,7 +128,7 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 				)}
 				
 				{/*	Disconnect */}
-				{isConnected && (
+				{/* {isConnected && (
 					
 				<div className='col-auto'>
 
@@ -149,7 +149,7 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 						/>
 					</Popovers>
 				</div>
-				)}
+				)} */}
 
 				{/*	Full Screen */}
 				{/* <div className='col-auto'>
