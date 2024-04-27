@@ -75,7 +75,13 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
       });
       console.log(response);
       if (response.status_code == 200 && response.session_jwt) {
-        registerInBackend({email: response?.user?.emails[0].email, address: address, subscribe: subscribe});
+        const email = await checkEmailExistence()
+        // if this guy has already registered this email with a metamask address
+        if(email.data.addressRegistered) {
+          showSuccess();
+        } else {
+          registerInBackend({email: response?.user?.emails[0].email, address: address, subscribe: subscribe});
+        }
       }
     } catch (err: any) {
       alert("Invalid code entered");
@@ -108,6 +114,15 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
       alert("Something goes wrong, please try again!")
     })
   }
+
+	const checkEmailExistence = () => {
+    const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-email'
+    return axios.get(apiUrl,{
+      params: {
+        email: formik.values.emailAddress
+    }
+    })
+    }
 
   const handleAcceptTermsChange = () => {
     setAcceptTerms(!acceptTerms);

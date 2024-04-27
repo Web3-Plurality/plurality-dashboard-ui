@@ -118,13 +118,29 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		setStep("success")
 	}
 
-	const skipEmailRegistration = () => {
-		// Call backend to register the current metamask address
-		showSuccess()
+	const skipEmailRegistration = async () => {
+		const currentAddress = await checkAddressExistence()
+		// if this guy has already registered this metamask address with an email
+		if (currentAddress.data.emailRegistered){
+			showSuccess();
+		} else {
+			const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch';
+			axios.post(apiUrl, {
+				data: {email: "", address: address, subscribe: false}
+				})
+				.then(function (response) {
+				if(response.status === 200) {
+					showSuccess();
+				} 
+				})
+				.catch(function (error) {
+				alert("Something goes wrong, please try again!")
+				})
+		}
 	}
 
-	const checkAddressExistence = (address: string) => {
-		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-user'
+	const checkAddressExistence = () => {
+		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-address'
 		return axios.get(apiUrl,{
 		  params: {
 			  address: address
