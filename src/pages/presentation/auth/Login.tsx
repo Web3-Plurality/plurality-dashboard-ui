@@ -121,7 +121,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const skipEmailRegistration = async () => {
 		const currentAddress = await checkAddressExistence()
 		// if this guy has already registered this metamask address with an email
-		if (currentAddress.data.emailRegistered){
+		if (currentAddress.data.exists){
 			showSuccess();
 		} else {
 			const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch';
