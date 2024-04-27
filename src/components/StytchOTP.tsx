@@ -170,7 +170,9 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                   onChange={handleAcceptTermsChange} 
                   style={{marginLeft: "5px"}}
                 />
-                <span style={{ marginLeft: '5px' }}>I accept terms of use</span>
+                <span style={{ marginLeft: '5px' }}>I accept <a href="https://plurality.network/user-terms-of-service" target="_blank" rel="noopener noreferrer">
+                terms of use
+				        </a></span>
               </label>
               <label className="d-flex justify-content-left">
                 <input 
