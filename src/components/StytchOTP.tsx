@@ -28,7 +28,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
   const [code, setCode] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(true);
   const [subscribe, setSubscribe] = useState(true);
 
   const stytchClient = useStytch();
@@ -142,7 +142,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
               <p>{error.message}</p>
             </div>
           )}
-          <div className="form-wrapper mt-5" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "-50px", marginLeft:"20px", marginRight:"20px"}}>
+          <div className="form-wrapper mt-5" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "-25px", marginLeft:"20px", marginRight:"20px"}}>
             <form className="form" onSubmit={sendPasscode} style={{width: "100%"}}>
             <FormGroup
                 id='emailAddress'
@@ -162,7 +162,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                 />
             </FormGroup>
             <br />
-            <div>
+            <div style={{ marginTop: "-15px"}}>
               <label className="d-flex justify-content-left">
                 <input 
                   type="checkbox" 
@@ -170,7 +170,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                   onChange={handleAcceptTermsChange} 
                   style={{marginLeft: "5px"}}
                 />
-                <span style={{ marginLeft: '5px' }}>I accept <a href="https://plurality.network/user-terms-of-service" target="_blank" rel="noopener noreferrer">
+                <span style={{ marginLeft: '5px', fontSize: 'x-small' }}>I accept <a href="https://plurality.network/user-terms-of-service" target="_blank" rel="noopener noreferrer">
                 terms of use
 				        </a></span>
               </label>
@@ -181,7 +181,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                   onChange={handleSubscribeChange} 
                   style={{marginLeft: "5px"}}
                 />
-                <span style={{ marginLeft: '5px' }}>Subscribe to get latest updates</span>
+                <span style={{ marginLeft: '5px', fontSize: 'x-small' }}>Subscribe to get latest updates</span>
               </label>
             </div>
             <br />
@@ -190,7 +190,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                 isOutline
                 className="border-light"
                 color={'dark'}
-                style={{ height: "50px", width: "140px", marginTop: "5px" }}
+                style={{ height: "50px", width: "140px"}}
                 onClick={onMoveBack}>
                 Back
               </Button>
@@ -198,7 +198,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                 isOutline
                 isDisable={!!formik.errors.emailAddress || !formik.values.emailAddress || !acceptTerms}
                 className="border-light customized-button"
-                style={{ height: "50px",  width: "140px", marginTop: "5px" }}
+                style={{ height: "50px",  width: "140px"}}
                 onClick={sendPasscode}>
                 Send code
               </Button>
@@ -222,16 +222,18 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                   />}
                 />
               </div>
-
+                <div className='d-flex align-items-center justify-content-center' >
                 <Button
                   isOutline
-                  className={classNames('w-100 py-3', {
+                  className={classNames('py-3', {
                     'border-light': true,
                     'customized-button': true
                   })}
+                  style={{width: "370px"}}
                   onClick={authenticate}>
                   Verify
                 </Button>
+                </div>
                 <div className='d-flex align-items-center justify-content-center' style={{marginTop: "5px"}}>
                   <a href="#" className="hyperlink-button" onClick={onTryAgainClick}>
                     Didn’t get the code? Try again
