@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState,useContext } from 'react';
 import { useStytch, useStytchSession, useStytchUser } from '@stytch/react';
 import OtpInput from 'react-otp-input';
 import './otpCss.css'
@@ -9,6 +9,7 @@ import FormGroup from './bootstrap/forms/FormGroup';
 import Button from './bootstrap/Button';
 import validate from '../pages/presentation/demo-pages/helper/editPagesValidate';
 import classNames from 'classnames';
+import LoadingContext from '../utils/LoadingContext';
 
 interface ILoginProps {
 	moveBack: any;
@@ -26,10 +27,9 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
   const { user } = useStytchUser();
   const [methodId, setMethodId] = useState<string>('');
   const [code, setCode] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error>();
   const [acceptTerms, setAcceptTerms] = useState(true);
   const [subscribe, setSubscribe] = useState(true);
+  const { showLoading, hideLoading } = useContext(LoadingContext);
 
   const stytchClient = useStytch();
 
@@ -51,24 +51,22 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
 
   async function sendPasscode(event: any) {
     event.preventDefault();
-    setLoading(true);
-    setError(undefined);
+    showLoading();
     try {
       let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress);
       console.log(response);
       setMethodId(response.method_id);
       sendCode();
     } catch (err: any) {
-      setError(err);
+      alert("Something goes wrong while sending the passcode, please try it again");
     } finally {
-      setLoading(false);
+      hideLoading();
     }
   }
 
   async function authenticate(event: any) {
     event.preventDefault();
-    setLoading(true);
-    setError(undefined);
+    showLoading();
     try {
       const response = await stytchClient.otps.authenticate(code, methodId, {
         session_duration_minutes: 60,
@@ -85,10 +83,9 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
         }
       }
     } catch (err: any) {
-      alert("Invalid code entered");
-      setError(err);
+      alert("Invalid code entered, if this behavior persists, please contact us");
     } finally {
-      setLoading(false);
+      hideLoading();
     }
   }
 
@@ -137,11 +134,6 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     <>
       {step === 'submit' && (
         <>
-          {error && (
-            <div className="alert alert--error">
-              <p>{error.message}</p>
-            </div>
-          )}
           <div className="form-wrapper mt-5" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "-25px", marginLeft:"20px", marginRight:"20px"}}>
             <form className="form" onSubmit={sendPasscode} style={{width: "100%"}}>
             <FormGroup

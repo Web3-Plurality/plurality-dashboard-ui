@@ -119,9 +119,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}
 
 	const skipEmailRegistration = async () => {
+		showLoading();
 		const currentAddress = await checkAddressExistence()
 		// if this guy has already registered this metamask address with an email
 		if (currentAddress.data.exists){
+			hideLoading();
 			showSuccess();
 		} else {
 			const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch';
@@ -136,6 +138,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				.catch(function (error) {
 				alert("Something goes wrong, please try again!")
 				})
+			hideLoading();
 		}
 	}
 
