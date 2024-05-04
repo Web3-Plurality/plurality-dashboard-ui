@@ -110,10 +110,6 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     setAcceptTerms(!acceptTerms);
   };
 
-  const handleSubscribeChange = () => {
-    setSubscribe(!subscribe);
-  };
-
   return (
     <>
       {step === 'submit' && (
@@ -147,17 +143,8 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                   style={{marginLeft: "5px"}}
                 />
                 <span style={{ marginLeft: '5px', fontSize: 'x-small' }}>I accept <a href="https://plurality.network/user-terms-of-service" target="_blank" rel="noopener noreferrer">
-                terms of use
-				        </a></span>
-              </label>
-              <label className="d-flex justify-content-left">
-                <input 
-                  type="checkbox" 
-                  checked={subscribe} 
-                  onChange={handleSubscribeChange} 
-                  style={{marginLeft: "5px"}}
-                />
-                <span style={{ marginLeft: '5px', fontSize: 'x-small' }}>Subscribe to get latest updates</span>
+                terms of service
+				        </a> and subscribe to updates</span>
               </label>
             </div>
             <br />
