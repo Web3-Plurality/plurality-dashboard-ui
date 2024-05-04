@@ -74,13 +74,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
       console.log(response);
       if (response.status_code == 200 && response.session_jwt) {
         const email = await checkEmailExistence()
-        // if this guy has already registered this email with a metamask address
-        if(!!email.data.addressRegistered) {
-          const theAddress = address ? address : email.data.addressRegistered
-          registerInBackend({email: response?.user?.emails[0].email, address: theAddress, subscribe: subscribe});
-        } else {
-          registerInBackend({email: response?.user?.emails[0].email, address: address, subscribe: subscribe});
-        }
+        registerInBackend({email: response?.user?.emails[0].email, address: address, subscribe: subscribe});
       }
     } catch (err: any) {
       alert("Invalid code entered, if this behavior persists, please contact us");

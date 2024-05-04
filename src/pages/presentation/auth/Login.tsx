@@ -392,19 +392,19 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [address])
 
-	// useEffect(() => {
-	// 	if(address) {
-	// 		checkAddressExistence(address)
-	// 		checkAddressExistence(address).then(res => {
-	// 			if (!res.data.exists) {
-	// 				setStep("pre-submit");
-	// 			}
-	// 			if(res.data.exists && res.data.emailRegistered){
-	// 				setStep("success");
-	// 			}
-	// 		})		
-	// 	}
-	// }, [address])
+	useEffect(() => {
+		if(address) {
+			showLoading();
+			checkAddressExistence().then(res => {
+				if (!res.data.exists) {
+					setStep("pre-submit");
+				} else {
+					setStep("success");
+				}
+				hideLoading();
+			})		
+		}
+	}, [address])
 
 	return (
 		<PageWrapper
@@ -458,7 +458,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												</Button>
 											</div>
 											{address && (
-												<div className="d-flex justify-content-center">
+												<div className="d-flex justify-content-center mt-1">
 													<a href="#" onClick={skipEmailRegistration}>Skip</a>
 												</div>	
 											)}
