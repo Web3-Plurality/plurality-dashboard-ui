@@ -18,3 +18,4 @@ export { default as CustomUsa } from './CustomUsa';
 export { default as CustomYarn } from './CustomYarn';
 export { default as CustomMetamask } from './CustomMetamask';
 export { default as CustomTwitter } from './CustomTwitter';
+export { default as CustomEmail} from '../material-icons/Email'
