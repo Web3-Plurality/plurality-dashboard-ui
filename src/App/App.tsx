@@ -22,6 +22,7 @@ import { publicProvider } from "wagmi/providers/public";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import LoadingProvider from '../utils/LoadingProvider';
 import Spinner from '../utils/Spinner';
+import EventListener from '../pages/presentation/auth/EventListener';
 
 const App = () => {
 	getOS();
@@ -100,6 +101,7 @@ const App = () => {
 			<LoadingProvider>
       		<Spinner />
 			<MetaMaskProvider>
+			<EventListener />
 			<WagmiConfig config={config}>
 			<TourProvider steps={steps} styles={styles} showNavigation={false} showBadge={false}>
 				<div
