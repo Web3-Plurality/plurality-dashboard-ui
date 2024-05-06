@@ -7,7 +7,6 @@ import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
 import Button from '../../../components/bootstrap/Button';
-import Logo from '../../../components/Logo';
 import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
@@ -19,30 +18,52 @@ import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import PLogo from '../../../assets/img/new-logo.png';
+import StytchOTP from '../../../components/StytchOTP';
+import Instagram from '../../../assets/instagram.png';
+import Twitter from '../../../assets/twitter.png';
+import mvfwImage from '../../../assets/metaverse-fashion-week-2022.jpg';
+import axios from 'axios';
 
+type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
 
+// interface ILoginHeaderProps {
+// 	isMetamaskConnected?: boolean;
+// 	callingDApp?: String;
+// }
 
-interface ILoginHeaderProps {
-	isMetamaskConnected?: boolean;
-	callingDApp?: String;
-}
-const LoginHeader: FC<ILoginHeaderProps> = ({ isMetamaskConnected, callingDApp }) => {
-	if (!isMetamaskConnected) {
-		return (
-			<>
-			<div className='text-center h1 fw-bold mt-5'>Social Connect</div>
-			<div className='text-center h4 text-muted mb-5'>Sign in to continue!</div>
-			</>
-		);
-	}
+const LoginHeader: FC<any> = ({step}) => {
 	return (
 		<>
-			<div className='text-center h1 fw-bold mt-5'>Social Connect</div>
-			<div className='text-center h4 text-muted mb-5'>Connect your social profiles</div>
-			<div className='text-center h5 text-muted mb-5'>{callingDApp}</div>
+			<div className='text-center h1 fw-bold' style={{marginTop: "50px"}}>Social Connect</div>
+			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Subscribe to access early bird benefits</div>)}
+			{step === "submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>A verification code will be sent to your email</div>)}
+			{step === "verify" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Enter the 6 digit code sent to your email</div>)}
+			{step === "success" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Subscription successful. Congrats!</div>)}
 		</>
 	);
 };
+const LoginFooter: FC<any> = () => {
+	return (
+		<>
+			<div className="d-flex align-items-center justify-content-center" style={{marginTop: "50px"}}>
+				Powered by 
+				<a href="https://twitter.com/PluralityWeb3" target="_blank" rel="noopener noreferrer">
+					<img src={PLogo} alt="Logo" style={{width: "100px", height: "40px"}}/>
+				</a>
+			</div>
+		</>
+	);
+};
+const CenteredImage: FC<any> = ({imageSrc, width, height}) => {
+	return (
+		<>
+			<div className='d-flex align-items-center justify-content-center'>
+				<img src={imageSrc} alt="GIF Image"  style={{width: width, height: height}}/>
+			</div>
+		</>
+	);
+};
+
 LoginHeader.defaultProps = {
 	isMetamaskConnected: false,
 	callingDApp: "http://some-dapp.com"
@@ -59,7 +80,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
 	
 	const navigate = useNavigate();
-	const handleOnClick = useCallback(() => navigate('/'), [navigate]);
 
 	// metamask hooks
 	const [state, dispatch] = useContext(MetaMaskContext);
@@ -73,12 +93,63 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { showLoading, hideLoading } = useContext(LoadingContext);
 
 	// wagmi connectors and disconnectors
-	const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
+	const { connect, connectors } = useConnect();
 	const { address, connector, isConnected } = useAccount();
-	const { disconnect } = useDisconnect()
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
 	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
+
+	// Stytch
+	const [step, setStep] = useState<OtpStep>("pre-submit");
+	const moveBack = () => {
+		setStep("pre-submit")
+	}
+	const sendCode = () => {
+		setStep("verify")
+	}
+	const tryAgain = () => {
+		setStep("submit")
+	}
+	const handleEmailOnClick = () => {
+		setStep("submit")
+	};
+
+	const showSuccess = () => {
+		setStep("success")
+	}
+
+	const skipEmailRegistration = async () => {
+		showLoading();
+		const currentAddress = await checkAddressExistence()
+		// if this guy has already registered this metamask address with an email
+		if (currentAddress.data.exists){
+			hideLoading();
+			showSuccess();
+		} else {
+			const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch';
+			axios.post(apiUrl, {
+				data: {email: "", address: address, subscribe: false}
+				})
+				.then(function (response) {
+				if(response.status === 200) {
+					showSuccess();
+				} 
+				})
+				.catch(function (error) {
+				alert("Something goes wrong, please try again!")
+				})
+			hideLoading();
+		}
+	}
+
+	const checkAddressExistence = () => {
+		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-address'
+		return axios.get(apiUrl,{
+		  params: {
+			  address: address
+		}
+		})
+	  }
 
 	const handleMetamaskConnect = async () => {
 		try {	
@@ -321,6 +392,20 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [address])
 
+	useEffect(() => {
+		if(address) {
+			showLoading();
+			checkAddressExistence().then(res => {
+				if (!res.data.exists) {
+					setStep("pre-submit");
+				} else {
+					setStep("success");
+				}
+				hideLoading();
+			})		
+		}
+	}, [address])
+
 	return (
 		<PageWrapper
 			isProtected={false}
@@ -332,7 +417,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
 						<Card className='shadow-3d-dark' data-tour='login-page'>
 							<CardBody>
-								<div className='text-center mt-4'>
+								<div className='text-center mt-5'>
 									<div
 										className={classNames(
 											'text-decoration-none  fw-bold display-2',
@@ -342,8 +427,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											},
 										)}
 										aria-label='Facit'>
-										{/* <Logo width={200}/> */}
-										<img src={PLogo} alt="Logo" style={{height: "140px"}}/>
+										{/* Here goes logo */}
+										<CenteredImage imageSrc={mvfwImage} width={250} height={80}/>
 									</div>
 								</div>
 								<div
@@ -355,11 +440,36 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</div>
 
 									{/* BEGIN :: Metamask Login or Google Login */}
-									{!address && (
+										<LoginHeader step={step} isMetamaskConnected={false} callingDApp={callingDApp}/>
+										{step === "pre-submit" && (
 										<>
-											<LoginHeader isMetamaskConnected={false} callingDApp={callingDApp}/>
-											<form className='row g-4'>
-											<div className='col-12 mt-3'>
+											<div className='col-12'>
+												<Button
+													isOutline
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='Email'
+													onClick={handleEmailOnClick}
+													>
+													{address ? "Register your Email" : "Continue with Email"}
+												</Button>
+											</div>
+											{address && (
+												<div className="d-flex justify-content-center mt-1">
+													<a href="#" onClick={skipEmailRegistration}>Skip</a>
+												</div>	
+											)}
+										</>
+										)}
+										{!address && step === "pre-submit" && (
+										<>
+											<div className='col-12 mt-4 text-center text-muted'>
+												OR
+											</div>
+											<div className='col-12 mt-4'>
 												<Button
 													isOutline
 													color={darkModeStatus ? 'light' : 'dark'}
@@ -369,34 +479,44 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													})}
 													icon='CustomMetamask'
 													onClick={handleMetamaskConnect}>
-													Sign in with MetaMask
+													Continue with MetaMask
 												</Button>
 											</div>
-											<div className='col-12 mt-3 text-center text-muted'>
-												OR
-											</div>
-											<div className='col-12'>
-												<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomGoogle'
-													onClick={handleOnClick}
-													isDisable>
-													Coming Soon
-												</Button>
-											</div>
-											</form>
-										</>
-										
+										</>	
+										)}
+									{/* END :: Metamask Login or Email Login */}
+
+									{/* BEGIN :: Stych workflow */}
+									{
+										(step === "submit" || step === "verify") && (
+											<>
+											<StytchOTP showSuccess={showSuccess} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address}/>
+											</>
 									)}
-									{/* END :: Metamask Login or Google Login */}
+									{/* END :: Stych workflow */}
+
+									{/* BEGIN :: Success page */}
+									{
+										(step === "success") && (
+											<>
+											<div className='d-flex align-items-center justify-content-center' style={{marginTop: "70px"}}>
+												<p>Stay Connected with us!</p>
+											</div>
+											<div className='d-flex align-items-center justify-content-center' style={{marginBottom: "90px"}}>
+												<a href="https://x.com/mvfwofficial?s=21&t=1GCSt3HPM8WcPENlVpgHfQ" target="_blank" rel="noopener noreferrer">
+													<img src={Twitter} style={{height: "45px", width: "45px"}} alt="Twitter" />
+												</a>
+												<a href="https://www.instagram.com/mvfwofficial?igsh=MW15MW5hem44MTR3dQ==" target="_blank" rel="noopener noreferrer">
+													<img src={Instagram} style={{height: "50px", width: "50px", marginLeft: "10px"}} alt="Instagram" />
+												</a>
+											</div>
+											</>
+									)}
+									{/* END :: Success page */}
+									
 
 									{/* BEGIN :: Social Login */}
-									{address && isWidget &&(
+									{address && isWidget && step === "post-submit" &&(
 										<>
 										<LoginHeader isMetamaskConnected={true} callingDApp={callingDApp} />
 
@@ -477,6 +597,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										</>
 									)}
 									{/* END :: Social Login */}
+									{/* START:: Footer */}
+									<LoginFooter/>
+									{/* END :: Footer */}
 							</CardBody>
 						</Card>
 						<div className='text-center'>

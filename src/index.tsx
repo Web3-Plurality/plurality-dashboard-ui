@@ -8,13 +8,21 @@ import reportWebVitals from './reportWebVitals';
 import { ThemeContextProvider } from './contexts/themeContext';
 import { AuthContextProvider } from './contexts/authContext';
 import './i18n';
+import { StytchProvider } from '@stytch/react';
+import { StytchUIClient } from '@stytch/vanilla-js';
+
+const stytch = new StytchUIClient(
+  process.env.REACT_APP_PUBLIC_STYTCH_PUBLIC_TOKEN || ''
+);
 
 const children = (
 	<AuthContextProvider>
 		<ThemeContextProvider>
-			<Router>
-					<App />
-			</Router>
+			<StytchProvider stytch={stytch}>
+				<Router>
+						<App />
+				</Router>
+			</StytchProvider>
 		</ThemeContextProvider>
 	</AuthContextProvider>
 );
