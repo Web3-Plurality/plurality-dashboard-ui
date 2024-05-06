@@ -34,7 +34,7 @@ const EventListener: React.FC = () => {
 
               }
         
-              if (data.type === 'metamaskRequest' && data.method === 'eth_requestAccounts') {
+              if (data.type === 'metamaskRequest' && data.method === 'getConnectedAccount') {
                   // Call MetaMask method
                   window.ethereum.request({ method: 'eth_requestAccounts' })
                       .then(accounts => {
@@ -45,7 +45,7 @@ const EventListener: React.FC = () => {
                           // Handle error
                       });
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'personal_sign' && data.message) {
+              else if (data.type === 'metamaskRequest' && data.method === 'getMessageSignature' && data.message) {
                   // signMessage();
                   // window.parent.postMessage({ type: 'metamaskResponse', data: "personal sign response" }, parentUrl);
   
