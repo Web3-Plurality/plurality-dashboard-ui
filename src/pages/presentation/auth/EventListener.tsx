@@ -25,13 +25,11 @@ const EventListener: React.FC = () => {
                 return; //todo: send to parent?
                 
               } else {
-                
                 // Connect to the MetaMask EIP-1193 object. This is a standard
                 // protocol that allows Ethers access to make all read-only
                 // requests through MetaMask.
                 provider = new ethers.BrowserProvider(window.ethereum);
                 signer = await provider.getSigner();
-
               }
         
               if (data.type === 'metamaskRequest' && data.method === 'getAllAccounts') {
@@ -57,7 +55,13 @@ const EventListener: React.FC = () => {
               else if (data.type === 'metamaskRequest' && data.method === 'verifyMessageSignature' && data.signature && data.message) {
                 try {
                 let signerAddress = verifyMessage(data.message, data.signature);
-                window.parent.postMessage({ type: 'metamaskResponse', data: signerAddress }, parentUrl);
+                if (signerAddress == await signer.getAddress()) {
+                  window.parent.postMessage({ type: 'metamaskResponse', data: "true" }, parentUrl);
+                }
+                else {
+                  window.parent.postMessage({ type: 'metamaskResponse', data: "false" }, parentUrl);
+
+                }
                 }
                 catch (e) {
                   console.log(e);
