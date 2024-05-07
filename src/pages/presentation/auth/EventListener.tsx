@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, verifyMessage } from 'ethers';
 import { BrowserProvider, parseUnits } from "ethers";
 
 import React, { useEffect } from 'react';
@@ -34,45 +34,17 @@ const EventListener: React.FC = () => {
 
               }
         
-              if (data.type === 'metamaskRequest' && data.method === 'getConnectedAccount') {
-                  // Call MetaMask method
-                  window.ethereum.request({ method: 'eth_requestAccounts' })
-                      .then(accounts => {
-                          // Send response back to parent application
-                          window.parent.postMessage({ type: 'metamaskResponse', data: accounts }, parentUrl);
-                      })
-                      .catch(error => {
-                          // Handle error
-                      });
+              if (data.type === 'metamaskRequest' && data.method === 'getAllAccounts') {
+                const accounts = await provider.listAccounts();
+                window.parent.postMessage({ type: 'metamaskResponse', data: accounts }, parentUrl);
+
               }
+              else if (data.type === 'metamaskRequest' && data.method === 'getConnectedAccount') {
+                const accounts = await provider.listAccounts();
+                window.parent.postMessage({ type: 'metamaskResponse', data: accounts[0] }, parentUrl);
+              }
+                            
               else if (data.type === 'metamaskRequest' && data.method === 'getMessageSignature' && data.message) {
-                  // signMessage();
-                  // window.parent.postMessage({ type: 'metamaskResponse', data: "personal sign response" }, parentUrl);
-  
-                 
-                  // Call MetaMask method
-                  // const from = selectedAccount;
-                  // For historical reasons, you must submit the message to sign in hex-encoded UTF-8.
-                  // This uses a Node.js-style buffer shim in the browser.
-                  // const msg = `0x${btoa(data.message)}`;
-                  /*console.log("Received personal sign request: " , event.origin);
-                  window.ethereum.request({ method: 'eth_requestAccounts' })
-                      .then(accounts => {
-                       
-                          window.ethereum.request({ method: 'personal_sign', params: [data.message, "0xCD96f257Cc6603132Cf6B8709Ae14F0A391d1916"] })
-                          .then(result => {
-                              console.log("Sign result: "+ result);
-                              // Send response back to parent application
-                              window.parent.postMessage({ type: 'metamaskResponse', data: result }, parentUrl);
-                          })
-                          .catch(error => {
-                              // Handle error
-                          });
-                          
-                      })
-                      .catch(error => {
-                          // Handle error
-                      });*/
                       try {
                       let signature = await signer.signMessage(data.message);
                       window.parent.postMessage({ type: 'metamaskResponse', data: signature }, parentUrl);
@@ -81,6 +53,16 @@ const EventListener: React.FC = () => {
                         console.log(e);
                       }
                   
+              }
+              else if (data.type === 'metamaskRequest' && data.method === 'verifyMessageSignature' && data.signature && data.message) {
+                try {
+                let signerAddress = verifyMessage(data.message, data.signature);
+                window.parent.postMessage({ type: 'metamaskResponse', data: signerAddress }, parentUrl);
+                }
+                catch (e) {
+                  console.log(e);
+                }
+            
               }
               else if (data.type === 'metamaskRequest' && data.method === 'getBalance') {
                 let connectedAddress= await signer.getAddress();
@@ -98,8 +80,27 @@ const EventListener: React.FC = () => {
                 const receipt = await tx.wait();
                 window.parent.postMessage({ type: 'metamaskResponse', data: receipt }, parentUrl);
               }
-              
-          }
+              else if (data.type === 'metamaskRequest' && data.method === 'getBlockNumber' ) {
+                const blockNumber = await provider.getBlockNumber();
+                window.parent.postMessage({ type: 'metamaskResponse', data: blockNumber }, parentUrl);
+              }
+              else if (data.type === 'metamaskRequest' && data.method === 'getTransactionCount' && data.address ) {
+                const transactionCount = await provider.getTransactionCount(data.address);
+                window.parent.postMessage({ type: 'metamaskResponse', data: transactionCount }, parentUrl);
+              }
+              else if (data.type === 'metamaskRequest' && data.method === 'readFromContract' && data.contractAddress && data.abi && data.methodName && data.methodParams) {
+                // to be implemented
+                const contract = new ethers.Contract(data.contractAddress, data.abi,provider);
+                const method = contract.getFunction(data.methodName);
+                const methodResponse = await method(data.methodParams);
+              }
+              else if (data.type === 'metamaskRequest' && data.method === 'writeToContract' && data.address ) {
+                // to be implemented
+                const contract = new ethers.Contract(data.contractAddress, data.abi,signer);
+
+              }
+
+            }
       };
   useEffect(() => {
 
