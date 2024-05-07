@@ -60,13 +60,11 @@ const EventListener: React.FC = () => {
                 }
                 else {
                   window.parent.postMessage({ type: 'metamaskResponse', data: "false" }, parentUrl);
-
-                }
+                 }
                 }
                 catch (e) {
                   console.log(e);
                 }
-            
               }
               else if (data.type === 'metamaskRequest' && data.method === 'getBalance') {
                 let connectedAddress= await signer.getAddress();
@@ -92,25 +90,48 @@ const EventListener: React.FC = () => {
                 const transactionCount = await provider.getTransactionCount(data.address);
                 window.parent.postMessage({ type: 'metamaskResponse', data: transactionCount }, parentUrl);
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'readFromContract' && data.contractAddress && data.abi && data.methodName && data.methodParams) {
+              else if (data.type === 'metamaskRequest' && data.method === 'readFromContract' && data.contractAddress && data.abi && data.methodName) {
                 // to be implemented
                 const contract = new ethers.Contract(data.contractAddress, data.abi,provider);
-                const method = contract.getFunction(data.methodName);
-                const methodResponse = await method(data.methodParams);
+                if (!contract[data.methodName]) {
+                  throw new Error(`Method ${data.methodName} does not exist on the contract.`);
+                }
+                try {
+                    let result;
+                    if (!data.methodParams) {
+                      result = await contract[data.methodName]();
+                    }
+                    else {
+                      result = await contract[data.methodName](...data.methodParams);
+                    }
+                    window.parent.postMessage({ type: 'metamaskResponse', data: result }, parentUrl);
+                  } catch (error) {
+                    window.parent.postMessage({ type: 'metamaskResponse', data: error }, parentUrl);
+                }
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'writeToContract' && data.address ) {
-                // to be implemented
+              else if (data.type === 'metamaskRequest' && data.method === 'writeToContract' && data.contractAddress && data.abi && data.methodName ) {
                 const contract = new ethers.Contract(data.contractAddress, data.abi,signer);
-
+                if (!contract[data.methodName]) {
+                  throw new Error(`Method ${data.methodName} does not exist on the contract.`);
+                }
+                try {
+                  let result;
+                  if (!data.methodParams) {
+                    result = await contract[data.methodName]();
+                  }
+                  else {
+                    result = await contract[data.methodName](...data.methodParams);
+                  }
+                  window.parent.postMessage({ type: 'metamaskResponse', data: result }, parentUrl);
+                  } catch (error) {
+                    window.parent.postMessage({ type: 'metamaskResponse', data: error }, parentUrl);
+                }
               }
-
             }
       };
   useEffect(() => {
 
-
     window.addEventListener('message', receiveMessage, false);
-
     // Cleanup function to remove the event listener
     return () => {
       window.removeEventListener('message', receiveMessage);
