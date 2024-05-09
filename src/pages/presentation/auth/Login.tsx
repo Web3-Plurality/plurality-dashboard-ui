@@ -21,7 +21,6 @@ import PLogo from '../../../assets/img/new-logo.png';
 import StytchOTP from '../../../components/StytchOTP';
 import Instagram from '../../../assets/instagram.png';
 import Twitter from '../../../assets/twitter.png';
-import mvfwImage from '../../../assets/metaverse-fashion-week-2022.jpg';
 import axios from 'axios';
 
 type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
@@ -39,6 +38,7 @@ const LoginHeader: FC<any> = ({step}) => {
 			{step === "submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>A verification code will be sent to your email</div>)}
 			{step === "verify" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Enter the 6 digit code sent to your email</div>)}
 			{step === "success" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Subscription successful. Congrats!</div>)}
+			{step === "post-submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Please connect your social profiles</div>)}
 		</>
 	);
 };
@@ -118,28 +118,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		setStep("success")
 	}
 
+	const showPostSubmit = () => {
+		setStep("post-submit")
+	}
+
 	const skipEmailRegistration = async () => {
 		showLoading();
-		const currentAddress = await checkAddressExistence()
-		// if this guy has already registered this metamask address with an email
-		if (currentAddress.data.exists){
-			hideLoading();
-			showSuccess();
-		} else {
-			const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch';
-			axios.post(apiUrl, {
-				data: {email: "", address: address, subscribe: false}
-				})
-				.then(function (response) {
-				if(response.status === 200) {
-					showSuccess();
-				} 
-				})
-				.catch(function (error) {
-				alert("Something goes wrong, please try again!")
-				})
-			hideLoading();
-		}
+		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch';
+		axios.post(apiUrl, {
+			data: {email: "", address: address, subscribe: false}
+			})
+			.then(function (response) {
+			if(response.status === 200) {
+				showPostSubmit();
+			} 
+			})
+			.catch(function (error) {
+			alert("Something goes wrong, please try again!")
+			})
+		hideLoading();
 	}
 
 	const checkAddressExistence = () => {
@@ -399,7 +396,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				if (!res.data.exists) {
 					setStep("pre-submit");
 				} else {
-					setStep("success");
+					setStep("post-submit");
 				}
 				hideLoading();
 			})		
@@ -428,7 +425,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										)}
 										aria-label='Facit'>
 										{/* Here goes logo */}
-										<CenteredImage imageSrc={mvfwImage} width={250} height={80}/>
+										<CenteredImage imageSrc={PLogo} width={200} height={80}/>
 									</div>
 								</div>
 								<div
@@ -439,36 +436,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								
 								</div>
 
-									{/* BEGIN :: Metamask Login or Google Login */}
+									{/* BEGIN :: Metamask Login*/}
 										<LoginHeader step={step} isMetamaskConnected={false} callingDApp={callingDApp}/>
-										{step === "pre-submit" && (
-										<>
-											<div className='col-12'>
-												<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='Email'
-													onClick={handleEmailOnClick}
-													>
-													{address ? "Register your Email" : "Continue with Email"}
-												</Button>
-											</div>
-											{address && (
-												<div className="d-flex justify-content-center mt-1">
-													<a href="#" onClick={skipEmailRegistration}>Skip</a>
-												</div>	
-											)}
-										</>
-										)}
 										{!address && step === "pre-submit" && (
 										<>
-											<div className='col-12 mt-4 text-center text-muted'>
+											{/* <div className='col-12 mt-4 text-center text-muted'>
 												OR
-											</div>
+											</div> */}
 											<div className='col-12 mt-4'>
 												<Button
 													isOutline
@@ -484,13 +458,37 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											</div>
 										</>	
 										)}
-									{/* END :: Metamask Login or Email Login */}
+									{/* END :: Metamask Login*/}
+
+									{/* BEGIN :: Add email or skip */}
+									{address && step === "pre-submit" && (
+										<>
+											<div className='col-12'>
+												<Button
+													isOutline
+													color={darkModeStatus ? 'light' : 'dark'}
+													className={classNames('w-100 py-3', {
+														'border-light': !darkModeStatus,
+														'border-dark': darkModeStatus,
+													})}
+													icon='Email'
+													onClick={handleEmailOnClick}
+													>
+													{address ? "Register your Email" : "Continue with Email"}
+												</Button>
+											</div>
+											<div className="d-flex justify-content-center mt-1">
+												<a href="#" onClick={skipEmailRegistration}>Skip</a>
+											</div>	
+										</>
+										)}
+									{/* END :: Add email or skip */}
 
 									{/* BEGIN :: Stych workflow */}
 									{
 										(step === "submit" || step === "verify") && (
 											<>
-											<StytchOTP showSuccess={showSuccess} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address}/>
+											<StytchOTP showPostSubmit={showPostSubmit} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address}/>
 											</>
 									)}
 									{/* END :: Stych workflow */}
@@ -518,8 +516,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									{/* BEGIN :: Social Login */}
 									{address && isWidget && step === "post-submit" &&(
 										<>
-										<LoginHeader isMetamaskConnected={true} callingDApp={callingDApp} />
-
 											<form className='row g-4'>
 											{isTwitterSelected && (<div className='col-12 mt-3'>
 												<Button
