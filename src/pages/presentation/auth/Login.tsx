@@ -147,6 +147,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 		})
 	  }
+	const isInsideIframe = window.self !== window.top;
+
 
 	const handleMetamaskConnect = async () => {
 		try {	
@@ -407,7 +409,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		<PageWrapper
 			isProtected={false}
 			title={singUpStatus ? 'Sign Up' : 'Login'}
-			className={classNames({ 'bg-dark': !singUpStatus, 'bg-light': singUpStatus })}>
+			// className={classNames({ 'bg-dark': !singUpStatus, 'bg-light': singUpStatus })}
+			>
 			<Page className='p-0'>
 				{/*{ !renderBlocker && (*/
 				<div className='row h-100 align-items-center justify-content-center'>
@@ -598,7 +601,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									{/* END :: Footer */}
 							</CardBody>
 						</Card>
-						<div className='text-center'>
+						{!isInsideIframe && <div className='text-center'>
 							<a
 								href='/'
 								className={classNames('text-decoration-none me-3', {
@@ -615,7 +618,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								})}>
 								Terms of use
 							</a>
-						</div>
+						</div>}
 					</div>
 				</div>
 				/*)}*/}

@@ -43,7 +43,7 @@ const PageWrapper = forwardRef<HTMLDivElement, IPageWrapperProps>(
 		// }, []);
 
 		return (
-			<div ref={ref} className={classNames('page-wrapper', 'container-fluid', className)}>
+			<div ref={ref} style={{backgroundColor: '#ffffff'}} className={classNames('page-wrapper', 'container-fluid', className)}>
 				{children}
 			</div>
 		);
