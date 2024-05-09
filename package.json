@@ -1,6 +1,6 @@
 {
 	"name": "plurality-dashboard",
-	"version": "1.6.0",
+	"version": "1.6.1",
 	"private": true,
 	"scripts": {
 		"start": "cross-env GENERATE_SOURCEMAP=false react-app-rewired start",
