@@ -23,7 +23,7 @@ import Instagram from '../../../assets/instagram.png';
 import Twitter from '../../../assets/twitter.png';
 import axios from 'axios';
 
-type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
+type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success' | 'creating-profile';
 
 // interface ILoginHeaderProps {
 // 	isMetamaskConnected?: boolean;
@@ -85,8 +85,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [state, dispatch] = useContext(MetaMaskContext);
 
 	// social logins connection hooks
-	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
-	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
+	const [isFacebookConnected, setIsFacebookConnected] = useState<Boolean>(false);
+	const [isTwitterConnected, setIsTwitterConnected] = useState<Boolean>(false);
 	const [callingDApp, setCallingDApp] = useState<String>("");
 	const [isFacebookSelected, setIsFacebookSelected] = useState<Boolean>(false);
 	const [isTwitterSelected, setIsTwitterSelected] = useState<Boolean>(false);
@@ -178,7 +178,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									JSON.stringify(profile)
 								);
 			if (isProfileCreated) {
-				setFacebookConnected(true);
+				setIsFacebookConnected(true);
 				// We can construct the profile data from user login data
 				const profileDataObj = constructProfileData(AssetType.INTEREST, interests, process.env.REACT_APP_FACEBOOK!, JSON.stringify(profile));
 				if (profileDataObj) {
@@ -252,7 +252,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 		if (profileDataObj) {
 			window.parent?.postMessage(profileDataObj, origin);
-			setTwitterConnected(true);
+			setIsTwitterConnected(true);
 			hideLoading();
 			window.close();
 		}
@@ -266,13 +266,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			console.log("Child window: ");
 			console.log(childWindow);
 			// Loop in main window	
-			while (!isTwitterConnected) {
+			while (!isTwitterConnected && window.parent !== null) {
 				console.log("Twitter not yet connected, so waiting");
 				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 				if (profileDataObj) {
 					childWindow!.close();
 					window.parent?.postMessage(profileDataObj, origin);
-					setTwitterConnected(true);
+					setIsTwitterConnected(true);
 					hideLoading();
 					window.close();
 				}
@@ -282,7 +282,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				}
 			}
 		}
-	  };
+	  }; 
 
 	// Function to call before the Facebook popup
 	const handleBeforeFacebookPopup = async (rednerPropsOnclick: Function) => {
@@ -297,7 +297,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
 			window.parent?.postMessage(profileDataObj, origin);
-			setFacebookConnected(true);
+			setIsFacebookConnected(true);
 			window.close();
 		} else {
 			// if there is no profile yet, we connect facebook
@@ -351,6 +351,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const description = 'some description';
 			const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
 			showLoading();
+			setStep("creating-profile")
 			createProfile(process.env.REACT_APP_TWITTER!, 
 						process.env.REACT_APP_TWITTER_GROUP_ID!,
 						username,
@@ -359,7 +360,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
 							if (isProfileCreated) {
 								// Add condition for making sure that the user has indeed connected
-								//setTwitterConnected(true);
+								setIsTwitterConnected(true);
 								console.log("Twitter is successfully connected");
 								wait(5000).then(res=>{
 									window.close();
