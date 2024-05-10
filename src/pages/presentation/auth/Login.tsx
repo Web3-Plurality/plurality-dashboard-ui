@@ -185,7 +185,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				if (profileDataObj) {
 					const params = new URLSearchParams(window.location.search)
 					const origin = params.get('origin')!;
-					window.parent?.postMessage(profileDataObj, origin);
+					window.parent.postMessage({ type: 'facebookResponse', data: profileDataObj }, origin);
+
 					wait(5000).then(res=>{
 						window.close();
 					}).catch(console.error);
@@ -253,7 +254,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		showLoading();
 		const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 		if (profileDataObj) {
-			window.parent?.postMessage(profileDataObj, origin);
+			window.parent.postMessage({ type: 'twitterResponse', data: profileDataObj }, origin);
+
 			setIsTwitterConnected(true);
 			hideLoading();
 			//window.close();
@@ -273,12 +275,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				console.log("Twitter not yet connected, so waiting");
 				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 				if (profileDataObj) {
-					//childWindow!.close();
-					window.parent?.postMessage(profileDataObj, origin);
+					window.parent.postMessage({ type: 'twitterResponse', data: profileDataObj }, origin);
 					setIsTwitterConnected(true);
 					breakLoop=true;
 					hideLoading();
-					//window.close();
 				}
 				else {
 					console.log("waiting");
@@ -286,7 +286,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				}
 			}
 		}
-	  }; 
+	}; 
 
 	// Function to call before the Facebook popup
 	const handleBeforeFacebookPopup = async (renderPropsOnclick: Function) => {
@@ -300,7 +300,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if (profileDataObj) {
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
-			window.parent?.postMessage(profileDataObj, origin);
+			window.parent.postMessage({ type: 'facebookResponse', data: profileDataObj }, origin);
 			setIsFacebookConnected(true);
 			hideLoading();
 			window.close();

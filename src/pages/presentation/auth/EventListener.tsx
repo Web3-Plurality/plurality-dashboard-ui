@@ -70,7 +70,7 @@ const EventListener: React.FC = () => {
                 let connectedAddress= await signer.getAddress();
                 console.log("Connected address: "+ connectedAddress)
                 let balance = await provider.getBalance(connectedAddress);
-                window.parent.postMessage({ type: 'metamaskResponse', data: balance }, parentUrl);
+                window.parent.postMessage({ type: 'metamaskResponse', data: balance.toString() + 'n' }, parentUrl);
               }
               else if (data.type === 'metamaskRequest' && data.method === 'sendTransaction' && data.sendTo && data.value) {
                 let connectedAddress= await signer.getAddress();
