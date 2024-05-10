@@ -22,6 +22,7 @@ import StytchOTP from '../../../components/StytchOTP';
 import Instagram from '../../../assets/instagram.png';
 import Twitter from '../../../assets/twitter.png';
 import axios from 'axios';
+import { useWindowScroll } from 'react-use';
 
 type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success' | 'creating-profile';
 
@@ -198,12 +199,15 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			}
 			catch (error) {
 				console.log(error);
+				alert(error);
 				hideLoading();
 			}
 			
 		}
 		else {
 			console.log("access token not found");
+			alert("Could not sign in to facebook");
+			hideLoading();
 		}
 	};	
 
@@ -230,13 +234,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}
 
 	const openTwitterOAuthPopup = async () => {
-		const params = new URLSearchParams(window.location.search)
+		const params = new URLSearchParams(window.location.search);
 		const isWidget = params.get('isWidget')!;
 		const origin = params.get('origin')!;
 		const apps = params.get('apps')!;
 		const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?apps=${apps}&isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
-		//TODO: Change it back
-		//const apiUrl = "http://localhost:3000/auth-pages/login?isWidget=true&origin=http://localhost:3001/&id_platform=twitter&username=hirasiddiqui199&display_name=HiraSiddiqui&picture_url=https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"; // Replace with your Twitter API endpoint
 		// Define the dimensions for the popup window
 		const popupWidth = 450;
 		const popupHeight = 540;
@@ -254,7 +256,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			window.parent?.postMessage(profileDataObj, origin);
 			setIsTwitterConnected(true);
 			hideLoading();
-			window.close();
+			//window.close();
 		}
 		else {
 			// Open the popup window
@@ -265,16 +267,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			);
 			console.log("Child window: ");
 			console.log(childWindow);
-			// Loop in main window	
-			while (!isTwitterConnected && window.parent !== null) {
+			// Loop in main window
+			let breakLoop = false;	
+			while (!isTwitterConnected && !breakLoop) {
 				console.log("Twitter not yet connected, so waiting");
 				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 				if (profileDataObj) {
-					childWindow!.close();
+					//childWindow!.close();
 					window.parent?.postMessage(profileDataObj, origin);
 					setIsTwitterConnected(true);
+					breakLoop=true;
 					hideLoading();
-					window.close();
+					//window.close();
 				}
 				else {
 					console.log("waiting");
@@ -296,7 +300,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if (profileDataObj) {
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
-			alert("Sending to parent");
 			window.parent?.postMessage(profileDataObj, origin);
 			setIsFacebookConnected(true);
 			hideLoading();
