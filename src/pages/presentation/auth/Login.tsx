@@ -184,7 +184,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				if (profileDataObj) {
 					const params = new URLSearchParams(window.location.search)
 					const origin = params.get('origin')!;
-					window.opener?.postMessage(profileDataObj, origin);
+					window.parent?.postMessage(profileDataObj, origin);
 					wait(5000).then(res=>{
 						window.close();
 					}).catch(console.error);
@@ -285,23 +285,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	  }; 
 
 	// Function to call before the Facebook popup
-	const handleBeforeFacebookPopup = async (rednerPropsOnclick: Function) => {
+	const handleBeforeFacebookPopup = async (renderPropsOnclick: Function) => {
 		//If metamask is somehow not connected
 		if (!address) {
 			await ensureMetamaskConnection()
 		}
-		// Check if twitter profile already exists at orbis
+		// Check if facebook profile already exists at orbis
 		showLoading();
 		const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
 		if (profileDataObj) {
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
+			alert("Sending to parent");
 			window.parent?.postMessage(profileDataObj, origin);
 			setIsFacebookConnected(true);
+			hideLoading();
 			window.close();
 		} else {
 			// if there is no profile yet, we connect facebook
-			rednerPropsOnclick();
+			renderPropsOnclick();
 		}
 	}
 	 
