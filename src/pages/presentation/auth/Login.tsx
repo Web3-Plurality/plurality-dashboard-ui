@@ -89,6 +89,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isTwitterSelected, setIsTwitterSelected] = useState<Boolean>(false);
 	const { showLoading, hideLoading } = useContext(LoadingContext);
 
+	// profile data
+	const [userProfiles, setUserProfiles] = useState<any[]>([]);
+
 	// wagmi connectors and disconnectors
 	const { connect, connectors } = useConnect();
 	const { address, connector, isConnected } = useAccount();
@@ -136,6 +139,22 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		hideLoading();
 	}
 
+	// If the user skipped the profile connect
+	const skipConnectProfiles = async () => {
+		showLoading();
+		const params = new URLSearchParams(window.location.search)
+		const origin = params.get('origin')!;
+		// If nothing is connected
+		if(userProfiles.length === 0) {
+			window.parent.postMessage({ type: 'null', data: [] }, origin);
+		} else if (userProfiles.length > 0 && userProfiles[0].dataFetchedFrom === "twitter") {
+			window.parent.postMessage({ type: 'twitterResponse', data: [userProfiles[0]] }, origin);
+		} else if (userProfiles.length > 0 && userProfiles[0].dataFetchedFrom === "facebook") {
+			window.parent.postMessage({ type: 'facebookResponse', data: [userProfiles[0]] }, origin);
+		}
+		hideLoading();
+	}
+
 	const checkAddressExistence = () => {
 		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-address'
 		return axios.get(apiUrl,{
@@ -144,7 +163,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 		})
 	  }
-	const isInsideIframe = window.self !== window.top;
 
 
 	const handleMetamaskConnect = async () => {
@@ -181,8 +199,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				if (profileDataObj) {
 					const params = new URLSearchParams(window.location.search)
 					const origin = params.get('origin')!;
-					window.parent.postMessage({ type: 'facebookResponse', data: profileDataObj }, origin);
-
+					setUserProfiles([...userProfiles, profileDataObj])
 					wait(5000).then(res=>{
 						window.close();
 					}).catch(console.error);
@@ -250,8 +267,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		showLoading();
 		const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 		if (profileDataObj) {
-			window.parent.postMessage({ type: 'twitterResponse', data: profileDataObj }, origin);
-
+			setUserProfiles([...userProfiles, profileDataObj]);
 			setIsTwitterConnected(true);
 			hideLoading();
 			//window.close();
@@ -271,7 +287,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				console.log("Twitter not yet connected, so waiting");
 				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 				if (profileDataObj) {
-					window.parent.postMessage({ type: 'twitterResponse', data: profileDataObj }, origin);
+					setUserProfiles([...userProfiles, profileDataObj]);
 					setIsTwitterConnected(true);
 					breakLoop=true;
 					hideLoading();
@@ -296,7 +312,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if (profileDataObj) {
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
-			window.parent.postMessage({ type: 'facebookResponse', data: profileDataObj }, origin);
+			setUserProfiles([...userProfiles, profileDataObj]);
 			setIsFacebookConnected(true);
 			hideLoading();
 			window.close();
@@ -360,8 +376,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						AssetType.INTEREST,
 						getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
 							if (isProfileCreated) {
-								// Add condition for making sure that the user has indeed connected
-								setIsTwitterConnected(true);
 								console.log("Twitter is successfully connected");
 								wait(5000).then(res=>{
 									window.close();
@@ -411,6 +425,15 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			})		
 		}
 	}, [address])
+
+	// userProfiles useEffect hook, once all profiles are connected, we return the userprofile back the profiles
+	useEffect(() => {
+		if (userProfiles.length === 2) {
+			const params = new URLSearchParams(window.location.search)
+			const origin = params.get('origin')!;
+			window.parent.postMessage({ type: 'bothResponse', data: userProfiles }, origin);
+		}
+	}, [userProfiles])
 
 	return (
 		<PageWrapper
@@ -589,7 +612,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													</Button>
 													)}
 												/>
-												<div className='text-center col-12 mt-3'>
+												<div className="d-flex justify-content-center mt-1">
+													<a href="#" onClick={skipConnectProfiles}>Skip</a>
+												</div>	
+												<div className='text-center col-12 mt-1'>
 												<a href='mailto:hirasiddiqui95@gmail.com'>
 														<br />
 													Please contact <u>devs</u> to request access for facebook
