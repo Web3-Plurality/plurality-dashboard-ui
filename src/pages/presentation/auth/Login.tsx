@@ -26,11 +26,6 @@ import { useWindowScroll } from 'react-use';
 
 type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success' | 'creating-profile';
 
-// interface ILoginHeaderProps {
-// 	isMetamaskConnected?: boolean;
-// 	callingDApp?: String;
-// }
-
 const LoginHeader: FC<any> = ({step}) => {
 	return (
 		<>
@@ -453,11 +448,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 									{/* BEGIN :: Metamask Login*/}
 										<LoginHeader step={step} isMetamaskConnected={false} callingDApp={callingDApp}/>
-										{!address && step === "pre-submit" && (
+										{!address && (
 										<>
-											{/* <div className='col-12 mt-4 text-center text-muted'>
-												OR
-											</div> */}
 											<div className='col-12 mt-4'>
 												<Button
 													isOutline
