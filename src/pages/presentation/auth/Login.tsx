@@ -435,6 +435,20 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [userProfiles])
 
+	useEffect(() => {
+		const handleMessage = (event: any) => {
+		  if (event.data === 'reloadIframe') {
+			window.location.reload();
+		  }
+		};
+	
+		window.addEventListener('message', handleMessage);
+	
+		return () => {
+		  window.removeEventListener('message', handleMessage);
+		};
+	  }, []);
+
 	return (
 		<PageWrapper
 			isProtected={false}
