@@ -40,6 +40,7 @@ const LoginHeader: FC<any> = ({step}) => {
 			{step === "verify" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Enter the 6 digit code sent to your email</div>)}
 			{step === "success" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Subscription successful. Congrats!</div>)}
 			{step === "post-submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Please connect your social profiles</div>)}
+			{step === "creating-profile" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Your profile is creating, please don't close this window</div>)}
 		</>
 	);
 };
@@ -398,8 +399,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [address])
 
+	// This useEffect is used for checking if the connected address is already stored in backend or not
+	// We need to make an exception here, we should disable this behavior when in the child window
 	useEffect(() => {
-		if(address) {
+		const params = new URLSearchParams(window.location.search);
+		const username = params.get('username')!;
+		if(address && !username) {
 			showLoading();
 			checkAddressExistence().then(res => {
 				if (!res.data.exists) {
