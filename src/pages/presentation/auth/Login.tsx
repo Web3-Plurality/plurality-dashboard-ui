@@ -605,24 +605,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									{/* END :: Footer */}
 							</CardBody>
 						</Card>
-						{!isInsideIframe && <div className='text-center'>
-							<a
-								href='/'
-								className={classNames('text-decoration-none me-3', {
-									'link-light': singUpStatus,
-									'link-dark': !singUpStatus,
-								})}>
-								Privacy policy
-							</a>
-							<a
-								href='/'
-								className={classNames('link-light text-decoration-none', {
-									'link-light': singUpStatus,
-									'link-dark': !singUpStatus,
-								})}>
-								Terms of use
-							</a>
-						</div>}
 					</div>
 				</div>
 				/*)}*/}
