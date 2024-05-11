@@ -10,6 +10,7 @@ import Button from './bootstrap/Button';
 import validate from '../pages/presentation/demo-pages/helper/editPagesValidate';
 import classNames from 'classnames';
 import LoadingContext from '../utils/LoadingContext';
+import { OTPCodeEmailOptions } from '@stytch/vanilla-js';
 
 interface ILoginProps {
 	moveBack: any;
@@ -53,7 +54,12 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showPostSubm
     event.preventDefault();
     showLoading();
     try {
-      let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress);
+      const templateId = process.env.REACT_APP_EMAIL_TEMPLATE_ID!;
+      const options: OTPCodeEmailOptions = {
+        login_template_id: templateId,
+        expiration_minutes: 2
+      }
+      let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress, options );
       console.log(response);
       setMethodId(response.method_id);
       sendCode();
