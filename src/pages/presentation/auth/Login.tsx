@@ -145,11 +145,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const origin = params.get('origin')!;
 		// If nothing is connected
 		if(userProfiles.length === 0) {
-			window.parent.postMessage({ type: 'null', data: [] }, origin);
+			window.parent.postMessage({ type: 'profile', data: [] }, origin);
 		} else if (userProfiles.length > 0 && userProfiles[0].dataFetchedFrom === "twitter") {
-			window.parent.postMessage({ type: 'twitterResponse', data: [userProfiles[0]] }, origin);
+			window.parent.postMessage({ type: 'profile', data: [userProfiles[0]] }, origin);
 		} else if (userProfiles.length > 0 && userProfiles[0].dataFetchedFrom === "facebook") {
-			window.parent.postMessage({ type: 'facebookResponse', data: [userProfiles[0]] }, origin);
+			window.parent.postMessage({ type: 'profile', data: [userProfiles[0]] }, origin);
+		} else {
+			window.parent.postMessage({ type: 'profile', data: [userProfiles] }, origin);
 		}
 		hideLoading();
 	}
@@ -430,7 +432,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if (userProfiles.length === 2) {
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
-			window.parent.postMessage({ type: 'bothResponse', data: userProfiles }, origin);
+			window.parent.postMessage({ type: 'profile', data: userProfiles }, origin);
 		}
 	}, [userProfiles])
 
