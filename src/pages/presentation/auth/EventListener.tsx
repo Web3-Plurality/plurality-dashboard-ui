@@ -5,7 +5,7 @@ const EventListener: React.FC = () => {
     
       const receiveMessage = async (event: MessageEvent) => {
           const parentUrl = process.env.REACT_APP_PARENT_URL;
-          if (event.origin === parentUrl) {
+          if (event.origin === parentUrl && event.data.type === 'metamaskRequest') {
               const data = event.data;
               let signer = null;
 
@@ -19,7 +19,7 @@ const EventListener: React.FC = () => {
                 signer = await provider.getSigner();
               }
         
-              if (data.type === 'metamaskRequest' && data.method === 'getAllAccounts') {
+              if (data.method === 'getAllAccounts') {
                 try {
                   const accounts = await provider.listAccounts();
                   window.parent.postMessage({ type: 'metamaskResponse', data: accounts }, parentUrl);
@@ -29,7 +29,7 @@ const EventListener: React.FC = () => {
                   window.parent.postMessage({ type: 'metamaskResponse', data: error.toString() }, parentUrl);
                 }
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'getConnectedAccount') {
+              else if (data.method === 'getConnectedAccount') {
                 try {
                   const accounts = await provider.listAccounts();
                   window.parent.postMessage({ type: 'metamaskResponse', data: accounts[0] }, parentUrl);
@@ -40,7 +40,7 @@ const EventListener: React.FC = () => {
                 }
               }
                             
-              else if (data.type === 'metamaskRequest' && data.method === 'getMessageSignature' && data.message) {
+              else if (data.method === 'getMessageSignature' && data.message) {
                 try {
                   let signature = await signer.signMessage(data.message);
                   window.parent.postMessage({ type: 'metamaskResponse', data: signature }, parentUrl);
@@ -50,7 +50,7 @@ const EventListener: React.FC = () => {
                   window.parent.postMessage({ type: 'metamaskResponse', data: error.toString() }, parentUrl);
                 }  
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'verifyMessageSignature' && data.signature && data.message) {
+              else if (data.method === 'verifyMessageSignature' && data.signature && data.message) {
                 try {
                   let signerAddress = verifyMessage(data.message, data.signature);
                   if (signerAddress == await signer.getAddress()) {
@@ -65,7 +65,7 @@ const EventListener: React.FC = () => {
                   window.parent.postMessage({ type: 'metamaskResponse', data: error.toString() }, parentUrl);
                 }
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'getBalance') {
+              else if (data.method === 'getBalance') {
                 try {
                   let connectedAddress= await signer.getAddress();
                   console.log("Connected address: "+ connectedAddress)
@@ -77,7 +77,7 @@ const EventListener: React.FC = () => {
                   window.parent.postMessage({ type: 'metamaskResponse', data: error.toString() }, parentUrl);
                 }
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'sendTransaction' && data.sendTo && data.value) {
+              else if (data.method === 'sendTransaction' && data.sendTo && data.value) {
                 try {
                   //let connectedAddress= await signer.getAddress();
                   // TODO : Error handling - value > 0 , address valid
@@ -94,7 +94,7 @@ const EventListener: React.FC = () => {
                   window.parent.postMessage({ type: 'metamaskResponse', data: error.toString() }, parentUrl);
                 }
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'getBlockNumber' ) {
+              else if (data.method === 'getBlockNumber' ) {
                 try {
                   const blockNumber = await provider.getBlockNumber();
                   window.parent.postMessage({ type: 'metamaskResponse', data: blockNumber }, parentUrl);
@@ -104,7 +104,7 @@ const EventListener: React.FC = () => {
                   window.parent.postMessage({ type: 'metamaskResponse', data: error.toString() }, parentUrl);
                 }
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'getTransactionCount' && data.address ) {
+              else if (data.method === 'getTransactionCount' && data.address ) {
                 try {
                   const transactionCount = await provider.getTransactionCount(data.address);
                   window.parent.postMessage({ type: 'metamaskResponse', data: transactionCount }, parentUrl);
@@ -114,7 +114,7 @@ const EventListener: React.FC = () => {
                   window.parent.postMessage({ type: 'metamaskResponse', data: error.toString() }, parentUrl);
                 }
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'readFromContract' && data.contractAddress && data.abi && data.methodName) {
+              else if (data.method === 'readFromContract' && data.contractAddress && data.abi && data.methodName) {
                 // to be implemented
                 const contract = new ethers.Contract(data.contractAddress, data.abi,provider);
                 if (!contract[data.methodName]) {
@@ -135,7 +135,7 @@ const EventListener: React.FC = () => {
                     window.parent.postMessage({ type: 'metamaskResponse', data: error.toString() }, parentUrl);
                 }
               }
-              else if (data.type === 'metamaskRequest' && data.method === 'writeToContract' && data.contractAddress && data.abi && data.methodName ) {
+              else if (data.method === 'writeToContract' && data.contractAddress && data.abi && data.methodName ) {
                 const contract = new ethers.Contract(data.contractAddress, data.abi,signer);
                 if (!contract[data.methodName]) {
                   window.parent.postMessage({ type: 'metamaskResponse', data: "Method name does not exist on this contract" }, parentUrl);
