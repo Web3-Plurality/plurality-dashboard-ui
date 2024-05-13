@@ -26,6 +26,7 @@ import { useWindowScroll } from 'react-use';
 
 type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success' | 'creating-profile';
 
+const isIframe = window.location !== window.parent.location 
 const LoginHeader: FC<any> = ({step}) => {
 	return (
 		<>
@@ -39,16 +40,14 @@ const LoginHeader: FC<any> = ({step}) => {
 		</>
 	);
 };
-const LoginFooter: FC<any> = () => {
+const LoginFooter: FC<any> = ({address}: {address: string}) => {
 	return (
-		<>
-			<div className="d-flex align-items-center justify-content-center" style={{marginTop: "50px"}}>
+			<div className="d-flex align-items-center justify-content-center" style={{marginTop: isIframe && !address ? "105px" : "50px"}}>
 				Powered by 
 				<a href="https://twitter.com/PluralityWeb3" target="_blank" rel="noopener noreferrer">
 					<img src={PLogo} alt="Logo" style={{width: "100px", height: "40px"}}/>
 				</a>
 			</div>
-		</>
 	);
 };
 const CenteredImage: FC<any> = ({imageSrc, width, height}) => {
@@ -470,7 +469,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												'text-light': darkModeStatus,
 											},
 										)}
-										aria-label='Facit'>
+										style={{marginTop: isIframe && !address ? "80px" : "0"  }}
+										aria-label='Facit'
+										>
 										{/* Here goes logo */}
 										<CenteredImage imageSrc={PLogo} width={200} height={80}/>
 									</div>
@@ -627,7 +628,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													)}
 												/>
 												<div className="d-flex justify-content-center mt-1">
-													<a href="#" onClick={skipConnectProfiles}>Skip</a>
+													<button className='skip-btn'
+														onClick={skipConnectProfiles}
+													>
+														Skip
+													</button>
 												</div>	
 												{/* <div className='text-center col-12 mt-1'>
 												<a href='mailto:hirasiddiqui95@gmail.com'>
@@ -641,7 +646,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									)}
 									{/* END :: Social Login */}
 									{/* START:: Footer */}
-									<LoginFooter/>
+									<LoginFooter address={address}/>
 									{/* END :: Footer */}
 							</CardBody>
 						</Card>

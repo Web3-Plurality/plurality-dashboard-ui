@@ -5,8 +5,7 @@
 @use 'sass:map';
 
 .scroll-margin {
-	scroll-margin-top: map.get($header, height) + map.get($subheader, height) +
-		map.get($page, padding-y);
+	scroll-margin-top: map.get($header, height) + map.get($subheader, height) + map.get($page, padding-y);
 }
 
 .sticky-top-size {
@@ -15,4 +14,13 @@
 
 .border-transparent {
 	--#{$prefix}border-opacity: 0;
+}
+
+.skip-btn {
+	border: none;
+	font-weight: 600;
+	margin-top: 0.5rem;
+	padding: 0.5rem 1rem;
+	color: #6C6E6F;
+	background-color: transparent;
 }
