@@ -3,17 +3,18 @@ import LoadingContext from './LoadingContext';
 import styled, { keyframes } from 'styled-components'
 
 export const Wrapper = styled.div`
-  position: fixed;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  background-color: grey;
-  opacity: 0.5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
+position: fixed;
+left: 50%;
+transform: translate(-50%, 0.9%);
+height: 92%;
+width: 96%;
+background-color: grey;
+opacity: 0.5;
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 10;
+border-radius:26px
 `
 
 const spin = keyframes`
