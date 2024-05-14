@@ -89,7 +89,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { showLoading, hideLoading } = useContext(LoadingContext);
 
 	// profile data
-	const [userProfiles, setUserProfiles] = useState<any[]>([]);
+	const [userTwitterProfiles, setUserTwitterProfiles] = useState<any>();
+	const [userFacebookProfiles, setUserFacebookProfiles] = useState<any>();
 
 	// wagmi connectors and disconnectors
 	const { connect, connectors } = useConnect();
@@ -144,14 +145,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const params = new URLSearchParams(window.location.search)
 		const origin = params.get('origin')!;
 		// If nothing is connected
-		if(userProfiles.length === 0) {
+		if(!userTwitterProfiles && !userFacebookProfiles) {
 			window.parent.postMessage({ type: 'profile', data: [] }, origin);
-		} else if (userProfiles.length > 0 && userProfiles[0].dataFetchedFrom === "twitter") {
-			window.parent.postMessage({ type: 'profile', data: [userProfiles[0]] }, origin);
-		} else if (userProfiles.length > 0 && userProfiles[0].dataFetchedFrom === "facebook") {
-			window.parent.postMessage({ type: 'profile', data: [userProfiles[0]] }, origin);
+		} else if (userTwitterProfiles && !userFacebookProfiles) {
+			window.parent.postMessage({ type: 'profile', data: [userTwitterProfiles] }, origin);
+		} else if (!userTwitterProfiles && userFacebookProfiles) {
+			window.parent.postMessage({ type: 'profile', data: [userFacebookProfiles] }, origin);
 		} else {
-			window.parent.postMessage({ type: 'profile', data: [userProfiles] }, origin);
+			window.parent.postMessage({ type: 'profile', data: [userTwitterProfiles, userFacebookProfiles] }, origin);
 		}
 		hideLoading();
 	}
@@ -194,13 +195,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									JSON.stringify(profile)
 								);
 			if (isProfileCreated) {
-				setIsFacebookConnected(true);
+				// setIsFacebookConnected(true);
+				setIsFacebookConnectedInLocalStorage();
 				// We can construct the profile data from user login data
 				const profileDataObj = constructProfileData(AssetType.INTEREST, interests, process.env.REACT_APP_FACEBOOK!, JSON.stringify(profile));
 				if (profileDataObj) {
 					const params = new URLSearchParams(window.location.search)
 					const origin = params.get('origin')!;
-					setUserProfiles([...userProfiles, profileDataObj])
+					setUserFacebookProfiles(profileDataObj)
 					wait(5000).then(res=>{
 						window.close();
 					}).catch(console.error);
@@ -248,6 +250,50 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		return true;
 	}
 
+	const setIsTwitterConnectedInLocalStorage = () => {
+		const userInfo = localStorage.getItem(address!);
+		// If no localstorage of this address found then we create one with 'twitter connected' only
+		if (userInfo === null) {
+			console.log('No user info found in localStorage');
+			const storedUserInfo = {
+				isFacebookConnected: false,
+				isTwitterConnected: true,
+			}
+			localStorage.setItem(address!, JSON.stringify(storedUserInfo));
+		  } else {
+			console.log('User found, updating...');
+			const userInfoJson = JSON.parse(userInfo);
+			const storedUserInfo = {
+				isFacebookConnected: userInfoJson.isFacebookConnected,
+				isTwitterConnected: true,
+			}
+			localStorage.setItem(address!, JSON.stringify(storedUserInfo));
+		  }
+		setIsTwitterConnected(true);
+	}
+
+	const setIsFacebookConnectedInLocalStorage = () => {
+		const userInfo = localStorage.getItem(address!);
+		// If no localstorage of this address found then we create one with 'twitter connected' only
+		if (userInfo === null) {
+			console.log('No user info found in localStorage');
+			const storedUserInfo = {
+				isFacebookConnected: true,
+				isTwitterConnected: false,
+			}
+			localStorage.setItem(address!, JSON.stringify(storedUserInfo));
+		  } else {
+			console.log('User found, updating...');
+			const userInfoJson = JSON.parse(userInfo);
+			const storedUserInfo = {
+				isFacebookConnected: true,
+				isTwitterConnected: userInfoJson.isTwitterConnected,
+			}
+			localStorage.setItem(address!, JSON.stringify(storedUserInfo));
+		  }
+		setIsFacebookConnected(true);
+	}
+
 	const openTwitterOAuthPopup = async () => {
 		const params = new URLSearchParams(window.location.search);
 		const isWidget = params.get('isWidget')!;
@@ -268,8 +314,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		showLoading();
 		const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 		if (profileDataObj) {
-			setUserProfiles([...userProfiles, profileDataObj]);
-			setIsTwitterConnected(true);
+			setUserTwitterProfiles(profileDataObj);
+			//setIsTwitterConnected(true);
+			setIsTwitterConnectedInLocalStorage();
 			hideLoading();
 			//window.close();
 		}
@@ -288,8 +335,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				console.log("Twitter not yet connected, so waiting");
 				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
 				if (profileDataObj) {
-					setUserProfiles([...userProfiles, profileDataObj]);
-					setIsTwitterConnected(true);
+					setUserTwitterProfiles(profileDataObj);
+					//setIsTwitterConnected(true);
+					setIsTwitterConnectedInLocalStorage();
 					breakLoop=true;
 					hideLoading();
 				}
@@ -313,8 +361,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if (profileDataObj) {
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
-			setUserProfiles([...userProfiles, profileDataObj]);
-			setIsFacebookConnected(true);
+			setUserFacebookProfiles(profileDataObj);
+			//setIsFacebookConnected(true);
+			setIsFacebookConnectedInLocalStorage();
 			hideLoading();
 			window.close();
 		} else {
@@ -427,28 +476,53 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [address])
 
+	// Once user connected via metamask then we check if this address has twitter/facebook connected
+	useEffect(() => {
+		if(address) {
+			const userInfo = localStorage.getItem(address!);
+			// If there is already some data
+			if(userInfo) {
+				const userInfoJson = JSON.parse(userInfo);
+				if(userInfoJson.isTwitterConnected) {
+					showLoading();
+					getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(
+						profileDataObj => {
+							if(profileDataObj) {
+								setIsTwitterConnected(true);
+								setUserTwitterProfiles(profileDataObj);
+							}
+							hideLoading();
+						}
+					)
+				} else {
+					setIsTwitterConnected(false);
+				}
+				if(userInfoJson.isFacebookConnected) {
+					showLoading();
+					getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(
+						profileDataObj => {
+							if(profileDataObj) {
+								setIsFacebookConnected(true);
+								setUserFacebookProfiles(profileDataObj);
+							}
+							hideLoading();
+						}
+					)
+				} else {
+					setIsFacebookConnected(false);
+				}
+			}
+		}
+	}, [address])
+
 	// userProfiles useEffect hook, once all profiles are connected, we return the userprofile back the profiles
 	useEffect(() => {
-		if (userProfiles.length === 2) {
+		if (userFacebookProfiles && userTwitterProfiles) {
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
-			window.parent.postMessage({ type: 'profile', data: userProfiles }, origin);
+			window.parent.postMessage({ type: 'profile', data: [userTwitterProfiles, userFacebookProfiles] }, origin);
 		}
-	}, [userProfiles])
-
-	useEffect(() => {
-		const handleMessage = (event: any) => {
-		  if (event.data === 'reloadIframe') {
-			window.location.reload();
-		  }
-		};
-	
-		window.addEventListener('message', handleMessage);
-	
-		return () => {
-		  window.removeEventListener('message', handleMessage);
-		};
-	  }, []);
+	}, [userFacebookProfiles, userTwitterProfiles])
 
 	return (
 		<PageWrapper
