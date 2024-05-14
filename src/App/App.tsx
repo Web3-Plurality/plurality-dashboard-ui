@@ -17,7 +17,7 @@ import steps, { styles } from '../steps';
 import AsideRoutes from '../layout/Aside/AsideRoutes';
 import { ToastCloseButton } from '../components/bootstrap/Toasts';
 import { MetaMaskProvider } from '../hooks';
-import { configureChains, createConfig, WagmiConfig, mainnet  } from "wagmi";
+import { configureChains, createConfig, WagmiConfig, mainnet } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import LoadingProvider from '../utils/LoadingProvider';
@@ -69,7 +69,7 @@ const App = () => {
 	const { chains, publicClient, webSocketPublicClient } = configureChains(
 		[mainnet],
 		[publicProvider()]
-	  );
+	);
 
 	/**
 	 * Modern Design
@@ -87,41 +87,41 @@ const App = () => {
 		publicClient,
 		webSocketPublicClient,
 		connectors: [
-		  new InjectedConnector({
-			chains,
-			options: {
-			  shimDisconnect: false,
-			},
-		  }),
+			new InjectedConnector({
+				chains,
+				options: {
+					shimDisconnect: false,
+				},
+			}),
 		],
-	  });
+	});
 
 	return (
 		<ThemeProvider theme={theme}>
 			<LoadingProvider>
-      		<Spinner />
-			<MetaMaskProvider>
-			<EventListener />
-			<WagmiConfig config={config}>
-			<TourProvider steps={steps} styles={styles} showNavigation={false} showBadge={false}>
-				<div
-					ref={ref}
-					className='app'
-					style={{
-						backgroundColor: fullScreenStatus ? 'var(--bs-body-bg)' : undefined,
-						zIndex: fullScreenStatus ? 1 : undefined,
-						overflow: fullScreenStatus ? 'scroll' : undefined,
-					}}>
-					<AsideRoutes />
-					<Wrapper />
-				</div>
-				<Portal id='portal-notification'>
-					<ReactNotifications />
-				</Portal>
-				<ToastContainer closeButton={ToastCloseButton} toastClassName='toast show' />
-			</TourProvider>
-			</WagmiConfig>
-			</MetaMaskProvider>
+				<Spinner />
+				<MetaMaskProvider>
+					<EventListener />
+					<WagmiConfig config={config}>
+						<TourProvider steps={steps} styles={styles} showNavigation={false} showBadge={false}>
+							<div
+								ref={ref}
+								className='app'
+								style={{
+									backgroundColor: fullScreenStatus ? 'var(--bs-body-bg)' : undefined,
+									zIndex: fullScreenStatus ? 1 : undefined,
+									overflow: fullScreenStatus ? 'scroll' : undefined,
+								}}>
+								<AsideRoutes />
+								<Wrapper />
+							</div>
+							<Portal id='portal-notification'>
+								<ReactNotifications />
+							</Portal>
+							<ToastContainer closeButton={ToastCloseButton} toastClassName='toast show' />
+						</TourProvider>
+					</WagmiConfig>
+				</MetaMaskProvider>
 			</LoadingProvider>
 		</ThemeProvider>
 	);
