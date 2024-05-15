@@ -525,9 +525,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												'text-light': darkModeStatus,
 											},
 										)}
-										style={{marginTop: isIframe && !address ? "80px" : "0"  }}
-										aria-label='Facit'
-										>
+										style={{ marginTop: isIframe && !address ? "80px" : isIframe && step === "pre-submit" ? "92px" : "0" }}										aria-label='Facit'										>
 										{/* Here goes logo */}
 										<CenteredImage imageSrc={PLogo} width={200} height={80}/>
 									</div>
