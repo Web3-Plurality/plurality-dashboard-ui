@@ -60,11 +60,6 @@ const CenteredImage: FC<any> = ({imageSrc, width, height}) => {
 	);
 };
 
-LoginHeader.defaultProps = {
-	isMetamaskConnected: false,
-	callingDApp: "http://some-dapp.com"
-};
-
 interface ILoginProps {
 	isSignUp?: boolean;
 }
@@ -97,7 +92,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { address, connector, isConnected } = useAccount();
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
-	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
 
 	// Stytch
 	const [step, setStep] = useState<OtpStep>("pre-submit");
@@ -371,40 +365,38 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			renderPropsOnclick();
 		}
 	}
-	 
+	
+	// This use effect is for protecting accidently access to our dashboard ui
+	// Also it set up the profle options via url parameters
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const widget = params.get('isWidget')!;
-		const dAppName = params.get('origin')!; 
 		const idPlatform = params.get('id_platform')!;
 		const apps = params.get('apps')!;
 
 		if (widget == "true") {
-			if(!idPlatform && !window.opener){
+			if(!idPlatform){
 				navigate(`/?isWidget=false`);
 			}
 			else{
-				if (apps?.split(",")) {
-					for(let app of apps?.split(",")) {
-						if(app === "twitter"){
-							setIsTwitterSelected(true)
-						}
-						if(app === "facebook"){
-							setIsFacebookSelected(true)
-						}
+			if (apps?.split(",")) {
+				for(let app of apps?.split(",")) {
+					if(app === "twitter"){
+						setIsTwitterSelected(true)
 					}
-					setCallingDApp(dAppName);
-					setIsWidget(true);
+					if(app === "facebook"){
+						setIsFacebookSelected(true)
+					}
 				}
+				setIsWidget(true);
 			}
 		}
-		//else {
-		//	navigate(`/?isWidget=false`);
-		//} 
+	}
 	}, [state])
 
 	const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 
+	// This use effect is used for child window when it is trying to create twitter profiledata
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
@@ -437,26 +429,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						}).catch(error => {
 							console.log(error);
 							hideLoading();
-							//window.close();
 						})
 		}
 	}, [state])
-
-	useEffect(() => {
-		if(address) {
-			const params = new URLSearchParams(window.location.search)
-			const isWidget = params.get('isWidget')!;
-			if (!isWidget || isWidget == "false")
-				navigate(`/?isWidget=false`);
-			else if (isWidget == "true") {
-				// update widget state
-				setIsWidget(true);
-			}
-			else
-				throw new Error("Something went wrong while parsing the isWidget parameter");
-			setIsMetamaskConnected(true)
-		}
-	}, [address])
 
 	// This useEffect is used for checking if the connected address is already stored in backend or not
 	// We need to make an exception here, we should disable this behavior when in the child window
@@ -511,6 +486,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				} else {
 					setIsFacebookConnected(false);
 				}
+			} else {
+				setUserFacebookProfiles(null);
+				setUserTwitterProfiles(null);
+				setIsTwitterConnected(false);
+				setIsFacebookConnected(false);
 			}
 		}
 	}, [address])
@@ -561,7 +541,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</div>
 
 									{/* BEGIN :: Metamask Login*/}
-										<LoginHeader step={step} isMetamaskConnected={false} callingDApp={callingDApp}/>
+										<LoginHeader step={step}/>
 										{!address && (
 										<>
 											<div className='col-12 mt-4'>
@@ -637,7 +617,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									{/* BEGIN :: Social Login */}
 									{address && isWidget && step === "post-submit" &&(
 										<>
-											<form className='row g-4'>
 											{isTwitterSelected && (<div className='col-12 mt-3'>
 												<Button
 													isOutline
@@ -717,7 +696,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												</a>
 												</div> */}
 											</div>)}
-											</form>
 										</>
 									)}
 									{/* END :: Social Login */}
