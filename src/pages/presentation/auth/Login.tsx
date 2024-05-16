@@ -26,35 +26,35 @@ import { useWindowScroll } from 'react-use';
 
 type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success' | 'creating-profile';
 
-const isIframe = window.location !== window.parent.location 
-const LoginHeader: FC<any> = ({step}) => {
+const isIframe = window.location !== window.parent.location
+const LoginHeader: FC<any> = ({ step }) => {
 	return (
 		<>
-			<div className='text-center h1 fw-bold' style={{marginTop: "50px"}}>Social Connect</div>
-			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Subscribe to access early bird benefits</div>)}
-			{step === "submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>A verification code will be sent to your email</div>)}
-			{step === "verify" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Enter the 6 digit code sent to your email</div>)}
-			{step === "success" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Subscription successful. Congrats!</div>)}
-			{step === "post-submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Please connect your social profiles</div>)}
-			{step === "creating-profile" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Your profile is creating, please don't close this window</div>)}
+			<div className='text-center h1 fw-bold' style={{ marginTop: "50px" }}>Social Connect</div>
+			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Subscribe to access early bird benefits</div>)}
+			{step === "submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>A verification code will be sent to your email</div>)}
+			{step === "verify" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Enter the 6 digit code sent to your email</div>)}
+			{step === "success" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Subscription successful. Congrats!</div>)}
+			{step === "post-submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Please connect your social profiles</div>)}
+			{step === "creating-profile" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Your profile is creating, please don't close this window</div>)}
 		</>
 	);
 };
-const LoginFooter: FC<any> = ({address}: {address: string}) => {
+const LoginFooter: FC<any> = ({ address }: { address: string }) => {
 	return (
-			<div className="d-flex align-items-center justify-content-center" style={{marginTop: isIframe && !address ? "105px" : "50px"}}>
-				Powered by 
-				<a href="https://twitter.com/PluralityWeb3" target="_blank" rel="noopener noreferrer">
-					<img src={PLogo} alt="Logo" style={{width: "100px", height: "40px"}}/>
-				</a>
-			</div>
+		<div className="d-flex align-items-center justify-content-center" style={{ marginTop: isIframe && !address ? "105px" : "50px" }}>
+			Powered by
+			<a href="https://twitter.com/PluralityWeb3" target="_blank" rel="noopener noreferrer">
+				<img src={PLogo} alt="Logo" style={{ width: "100px", height: "40px" }} />
+			</a>
+		</div>
 	);
 };
-const CenteredImage: FC<any> = ({imageSrc, width, height}) => {
+const CenteredImage: FC<any> = ({ imageSrc, width, height }) => {
 	return (
 		<>
 			<div className='d-flex align-items-center justify-content-center'>
-				<img src={imageSrc} alt="GIF Image"  style={{width: width, height: height}}/>
+				<img src={imageSrc} alt="GIF Image" style={{ width: width, height: height }} />
 			</div>
 		</>
 	);
@@ -67,9 +67,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { setUser } = useContext(AuthContext);
 	const { darkModeStatus } = useDarkMode();
 
-	const [isWidget, setIsWidget] = useState(false);  
+	const [isWidget, setIsWidget] = useState(false);
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
-	
+
 	const navigate = useNavigate();
 
 	// metamask hooks
@@ -120,15 +120,15 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		showLoading();
 		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch';
 		axios.post(apiUrl, {
-			data: {email: "", address: address, subscribe: false}
-			})
+			data: { email: "", address: address, subscribe: false }
+		})
 			.then(function (response) {
-			if(response.status === 200) {
-				showPostSubmit();
-			} 
+				if (response.status === 200) {
+					showPostSubmit();
+				}
 			})
 			.catch(function (error) {
-			alert("Something goes wrong, please try again!")
+				alert("Something goes wrong, please try again!")
 			})
 		hideLoading();
 	}
@@ -139,7 +139,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const params = new URLSearchParams(window.location.search)
 		const origin = params.get('origin')!;
 		// If nothing is connected
-		if(!userTwitterProfiles && !userFacebookProfiles) {
+		if (!userTwitterProfiles && !userFacebookProfiles) {
 			window.parent.postMessage({ type: 'profile', data: [] }, origin);
 		} else if (userTwitterProfiles && !userFacebookProfiles) {
 			window.parent.postMessage({ type: 'profile', data: [userTwitterProfiles] }, origin);
@@ -153,24 +153,24 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const checkAddressExistence = () => {
 		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-address'
-		return axios.get(apiUrl,{
-		  params: {
-			  address: address
-		}
+		return axios.get(apiUrl, {
+			params: {
+				address: address
+			}
 		})
-	  }
+	}
 
 
 	const handleMetamaskConnect = async () => {
-		try {	
-		  if (setUser) setUser("user");
-		  //TODO need to find a way of how to selectivly connect
-		  await ensureMetamaskConnection();
+		try {
+			if (setUser) setUser("user");
+			//TODO need to find a way of how to selectivly connect
+			await ensureMetamaskConnection();
 		} catch (e: any) {
-		  console.error(e);
-		  dispatch({ type: MetamaskActions.SetError, payload: e });
+			console.error(e);
+			dispatch({ type: MetamaskActions.SetError, payload: e });
 		}
-	  };
+	};
 
 	const responseFacebook = async (response: any) => {
 		console.log(response);
@@ -178,49 +178,49 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const interests = getFacebookInterests(response);
 			const username = response.name;
 			const description = 'some description';
-			const profile = {name: username, profileUrl: ""};
+			const profile = { name: username, profileUrl: "" };
 			try {
-			const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!, 
-									process.env.REACT_APP_FACEBOOK_GROUP_ID!,
-									username,
-									description,
-									AssetType.INTEREST,
-									interests,
-									JSON.stringify(profile)
-								);
-			if (isProfileCreated) {
-				// setIsFacebookConnected(true);
-				setIsFacebookConnectedInLocalStorage();
-				// We can construct the profile data from user login data
-				const profileDataObj = constructProfileData(AssetType.INTEREST, interests, process.env.REACT_APP_FACEBOOK!, JSON.stringify(profile));
-				if (profileDataObj) {
-					const params = new URLSearchParams(window.location.search)
-					const origin = params.get('origin')!;
-					setUserFacebookProfiles(profileDataObj)
-					wait(5000).then(res=>{
+				const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!,
+					process.env.REACT_APP_FACEBOOK_GROUP_ID!,
+					username,
+					description,
+					AssetType.INTEREST,
+					interests,
+					JSON.stringify(profile)
+				);
+				if (isProfileCreated) {
+					// setIsFacebookConnected(true);
+					setIsFacebookConnectedInLocalStorage();
+					// We can construct the profile data from user login data
+					const profileDataObj = constructProfileData(AssetType.INTEREST, interests, process.env.REACT_APP_FACEBOOK!, JSON.stringify(profile));
+					if (profileDataObj) {
+						const params = new URLSearchParams(window.location.search)
+						const origin = params.get('origin')!;
+						setUserFacebookProfiles(profileDataObj)
+						wait(5000).then(res => {
+							window.close();
+						}).catch(console.error);
 						window.close();
-					}).catch(console.error);
-					window.close();
+					}
 				}
-			}
-			else
-				console.log("Profile could not be created. Please try again");
+				else
+					console.log("Profile could not be created. Please try again");
 
-			hideLoading();
+				hideLoading();
 			}
 			catch (error) {
 				console.log(error);
 				alert(error);
 				hideLoading();
 			}
-			
+
 		}
 		else {
 			console.log("access token not found");
 			alert("Could not sign in to facebook");
 			hideLoading();
 		}
-	};	
+	};
 
 	const constructProfileData = (assetType: any, assetData: any, dataFetchedFrom: any, profileData: any) => {
 		const profile = {
@@ -235,10 +235,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const ensureMetamaskConnection = async (): Promise<Boolean> => {
 		console.log("Ensure metamask connection called");
 		if (!address || !isConnected) {
-			for (let i=0; i < connectors.length; i++) {
+			for (let i = 0; i < connectors.length; i++) {
 				let connector = connectors[i];
-				console.log("Trying to connect with connector: "+connectors[i].name);
-				connect({ connector});
+				console.log("Trying to connect with connector: " + connectors[i].name);
+				connect({ connector });
 			}
 		}
 		return true;
@@ -254,7 +254,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				isTwitterConnected: true,
 			}
 			localStorage.setItem(address!, JSON.stringify(storedUserInfo));
-		  } else {
+		} else {
 			console.log('User found, updating...');
 			const userInfoJson = JSON.parse(userInfo);
 			const storedUserInfo = {
@@ -262,7 +262,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				isTwitterConnected: true,
 			}
 			localStorage.setItem(address!, JSON.stringify(storedUserInfo));
-		  }
+		}
 		setIsTwitterConnected(true);
 	}
 
@@ -276,7 +276,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				isTwitterConnected: false,
 			}
 			localStorage.setItem(address!, JSON.stringify(storedUserInfo));
-		  } else {
+		} else {
 			console.log('User found, updating...');
 			const userInfoJson = JSON.parse(userInfo);
 			const storedUserInfo = {
@@ -284,7 +284,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				isTwitterConnected: userInfoJson.isTwitterConnected,
 			}
 			localStorage.setItem(address!, JSON.stringify(storedUserInfo));
-		  }
+		}
 		setIsFacebookConnected(true);
 	}
 
@@ -293,7 +293,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const isWidget = params.get('isWidget')!;
 		const origin = params.get('origin')!;
 		const apps = params.get('apps')!;
-		const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?apps=${apps}&isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
+		const apiUrl = process.env.REACT_APP_API_BASE_URL + `/oauth-twitter?apps=${apps}&isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
 		// Define the dimensions for the popup window
 		const popupWidth = 450;
 		const popupHeight = 540;
@@ -303,10 +303,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const popupTop = 100;
 
 		await ensureMetamaskConnection()
-		
+
 		// Check if twitter profile already exists at orbis
 		showLoading();
-		const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+		const profileDataObj = await getProfileData(address!.toString(), process.env.REACT_APP_TWITTER!);
 		if (profileDataObj) {
 			setUserTwitterProfiles(profileDataObj);
 			//setIsTwitterConnected(true);
@@ -324,15 +324,15 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			console.log("Child window: ");
 			console.log(childWindow);
 			// Loop in main window
-			let breakLoop = false;	
+			let breakLoop = false;
 			while (!isTwitterConnected && !breakLoop) {
 				console.log("Twitter not yet connected, so waiting");
-				const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!);
+				const profileDataObj = await getProfileData(address!.toString(), process.env.REACT_APP_TWITTER!);
 				if (profileDataObj) {
 					setUserTwitterProfiles(profileDataObj);
 					//setIsTwitterConnected(true);
 					setIsTwitterConnectedInLocalStorage();
-					breakLoop=true;
+					breakLoop = true;
 					hideLoading();
 				}
 				else {
@@ -341,7 +341,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				}
 			}
 		}
-	}; 
+	};
 
 	// Function to call before the Facebook popup
 	const handleBeforeFacebookPopup = async (renderPropsOnclick: Function) => {
@@ -351,7 +351,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 		// Check if facebook profile already exists at orbis
 		showLoading();
-		const profileDataObj = await getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!);
+		const profileDataObj = await getProfileData(address!.toString(), process.env.REACT_APP_FACEBOOK!);
 		if (profileDataObj) {
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
@@ -365,7 +365,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			renderPropsOnclick();
 		}
 	}
-	
+
 	// This use effect is for protecting accidently access to our dashboard ui
 	// Also it set up the profle options via url parameters
 	useEffect(() => {
@@ -375,23 +375,23 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const apps = params.get('apps')!;
 
 		if (widget == "true") {
-			if(!idPlatform){
+			if (!idPlatform) {
 				navigate(`/?isWidget=false`);
 			}
-			else{
-			if (apps?.split(",")) {
-				for(let app of apps?.split(",")) {
-					if(app === "twitter"){
-						setIsTwitterSelected(true)
+			else {
+				if (apps?.split(",")) {
+					for (let app of apps?.split(",")) {
+						if (app === "twitter") {
+							setIsTwitterSelected(true)
+						}
+						if (app === "facebook") {
+							setIsFacebookSelected(true)
+						}
 					}
-					if(app === "facebook"){
-						setIsFacebookSelected(true)
-					}
+					setIsWidget(true);
 				}
-				setIsWidget(true);
 			}
 		}
-	}
 	}, [state])
 
 	const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
@@ -408,28 +408,28 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const profileUrl = params.get('picture_url')!;
 
 			const description = 'some description';
-			const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
+			const profile = { name: username, displayName: displayName, profileUrl: profileUrl };
 			showLoading();
 			setStep("creating-profile")
-			createProfile(process.env.REACT_APP_TWITTER!, 
-						process.env.REACT_APP_TWITTER_GROUP_ID!,
-						username,
-						description,
-						AssetType.INTEREST,
-						getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
-							if (isProfileCreated) {
-								console.log("Twitter is successfully connected");
-								wait(5000).then(res=>{
-									window.close();
-								}).catch(console.error);
-							}
-							else 
-								console.log("Profile could not be created. Please try again");
-							
-						}).catch(error => {
-							console.log(error);
-							hideLoading();
-						})
+			createProfile(process.env.REACT_APP_TWITTER!,
+				process.env.REACT_APP_TWITTER_GROUP_ID!,
+				username,
+				description,
+				AssetType.INTEREST,
+				getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
+					if (isProfileCreated) {
+						console.log("Twitter is successfully connected");
+						wait(5000).then(res => {
+							window.close();
+						}).catch(console.error);
+					}
+					else
+						console.log("Profile could not be created. Please try again");
+
+				}).catch(error => {
+					console.log(error);
+					hideLoading();
+				})
 		}
 	}, [state])
 
@@ -438,7 +438,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
 		const username = params.get('username')!;
-		if(address && !username) {
+		if (address && !username) {
 			showLoading();
 			checkAddressExistence().then(res => {
 				if (!res.data.exists) {
@@ -447,22 +447,22 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					setStep("post-submit");
 				}
 				hideLoading();
-			})		
+			})
 		}
 	}, [address])
 
 	// Once user connected via metamask then we check if this address has twitter/facebook connected
 	useEffect(() => {
-		if(address) {
+		if (address) {
 			const userInfo = localStorage.getItem(address!);
 			// If there is already some data
-			if(userInfo) {
+			if (userInfo) {
 				const userInfoJson = JSON.parse(userInfo);
-				if(userInfoJson.isTwitterConnected) {
+				if (userInfoJson.isTwitterConnected) {
 					showLoading();
-					getProfileData(address!.toString(),process.env.REACT_APP_TWITTER!).then(
+					getProfileData(address!.toString(), process.env.REACT_APP_TWITTER!).then(
 						profileDataObj => {
-							if(profileDataObj) {
+							if (profileDataObj) {
 								setIsTwitterConnected(true);
 								setUserTwitterProfiles(profileDataObj);
 							}
@@ -472,11 +472,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				} else {
 					setIsTwitterConnected(false);
 				}
-				if(userInfoJson.isFacebookConnected) {
+				if (userInfoJson.isFacebookConnected) {
 					showLoading();
-					getProfileData(address!.toString(),process.env.REACT_APP_FACEBOOK!).then(
+					getProfileData(address!.toString(), process.env.REACT_APP_FACEBOOK!).then(
 						profileDataObj => {
-							if(profileDataObj) {
+							if (profileDataObj) {
 								setIsFacebookConnected(true);
 								setUserFacebookProfiles(profileDataObj);
 							}
@@ -508,39 +508,39 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		<PageWrapper
 			isProtected={false}
 			title={singUpStatus ? 'Sign Up' : 'Login'}
-			// className={classNames({ 'bg-dark': !singUpStatus, 'bg-light': singUpStatus })}
-			>
+		// className={classNames({ 'bg-dark': !singUpStatus, 'bg-light': singUpStatus })}
+		>
 			<Page className='p-0'>
 				{/*{ !renderBlocker && (*/
-				<div className='row h-100 align-items-center justify-content-center'>
-					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
-						<Card className='shadow-3d-dark' data-tour='login-page'>
-							<CardBody>
-								<div className='text-center mt-5'>
-									<div
-										className={classNames(
-											'text-decoration-none  fw-bold display-2',
-											{
-												'text-dark': !darkModeStatus,
-												'text-light': darkModeStatus,
-											},
-										)}
-										style={{ marginTop: isIframe && !address ? "80px" : isIframe && step === "pre-submit" ? "92px" : "0" }}										aria-label='Facit'										>
-										{/* Here goes logo */}
-										<CenteredImage imageSrc={PLogo} width={200} height={80}/>
+					<div className='row h-100 align-items-center justify-content-center'>
+						<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
+							<Card className='shadow-3d-dark' data-tour='login-page'>
+								<CardBody>
+									<div className='text-center mt-5'>
+										<div
+											className={classNames(
+												'text-decoration-none  fw-bold display-2',
+												{
+													'text-dark': !darkModeStatus,
+													'text-light': darkModeStatus,
+												},
+											)}
+											style={{ marginTop: isIframe && !address ? "80px" : isIframe && step === "pre-submit" ? "92px" : "0" }} aria-label='Facit'										>
+											{/* Here goes logo */}
+											<CenteredImage imageSrc={PLogo} width={200} height={80} />
+										</div>
 									</div>
-								</div>
-								<div
-									className={classNames('rounded-3', {
-										'bg-l10-dark': !darkModeStatus,
-										'bg-dark': darkModeStatus,
-									})}>
-								
-								</div>
+									<div
+										className={classNames('rounded-3', {
+											'bg-l10-dark': !darkModeStatus,
+											'bg-dark': darkModeStatus,
+										})}>
+
+									</div>
 
 									{/* BEGIN :: Metamask Login*/}
-										<LoginHeader step={step}/>
-										{!address && (
+									<LoginHeader step={step} />
+									{!address && (
 										<>
 											<div className='col-12 mt-4'>
 												<Button
@@ -555,8 +555,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													Continue with MetaMask
 												</Button>
 											</div>
-										</>	
-										)}
+										</>
+									)}
 									{/* END :: Metamask Login*/}
 
 									{/* BEGIN :: Add email or skip */}
@@ -572,53 +572,57 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													})}
 													icon='Email'
 													onClick={handleEmailOnClick}
-													>
+												>
 													{address ? "Register your Email" : "Continue with Email"}
 												</Button>
 											</div>
 											<div className="d-flex justify-content-center mt-1">
-												<a href="#" onClick={skipEmailRegistration}>Skip</a>
-											</div>	
+												<button className='skip-btn'
+													onClick={skipEmailRegistration}
+												>
+													Skip
+												</button>
+											</div>
 										</>
-										)}
+									)}
 									{/* END :: Add email or skip */}
 
 									{/* BEGIN :: Stych workflow */}
 									{
 										(step === "submit" || step === "verify") && (
 											<>
-											<StytchOTP showPostSubmit={showPostSubmit} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address}/>
+												<StytchOTP showPostSubmit={showPostSubmit} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address} />
 											</>
-									)}
+										)}
 									{/* END :: Stych workflow */}
 
 									{/* BEGIN :: Success page */}
 									{
 										(step === "success") && (
 											<>
-											<div className='d-flex align-items-center justify-content-center' style={{marginTop: "70px"}}>
-												<p>Stay Connected with us!</p>
-											</div>
-											<div className='d-flex align-items-center justify-content-center' style={{marginBottom: "90px"}}>
-												<a href="https://x.com/mvfwofficial?s=21&t=1GCSt3HPM8WcPENlVpgHfQ" target="_blank" rel="noopener noreferrer">
-													<img src={Twitter} style={{height: "45px", width: "45px"}} alt="Twitter" />
-												</a>
-												<a href="https://www.instagram.com/mvfwofficial?igsh=MW15MW5hem44MTR3dQ==" target="_blank" rel="noopener noreferrer">
-													<img src={Instagram} style={{height: "50px", width: "50px", marginLeft: "10px"}} alt="Instagram" />
-												</a>
-											</div>
+												<div className='d-flex align-items-center justify-content-center' style={{ marginTop: "70px" }}>
+													<p>Stay Connected with us!</p>
+												</div>
+												<div className='d-flex align-items-center justify-content-center' style={{ marginBottom: "90px" }}>
+													<a href="https://x.com/mvfwofficial?s=21&t=1GCSt3HPM8WcPENlVpgHfQ" target="_blank" rel="noopener noreferrer">
+														<img src={Twitter} style={{ height: "45px", width: "45px" }} alt="Twitter" />
+													</a>
+													<a href="https://www.instagram.com/mvfwofficial?igsh=MW15MW5hem44MTR3dQ==" target="_blank" rel="noopener noreferrer">
+														<img src={Instagram} style={{ height: "50px", width: "50px", marginLeft: "10px" }} alt="Instagram" />
+													</a>
+												</div>
 											</>
-									)}
+										)}
 									{/* END :: Success page */}
-									
+
 
 									{/* BEGIN :: Social Login */}
-									{address && isWidget && step === "post-submit" &&(
+									{address && isWidget && step === "post-submit" && (
 										<>
 											{isTwitterSelected && (<div className='col-12 mt-3'>
 												<Button
 													isOutline
-													isDisable= {isTwitterConnected==true ? true: false}
+													isDisable={isTwitterConnected == true ? true : false}
 													color={darkModeStatus ? 'light' : 'dark'}
 													className={classNames('w-100 py-3', {
 														'border-light': !darkModeStatus,
@@ -627,15 +631,15 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													icon='CustomTwitter'
 													onClick={openTwitterOAuthPopup}>
 													{!isTwitterConnected && (
-															<>
+														<>
 															Connect Twitter
-															</>
-														)}
-														{isTwitterConnected && (
-															<>
+														</>
+													)}
+													{isTwitterConnected && (
+														<>
 															Connected
-															</>
-														)}
+														</>
+													)}
 												</Button>
 											</div>)}
 											{isFacebookSelected && (<div className='col-12 mt-3'>
@@ -648,36 +652,36 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
 													render={renderProps => (
 														<Button
-														isOutline
-														isDisable= {isFacebookConnected==true ? true: false}
-														color={darkModeStatus ? 'light' : 'dark'}
-														className={classNames('w-100 py-3', {
-															'border-light': !darkModeStatus,
-															'border-dark': darkModeStatus,
-														})}
-														icon='CustomFacebook'
-														onClick={() => {
-															 // Define an async inner function to await handleBeforeFacebookPopup
-															const onClickAsync = async () => {
-																// Let it judge if we need to login facebook
-																await handleBeforeFacebookPopup(renderProps.onClick);
-													
-															};
-															// Call the async inner function
-															onClickAsync();
-														  }}
+															isOutline
+															isDisable={isFacebookConnected == true ? true : false}
+															color={darkModeStatus ? 'light' : 'dark'}
+															className={classNames('w-100 py-3', {
+																'border-light': !darkModeStatus,
+																'border-dark': darkModeStatus,
+															})}
+															icon='CustomFacebook'
+															onClick={() => {
+																// Define an async inner function to await handleBeforeFacebookPopup
+																const onClickAsync = async () => {
+																	// Let it judge if we need to login facebook
+																	await handleBeforeFacebookPopup(renderProps.onClick);
+
+																};
+																// Call the async inner function
+																onClickAsync();
+															}}
 														>
 															{!isFacebookConnected && (
 																<>
-																Connect Facebook
+																	Connect Facebook
 																</>
 															)}
 															{isFacebookConnected && (
 																<>
-																Connected
+																	Connected
 																</>
 															)}
-													</Button>
+														</Button>
 													)}
 												/>
 												<div className="d-flex justify-content-center mt-1">
@@ -686,7 +690,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													>
 														Skip
 													</button>
-												</div>	
+												</div>
 												{/* <div className='text-center col-12 mt-1'>
 												<a href='mailto:hirasiddiqui95@gmail.com'>
 														<br />
@@ -698,12 +702,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									)}
 									{/* END :: Social Login */}
 									{/* START:: Footer */}
-									<LoginFooter address={address}/>
+									<LoginFooter address={address} />
 									{/* END :: Footer */}
-							</CardBody>
-						</Card>
+								</CardBody>
+							</Card>
+						</div>
 					</div>
-				</div>
 				/*)}*/}
 			</Page>
 		</PageWrapper>
