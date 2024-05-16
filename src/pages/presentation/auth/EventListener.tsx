@@ -3,8 +3,12 @@ import React, { useEffect } from 'react';
 
 const EventListener: React.FC = () => {
     
+  function removeTrailingSlash(url: string): string {
+    return url.replace(/\/+$/, ''); // Removes trailing slashes
+  }
       const receiveMessage = async (event: MessageEvent) => {
-          const parentUrl = process.env.REACT_APP_PARENT_URL;
+          const params = new URLSearchParams(window.location.search)
+		      const parentUrl = removeTrailingSlash(params.get('origin')!);
           if (event.origin === parentUrl && event.data.type === 'metamaskRequest') {
               const data = event.data;
               let signer = null;
