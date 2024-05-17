@@ -36,7 +36,7 @@ export const getFacebookInterests = (userProfile: any) => {
         }
     }
     if (quotes) {
-        if (quotes.data.length>0) {
+        if (quotes.data?.length>0) {
             interests.push("ART_ENTERTAINMENT__BOOKS");   
             interests.push("INTERESTS__QUOTES");   
 

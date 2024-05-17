@@ -10,12 +10,13 @@ import Button from './bootstrap/Button';
 import validate from '../pages/presentation/demo-pages/helper/editPagesValidate';
 import classNames from 'classnames';
 import LoadingContext from '../utils/LoadingContext';
+import { OTPCodeEmailOptions } from '@stytch/vanilla-js';
 
 interface ILoginProps {
 	moveBack: any;
   sendCode: any;
   tryAgain: any;
-  showSuccess: any;
+  showPostSubmit: any;
   step: string;
   address: any;
 }
@@ -23,7 +24,7 @@ interface ILoginProps {
 /**
  * One-time passcodes can be sent via phone number through Stytch
  */
-const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess, step, address }) => {
+const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showPostSubmit, step, address }) => {
   const { user } = useStytchUser();
   const [methodId, setMethodId] = useState<string>('');
   const [code, setCode] = useState<string>('');
@@ -53,7 +54,12 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     event.preventDefault();
     showLoading();
     try {
-      let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress);
+      const templateId = process.env.REACT_APP_EMAIL_TEMPLATE_ID!;
+      const options: OTPCodeEmailOptions = {
+        login_template_id: templateId,
+        expiration_minutes: 2
+      }
+      let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress, options );
       console.log(response);
       setMethodId(response.method_id);
       sendCode();
@@ -98,7 +104,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     })
     .then(function (response) {
       if(response.status === 200) {
-        showSuccess();
+        showPostSubmit();
       } 
     })
     .catch(function (error) {

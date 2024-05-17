@@ -6,16 +6,16 @@ $border-radius-child: #{$card-border-radius - $card-border-width};
 
 // stylelint-disable font-weight-notation
 .card {
+	min-height: 550px;
 	--#{$prefix}border-color: rgba(#{hex-to-rgb($card-border-color)}, #{$card-border-opacity});
 
 	@include dark-mode {
-		--#{$prefix}border-color: rgba(
-			#{hex-to-rgb($dark-card-border-color)},
-			#{$dark-card-border-opacity}
-		);
+		--#{$prefix}border-color: rgba(#{hex-to-rgb($dark-card-border-color)},
+			#{$dark-card-border-opacity});
 		// Card
 		--#{$prefix}card-bg: #{$dark-card-bg};
 	}
+
 	$self: &;
 
 	@include margin-bottom($grid-gutter-width);
@@ -25,7 +25,7 @@ $border-radius-child: #{$card-border-radius - $card-border-width};
 	box-shadow: $card-box-shadow;
 
 	// Card in card
-	.card-body > & {
+	.card-body>& {
 		&:last-child {
 			@include margin-bottom(0);
 		}
@@ -38,9 +38,10 @@ $border-radius-child: #{$card-border-radius - $card-border-width};
 			height: calc(100% - #{$grid-gutter-width});
 
 			@each $size, $value in $spacers {
+
 				&.mb-#{$size},
 				&.my-#{$size} {
-					height: if($value == 0, 100%, calc(100% - #{$value}));
+					height: if($value ==0, 100%, calc(100% - #{$value}));
 				}
 			}
 		}
@@ -52,11 +53,11 @@ $border-radius-child: #{$card-border-radius - $card-border-width};
 
 	// Compact
 	&-compact {
-		> *:not(:first-child) {
+		>*:not(:first-child) {
 			padding-top: 0;
 		}
 
-		> *:not(:last-child) {
+		>*:not(:last-child) {
 			padding-bottom: 0;
 		}
 
@@ -88,7 +89,7 @@ $border-radius-child: #{$card-border-radius - $card-border-width};
 		flex-direction: column;
 		align-items: baseline;
 
-		> *:not(:last-child) {
+		>*:not(:last-child) {
 			@include margin-bottom($card-header-padding-y);
 		}
 	}
@@ -155,7 +156,7 @@ $border-radius-child: #{$card-border-radius - $card-border-width};
 }
 
 .card-subtitle {
-	.card-label .card-title + & {
+	.card-label .card-title+& {
 		@include margin-top(0.25rem);
 	}
 }
@@ -167,7 +168,7 @@ $border-radius-child: #{$card-border-radius - $card-border-width};
 .card-body {
 	@include padding($card-body-padding-y $card-spacer-x);
 
-	> *:last-child {
+	>*:last-child {
 		margin-bottom: 0;
 	}
 
@@ -184,6 +185,7 @@ $border-radius-child: #{$card-border-radius - $card-border-width};
 	@include dark-mode {
 		--#{$prefix}card-footer-bg: #{$dark-card-footer-background-color};
 	}
+
 	@include padding($card-footer-padding-y $card-spacer-x);
 
 	display: flex;
@@ -198,7 +200,7 @@ $border-radius-child: #{$card-border-radius - $card-border-width};
 		flex-direction: column;
 		align-items: baseline;
 
-		> *:not(:last-child) {
+		>*:not(:last-child) {
 			@include margin-bottom($card-footer-padding-y);
 		}
 	}
@@ -247,4 +249,5 @@ $border-radius-child: #{$card-border-radius - $card-border-width};
 
 	margin-left: auto;
 }
+
 // stylelint-enable font-weight-notation
