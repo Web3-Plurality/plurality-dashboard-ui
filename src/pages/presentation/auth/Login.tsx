@@ -30,7 +30,7 @@ const isIframe = window.location !== window.parent.location
 const LoginHeader: FC<any> = ({ step }) => {
 	return (
 		<>
-			<div className='text-center h1 fw-bold' style={{ marginTop: "50px" }}>Social Connect</div>
+			<div className='text-center h1 fw-bold' style={{ marginTop: "20px" }}>Social Connect</div>
 			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Subscribe to access early bird benefits</div>)}
 			{step === "submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>A verification code will be sent to your email</div>)}
 			{step === "verify" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Enter the 6 digit code sent to your email</div>)}
@@ -232,17 +232,28 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		return profile;
 	}
 
-	const ensureMetamaskConnection = async (): Promise<Boolean> => {
-		console.log("Ensure metamask connection called");
-		if (!address || !isConnected) {
-			for (let i = 0; i < connectors.length; i++) {
-				let connector = connectors[i];
-				console.log("Trying to connect with connector: " + connectors[i].name);
-				connect({ connector });
+	const ensureMetamaskConnection = async (): Promise<boolean> => {
+		console.log("Ensure MetaMask connection called");
+
+		// Check if MetaMask is installed
+		if (typeof window.ethereum !== 'undefined') {
+			console.log("MetaMask is installed");
+
+			// Check if MetaMask is connected
+			if (!address || !isConnected) {
+				for (let i = 0; i < connectors.length; i++) {
+					let connector = connectors[i];
+					console.log("Trying to connect with connector: " + connectors[i].name);
+					connect({ connector });
+				}
 			}
+			return true; // MetaMask is installed
+		} else {
+			alert("MetaMask is not installed");
+			return false; // MetaMask is not installed
 		}
-		return true;
-	}
+	};
+
 
 	const setIsTwitterConnectedInLocalStorage = () => {
 		const userInfo = localStorage.getItem(address!);
@@ -327,6 +338,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			let breakLoop = false;
 			while (!isTwitterConnected && !breakLoop) {
 				console.log("Twitter not yet connected, so waiting");
+				if (!childWindow || childWindow.closed) {
+					hideLoading();
+					break;
+				}
 				const profileDataObj = await getProfileData(address!.toString(), process.env.REACT_APP_TWITTER!);
 				if (profileDataObj) {
 					setUserTwitterProfiles(profileDataObj);
@@ -691,12 +706,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 														Skip
 													</button>
 												</div>
-												{/* <div className='text-center col-12 mt-1'>
-												<a href='mailto:hirasiddiqui95@gmail.com'>
+												<div className='text-center col-12 mt-1'>
+													<a href='mailto:hirasiddiqui95@gmail.com'>
 														<br />
-													Please contact <u>devs</u> to request access for facebook
-												</a>
-												</div> */}
+														Please contact <u>devs</u> to request access for facebook
+													</a>
+												</div>
 											</div>)}
 										</>
 									)}
