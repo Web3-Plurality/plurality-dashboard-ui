@@ -250,6 +250,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			return true; // MetaMask is installed
 		} else {
 			alert("MetaMask is not installed");
+			const params = new URLSearchParams(window.location.search)
+			const origin = params.get('origin')!;
+			window.parent.postMessage({ type: 'noEthersProvider', data: "Please install metamask" }, origin);
 			return false; // MetaMask is not installed
 		}
 	};
