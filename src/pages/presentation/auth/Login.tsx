@@ -711,7 +711,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												</div>
 												<div className='text-center col-12 mt-1'>
 													<a href='mailto:hirasiddiqui95@gmail.com'>
-														<br />
 														Please contact <u>devs</u> to request access for facebook
 													</a>
 												</div>
