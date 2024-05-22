@@ -140,13 +140,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const origin = params.get('origin')!;
 		// If nothing is connected
 		if (!userTwitterProfiles && !userFacebookProfiles) {
-			window.parent.postMessage({ type: 'profile', data: [] }, origin);
+			window.parent.postMessage({ eventName: 'profileDataReturned', data: [] }, origin);
 		} else if (userTwitterProfiles && !userFacebookProfiles) {
-			window.parent.postMessage({ type: 'profile', data: [userTwitterProfiles] }, origin);
+			window.parent.postMessage({ eventName: 'profileDataReturned', data: [userTwitterProfiles] }, origin);
 		} else if (!userTwitterProfiles && userFacebookProfiles) {
-			window.parent.postMessage({ type: 'profile', data: [userFacebookProfiles] }, origin);
+			window.parent.postMessage({ eventName: 'profileDataReturned', data: [userFacebookProfiles] }, origin);
 		} else {
-			window.parent.postMessage({ type: 'profile', data: [userTwitterProfiles, userFacebookProfiles] }, origin);
+			window.parent.postMessage({ eventName: 'profileDataReturned', data: [userTwitterProfiles, userFacebookProfiles] }, origin);
 		}
 		hideLoading();
 	}
@@ -252,7 +252,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			alert("MetaMask is not installed");
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
-			window.parent.postMessage({ type: 'noEthersProvider', data: "Please install metamask" }, origin);
+			window.parent.postMessage({ eventName: 'errorMessage', data: "Please install metamask" }, origin);
 			return false; // MetaMask is not installed
 		}
 	};
@@ -518,7 +518,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if (userFacebookProfiles && userTwitterProfiles) {
 			const params = new URLSearchParams(window.location.search)
 			const origin = params.get('origin')!;
-			window.parent.postMessage({ type: 'profile', data: [userTwitterProfiles, userFacebookProfiles] }, origin);
+			window.parent.postMessage({ eventName: 'profileDataReturned', data: [userTwitterProfiles, userFacebookProfiles] }, origin);
 		}
 	}, [userFacebookProfiles, userTwitterProfiles])
 
