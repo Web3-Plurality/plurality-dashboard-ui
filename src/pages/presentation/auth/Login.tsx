@@ -116,6 +116,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		setStep("post-submit")
 	}
 
+
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search)
+		const origin = params.get('origin')!;
+		window.parent.postMessage({ eventName: 'profilesConnectionCompleted', data: JSON.stringify(isFacebookConnected && isTwitterConnected) }, origin);
+	}, [isFacebookConnected, isTwitterConnected])
+
 	const skipEmailRegistration = async () => {
 		showLoading();
 		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch';

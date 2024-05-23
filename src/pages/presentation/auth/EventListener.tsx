@@ -19,8 +19,15 @@ const EventListener: React.FC = () => {
                 window.parent.postMessage({ type: 'noEthersProvider', data: "Please install metamask" }, parentUrl);
                 return;
               } else {
-                provider = new ethers.BrowserProvider(window.ethereum);
-                signer = await provider.getSigner();
+                try{
+                  provider = new ethers.BrowserProvider(window.ethereum);
+                  signer = await provider.getSigner();
+                }
+                catch(e: any){
+                  console.log(e.toString())
+                  window.parent.postMessage({ type: 'noEthersProvider', data: e.toString() }, parentUrl);
+                  return;
+                }
               }
         
               if (data.method === 'getAllAccounts') {
