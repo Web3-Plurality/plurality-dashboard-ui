@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -93,6 +93,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
 
+	const [popup, setPopup] = useState<Window | null>(null);
+	const popupRef: any = useRef(null)
+	const [sseMessage, setSseMessage] = useState('');
+	const [isInfoButtonEnabled, setIsInfoButtonEnabled] = useState(false);
+
+
 	// Stytch
 	const [step, setStep] = useState<OtpStep>("pre-submit");
 	const moveBack = () => {
@@ -115,6 +121,56 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const showPostSubmit = () => {
 		setStep("post-submit")
 	}
+
+	useEffect(() => {
+		const evtSource = new EventSource('https://app.plurality.local:5000/register-event', { withCredentials: true });
+		evtSource.onmessage = function (event) {
+			console.log('Message from server:', JSON.parse(event?.data)?.message);
+			setSseMessage(event.data);
+
+			// Enable the button if the message is "received"
+			if (JSON.parse(event?.data)?.message === "received") {
+				console.log("Innnnnnn received", popup)
+				window.close()
+				console.log("OPo ref", popupRef)
+				if (popupRef && popupRef.current) {
+					popupRef.current.close();
+					handleInfoRequest()
+					popupRef.current = null
+				}
+				if (popup) {
+					popup.close();
+					setPopup(null);
+					console.log('Window closed.');
+					showLoading()
+					handleInfoRequest()
+				} else {
+					console.log('No window to close or window already closed.');
+				}
+
+				setIsInfoButtonEnabled(true);
+			}
+		};
+
+		evtSource.onerror = function (err) {
+			console.error('EventSource failed:', err);
+			evtSource.close();
+		};
+	}, [])
+
+	const handleInfoRequest = async () => {
+		await axios.get('https://app.plurality.local:5000/oauth-twitter/info')
+			.then(response => {
+				// setIsTwitterSelected(true)
+				hideLoading()
+				console.log('Info:', response.data);
+			})
+			.catch(error => {
+				hideLoading()
+				console.error('Error getting info:', error);
+			});
+	};
+
 
 
 	useEffect(() => {
@@ -328,6 +384,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		// Check if twitter profile already exists at orbis
 		showLoading();
 		const profileDataObj = await getProfileData(address!.toString(), process.env.REACT_APP_TWITTER!);
+
 		if (profileDataObj) {
 			setUserTwitterProfiles(profileDataObj);
 			//setIsTwitterConnected(true);
@@ -342,9 +399,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				'_blank',
 				`width=${popupWidth}, height=${popupHeight}, top=${popupTop}, left=${popupLeft}`
 			);
-			console.log("Child window: ");
-			console.log(childWindow);
+			childWindow?.localStorage.setItem("isConnected", JSON.stringify(false));
 			// Loop in main window
+			popupRef.current = childWindow
 			let breakLoop = false;
 			while (!isTwitterConnected && !breakLoop) {
 				console.log("Twitter not yet connected, so waiting");
@@ -356,6 +413,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				if (profileDataObj) {
 					setUserTwitterProfiles(profileDataObj);
 					//setIsTwitterConnected(true);
+					localStorage.setItem("isConnected", JSON.stringify(true));
 					setIsTwitterConnectedInLocalStorage();
 					breakLoop = true;
 					hideLoading();
