@@ -92,6 +92,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { address, connector, isConnected } = useAccount();
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
+	const [popup, setPopup] = useState<Window | null>(null)
 
 	// Stytch
 	const [step, setStep] = useState<OtpStep>("pre-submit");
@@ -137,6 +138,24 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			evtSource.close();
 		};
 	}, [])
+
+	useEffect(() => {
+        let intervalId: any;
+
+        if (popup) {
+            intervalId = setInterval(() => {
+                if (popup.closed) {
+                    hideLoading();
+                    clearInterval(intervalId);
+                    setPopup(null);
+                    console.log("Popup closed");
+                }
+            }, 500);
+        }
+
+        // Cleanup the interval when the component unmounts or popup is closed
+        return () => clearInterval(intervalId);
+    }, [popup]);
 
 	const handleInfoRequestTwitter = async () => {
 		console.log("info endpoint")
@@ -439,11 +458,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		else {
 			// Open the popup window
 			console.log("Window open here")
-			window.open(
+			const childPopup = window.open(
 				apiUrl,
 				'_blank',
 				`width=${popupWidth}, height=${popupHeight}, top=${popupTop}, left=${popupLeft}`
-			);		
+			);	
+			
+			setPopup(childPopup)
 		}
 	};
 
