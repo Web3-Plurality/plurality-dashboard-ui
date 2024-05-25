@@ -132,7 +132,6 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 				if (profileDataObjects[i].dataFetchedFrom == profileType) {
 				//TODO the data should be encrpted using the user wallet
 				const secret = "123456"
-				console.log("Secret is" + secret);
 				const cryptr = new Cryptr(secret);
 				const decryptedAssetData = cryptr.decrypt(profileDataObjects[i].assetData);
 				const decryptedProfileData = cryptr.decrypt(profileDataObjects[i].profileData);

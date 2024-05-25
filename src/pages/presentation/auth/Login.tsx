@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -22,8 +22,8 @@ import StytchOTP from '../../../components/StytchOTP';
 import Instagram from '../../../assets/instagram.png';
 import Twitter from '../../../assets/twitter.png';
 import axios from 'axios';
-import { useWindowScroll } from 'react-use';
 
+axios.defaults.withCredentials = true;
 type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success' | 'creating-profile';
 
 const isIframe = window.location !== window.parent.location
@@ -116,6 +116,95 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		setStep("post-submit")
 	}
 
+	useEffect(() => {
+		const evtSource = new EventSource(`${process.env.REACT_APP_API_BASE_URL}/register-event`, { withCredentials: true });
+		evtSource.onmessage = function (event) {
+			const {message, app} = JSON.parse(event?.data)
+			if (message === "received") {
+				if (app === "twitter") {
+					console.log("Twitter message received");
+					handleInfoRequestTwitter();
+				}
+				else if (JSON.parse(event?.data)?.app === "tiktok") {
+					console.log("Tiktok message received");
+					handleInfoRequestTiktok();
+				}
+			}
+		};
+
+		evtSource.onerror = function (err) {
+			console.error('EventSource failed:', err);
+			evtSource.close();
+		};
+	}, [])
+
+	const handleInfoRequestTwitter = async () => {
+		console.log("info endpoint")
+		await axios.get(`${process.env.REACT_APP_API_BASE_URL}/oauth-twitter/info`)
+			.then(response => {
+				console.log(response)
+				const {
+					username, name, reputationScore, 
+					description, introTags, followersCount, 
+					followingCount, tweetCount, 
+					mostRecentTweetId, interests
+				} = response.data.twitterProfile
+				const profile = { 
+					name: username, 
+					displayName: name, 
+					profileUrl: `https://twitter.com/${username}`,
+					reputationScore,
+					description,
+					introTags,
+					followersCount,
+					followingCount,
+					tweetCount,
+					mostRecentTweet: `https://twitter.com/${username}/status/${mostRecentTweetId}`,
+					interests,
+				};
+				createProfile(process.env.REACT_APP_TWITTER!,
+					process.env.REACT_APP_TWITTER_GROUP_ID!,
+					username,
+					description,
+					AssetType.INTEREST,
+					interests, 
+					JSON.stringify(profile))
+					.then(isProfileCreated => {
+						console.log("Profile created response", isProfileCreated)
+						if (isProfileCreated) {
+							setUserTwitterProfiles(constructProfileData(AssetType.INTEREST, response.data.twitterProfile.interests, process.env.REACT_APP_TWITTER!, JSON.stringify(profile)));
+							console.log("Profile created response 1")
+							setIsTwitterConnectedInLocalStorage();
+							hideLoading();
+						}
+						else
+							console.log("Profile could not be created. Please try again");
+
+						hideLoading();
+
+					}).catch(error => {
+						console.log(error);
+						hideLoading();
+					})
+				console.log('Info:', response.data);
+			})
+			.catch(error => {
+				hideLoading()
+				console.error('Error getting info:', error);
+			});
+	};
+
+	const handleInfoRequestTiktok = async () => {
+		await axios.get(`${process.env.REACT_APP_API_BASE_URL}/oauth-tiktok/info`)
+			.then(response => {
+				hideLoading()
+				console.log('Info:', response.data);
+			})
+			.catch(error => {
+				hideLoading()
+				console.error('Error getting info:', error);
+			});
+	};
 
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
@@ -140,21 +229,28 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		hideLoading();
 	}
 
+
 	// If the user skipped the profile connect
 	const skipConnectProfiles = async () => {
+		console.log("Profile Connected here - Start")
 		showLoading();
 		const params = new URLSearchParams(window.location.search)
 		const origin = params.get('origin')!;
 		// If nothing is connected
 		if (!userTwitterProfiles && !userFacebookProfiles) {
+			console.log("No account connected")
 			window.parent.postMessage({ eventName: 'profileDataReturned', data: [] }, origin);
 		} else if (userTwitterProfiles && !userFacebookProfiles) {
+			console.log("Twitter Connected block")
 			window.parent.postMessage({ eventName: 'profileDataReturned', data: [userTwitterProfiles] }, origin);
 		} else if (!userTwitterProfiles && userFacebookProfiles) {
+			console.log("Facebook Connected block")
 			window.parent.postMessage({ eventName: 'profileDataReturned', data: [userFacebookProfiles] }, origin);
 		} else {
+			console.log("Facebook and Twitter Connected block")
 			window.parent.postMessage({ eventName: 'profileDataReturned', data: [userTwitterProfiles, userFacebookProfiles] }, origin);
 		}
+		console.log("Profile Connected here - End")
 		hideLoading();
 	}
 
@@ -180,13 +276,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	};
 
 	const responseFacebook = async (response: any) => {
-		console.log(response);
-		if (response.accessToken) {
-			const interests = getFacebookInterests(response);
-			const username = response.name;
-			const description = 'some description';
-			const profile = { name: username, profileUrl: "" };
-			try {
+		try {
+			console.log(response);
+			if (response.accessToken) {
+				const interests = getFacebookInterests(response);
+				const username = response.name;
+				const description = 'some description';
+				const profile = { name: username, profileUrl: "" };
 				const isProfileCreated = await createProfile(process.env.REACT_APP_FACEBOOK!,
 					process.env.REACT_APP_FACEBOOK_GROUP_ID!,
 					username,
@@ -212,22 +308,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				}
 				else
 					console.log("Profile could not be created. Please try again");
-
+					hideLoading();
+			}
+			else {
+				console.log("access token not found");
+				alert("Could not sign in to facebook");
 				hideLoading();
 			}
-			catch (error) {
-				console.log(error);
-				alert(error);
-				hideLoading();
-			}
-
 		}
-		else {
-			console.log("access token not found");
-			alert("Could not sign in to facebook");
+		catch (error) {
+			console.log(error);
+			alert(error);
 			hideLoading();
 		}
 	};
+
+	const failureFacebook = (error: any) => {
+		alert(error);
+		hideLoading()
+	}
 
 	const constructProfileData = (assetType: any, assetData: any, dataFetchedFrom: any, profileData: any) => {
 		const profile = {
@@ -272,7 +371,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			console.log('No user info found in localStorage');
 			const storedUserInfo = {
 				isFacebookConnected: false,
-				isTwitterConnected: true,
+				isTwitterConnected: true, 
 			}
 			localStorage.setItem(address!, JSON.stringify(storedUserInfo));
 		} else {
@@ -328,7 +427,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		// Check if twitter profile already exists at orbis
 		showLoading();
 		const profileDataObj = await getProfileData(address!.toString(), process.env.REACT_APP_TWITTER!);
+
 		if (profileDataObj) {
+			console.log("fetching profile from orbis");
 			setUserTwitterProfiles(profileDataObj);
 			//setIsTwitterConnected(true);
 			setIsTwitterConnectedInLocalStorage();
@@ -337,34 +438,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 		else {
 			// Open the popup window
-			const childWindow = window.open(
+			console.log("Window open here")
+			window.open(
 				apiUrl,
 				'_blank',
 				`width=${popupWidth}, height=${popupHeight}, top=${popupTop}, left=${popupLeft}`
-			);
-			console.log("Child window: ");
-			console.log(childWindow);
-			// Loop in main window
-			let breakLoop = false;
-			while (!isTwitterConnected && !breakLoop) {
-				console.log("Twitter not yet connected, so waiting");
-				if (!childWindow || childWindow.closed) {
-					hideLoading();
-					break;
-				}
-				const profileDataObj = await getProfileData(address!.toString(), process.env.REACT_APP_TWITTER!);
-				if (profileDataObj) {
-					setUserTwitterProfiles(profileDataObj);
-					//setIsTwitterConnected(true);
-					setIsTwitterConnectedInLocalStorage();
-					breakLoop = true;
-					hideLoading();
-				}
-				else {
-					console.log("waiting");
-					await wait(5000);
-				}
-			}
+			);		
 		}
 	};
 
@@ -426,35 +505,15 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
 		if (idPlatform == "twitter" && !renderBlocker) {
-			setRenderBlocker(true);
-			const params = new URLSearchParams(window.location.search);
-			const username = params.get('username')!;
-			const displayName = params.get('display_name')!;
-			const profileUrl = params.get('picture_url')!;
+			window.close();
 
-			const description = 'some description';
-			const profile = { name: username, displayName: displayName, profileUrl: profileUrl };
-			showLoading();
-			setStep("creating-profile")
-			createProfile(process.env.REACT_APP_TWITTER!,
-				process.env.REACT_APP_TWITTER_GROUP_ID!,
-				username,
-				description,
-				AssetType.INTEREST,
-				getTwitterInterests({}), JSON.stringify(profile)).then(isProfileCreated => {
-					if (isProfileCreated) {
-						console.log("Twitter is successfully connected");
-						wait(5000).then(res => {
-							window.close();
-						}).catch(console.error);
-					}
-					else
-						console.log("Profile could not be created. Please try again");
+			// setRenderBlocker(true);
+			// const params = new URLSearchParams(window.location.search);
+			// const username = params.get('username')!;
+			// const displayName = params.get('display_name')!;
+			// const profileUrl = params.get('picture_url')!;
 
-				}).catch(error => {
-					console.log(error);
-					hideLoading();
-				})
+
 		}
 	}, [state])
 
@@ -521,13 +580,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}, [address])
 
 	// userProfiles useEffect hook, once all profiles are connected, we return the userprofile back the profiles
-	useEffect(() => {
-		if (userFacebookProfiles && userTwitterProfiles) {
-			const params = new URLSearchParams(window.location.search)
-			const origin = params.get('origin')!;
-			window.parent.postMessage({ eventName: 'profileDataReturned', data: [userTwitterProfiles, userFacebookProfiles] }, origin);
-		}
-	}, [userFacebookProfiles, userTwitterProfiles])
+	// useEffect(() => {
+	// 	if (userFacebookProfiles && userTwitterProfiles) {
+	// 		const params = new URLSearchParams(window.location.search)
+	// 		const origin = params.get('origin')!;
+	// 		window.parent.postMessage({ eventName: 'profileDataReturned', data: [userTwitterProfiles, userFacebookProfiles] }, origin);
+	// 	}
+	// }, [userFacebookProfiles, userTwitterProfiles])
 
 	return (
 		<PageWrapper
@@ -673,6 +732,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													autoLoad={false}
 													fields="name,picture,gender,inspirational_people,languages,meeting_for,quotes,significant_other,sports, music, photos, age_range, favorite_athletes, favorite_teams, hometown, feed, likes "
 													callback={responseFacebook}
+													onFailure={failureFacebook}
 													cssClass='shadow-3d-container'
 													scope="public_profile, email, user_hometown, user_likes, user_friends, user_gender, user_age_range"
 													render={renderProps => (
@@ -713,7 +773,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													<button className='skip-btn'
 														onClick={skipConnectProfiles}
 													>
-														Skip
+														{isTwitterConnected && isFacebookConnected ? "Done"  :"Skip"}
 													</button>
 												</div>
 												<div className='text-center col-12 mt-1'>
