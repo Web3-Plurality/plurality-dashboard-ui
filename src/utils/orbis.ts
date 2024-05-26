@@ -22,7 +22,7 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 		//dispatch({ type: MetamaskActions.SetInfoMessage, payload: "Signing in your orbis profile" });
 		console.log("Signing in your orbis profile");
 		const res = await orbis.connect_v2({ chain: "ethereum", lit: false });
-		console.log(orbis);
+		//console.log(orbis);
 		/** Check if the connection is successful or not */
 		if(res.status == 200) {
 			console.log(res.did);
@@ -41,8 +41,8 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 			console.log(error);
 			return -1;
 		  }
-		  console.log("PROFILE DATA: ");
-		  console.log(profileData);
+		  //console.log("PROFILE DATA: ");
+		  //console.log(profileData);
 		  //TODO the data should be encrpted using the user wallet
 		  const secret = "123456";
 
@@ -120,15 +120,15 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 			did: ""
 		};
 
-		console.log(data.details);
+		//console.log(data.details);
 		let profileDataObjects: ProfileData[] = data.details.profile?.data.web2ProfilesData;
 
 		  //todo: simplify this workflow and use a better encryption mechanism
 		  // todo: ideally implement ceramic's encrypted data streams
 		  // IMPORTANT: This is a workaround for testing - not production ready
 			for (let i=0;i<profileDataObjects.length;i++) {
-				console.log("Loop started");
-				console.log(profileDataObjects[i]);
+				//console.log("Loop started");
+				//console.log(profileDataObjects[i]);
 				if (profileDataObjects[i].dataFetchedFrom == profileType) {
 				//TODO the data should be encrpted using the user wallet
 				const secret = "123456"
@@ -136,8 +136,8 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 				const decryptedAssetData = cryptr.decrypt(profileDataObjects[i].assetData);
 				const decryptedProfileData = cryptr.decrypt(profileDataObjects[i].profileData);
 
-				console.log(decryptedAssetData);
-				console.log(decryptedProfileData);
+				//console.log(decryptedAssetData);
+				//console.log(decryptedProfileData);
 
 				var assetDataArray = new Array();
 				assetDataArray = decryptedAssetData.split(",");
@@ -146,7 +146,7 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 				profileDataObj.dataFetchedFrom = profileDataObjects[i].dataFetchedFrom;
 				profileDataObj.assetType = profileDataObjects[i].assetType;
 				profileDataObj.did = did;
-				console.log(profileDataObj);
+				//console.log(profileDataObj);
 				return profileDataObj;
 				}
 			}
@@ -164,7 +164,7 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 		const res = await orbis.createPost({
 		  body: postContent,
 		});
-		console.log(res);
+		//console.log(res);
 		return res;
 	  }
 

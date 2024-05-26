@@ -121,8 +121,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const evtSource = new EventSource(`${process.env.REACT_APP_API_BASE_URL}/register-event`, { withCredentials: true });
 		evtSource.onmessage = function (event) {
 			const {message, app} = JSON.parse(event?.data)
+			console.log(message);
 			if (message === "received") {
 				if (app === "twitter") {
+					showLoading();
 					console.log("Twitter message received");
 					handleInfoRequestTwitter();
 				}
