@@ -4,7 +4,11 @@ import React, { useEffect } from 'react';
 const EventListener: React.FC = () => {
     
   function removeTrailingSlash(url: string): string {
-    return url?.replace(/\/+$/, ''); // Removes trailing slashes
+    const slashesRemoved = url?.replace(/\/+$/, '');
+    const urlObject = new URL(slashesRemoved);
+  
+    // Extract the origin (protocol + domain + port)
+    return urlObject.origin;
   }
       const receiveMessage = async (event: MessageEvent) => {
           const params = new URLSearchParams(window.location.search)
