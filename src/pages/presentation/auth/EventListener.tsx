@@ -33,7 +33,7 @@ const EventListener: React.FC = () => {
               if (data.method === 'getAllAccounts') {
                 try {
                   const accounts = await provider.listAccounts();
-                  window.parent.postMessage({ eventName: 'getAllAccounts', data: accounts }, parentUrl);
+                  window.parent.postMessage({ id: data.id, eventName: 'getAllAccounts', data: accounts }, parentUrl);
                 }
                 catch (error: any) {
                   console.error(error);
