@@ -34,11 +34,12 @@ type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
 const LoginHeader: FC<any> = ({step}) => {
 	return (
 		<>
-			<div className='text-center h1 fw-bold' style={{marginTop: "50px"}}>Social Connect</div>
-			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Subscribe to access early bird benefits</div>)}
+			{step !== "success" && (<div className='text-center h1 fw-bold' style={{marginTop: "50px"}}>Join Us</div>)}
+			{step === "success" && (<div className='text-center h1 fw-bold' style={{marginTop: "50px"}}>Congrats! You've secured 1000 points</div>)}
+			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Create an account to be rewarded as an early user</div>)}
 			{step === "submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>A verification code will be sent to your email</div>)}
 			{step === "verify" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Enter the 6 digit code sent to your email</div>)}
-			{step === "success" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Subscription successful. Congrats!</div>)}
+			{step === "success" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>You can claim your points in September!</div>)}
 		</>
 	);
 };
@@ -313,23 +314,23 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const apps = params.get('apps')!;
 
 		if (widget == "true") {
-			if(!idPlatform && !window.opener){
-				navigate(`/?isWidget=false`);
-			}
-			else{
-				if (apps?.split(",")) {
-					for(let app of apps?.split(",")) {
-						if(app === "twitter"){
-							setIsTwitterSelected(true)
-						}
-						if(app === "facebook"){
-							setIsFacebookSelected(true)
-						}
+			// if(!idPlatform && !window.opener){
+			// 	navigate(`/?isWidget=false`);
+			// }
+			// else{
+			if (apps?.split(",")) {
+				for(let app of apps?.split(",")) {
+					if(app === "twitter"){
+						setIsTwitterSelected(true)
 					}
-					setCallingDApp(dAppName);
-					setIsWidget(true);
+					if(app === "facebook"){
+						setIsFacebookSelected(true)
+					}
 				}
+				setCallingDApp(dAppName);
+				setIsWidget(true);
 			}
+			// }
 		}
 		//else {
 		//	navigate(`/?isWidget=false`);
@@ -380,9 +381,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if(address) {
 			const params = new URLSearchParams(window.location.search)
 			const isWidget = params.get('isWidget')!;
-			if (!isWidget || isWidget == "false")
-				navigate(`/?isWidget=false`);
-			else if (isWidget == "true") {
+			// if (!isWidget || isWidget == "false")
+			// 	navigate(`/?isWidget=false`);
+			if (isWidget == "true") {
 				// update widget state
 				setIsWidget(true);
 			}
@@ -410,11 +411,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		<PageWrapper
 			isProtected={false}
 			title={singUpStatus ? 'Sign Up' : 'Login'}
-			className={classNames({ 'bg-dark': !singUpStatus, 'bg-light': singUpStatus })}>
+			className={classNames({ 'bg-dark': singUpStatus, 'bg-light': !singUpStatus })}>
 			<Page className='p-0'>
 				{/*{ !renderBlocker && (*/
 				<div className='row h-100 align-items-center justify-content-center'>
-					<div className='col-xl-4 col-lg-6 col-md-8 shadow-3d-container'>
+					<div className='col-xl-4 col-lg-6 col-md-8'>
 						<Card className='shadow-3d-dark' data-tour='login-page'>
 							<CardBody>
 								<div className='text-center mt-5'>
@@ -454,7 +455,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													icon='Email'
 													onClick={handleEmailOnClick}
 													>
-													{address ? "Register your Email" : "Continue with Email"}
+													{address ? "Register" : "Continue with Email"}
 												</Button>
 											</div>
 											{address && (
@@ -500,13 +501,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										(step === "success") && (
 											<>
 											<div className='d-flex align-items-center justify-content-center' style={{marginTop: "70px"}}>
-												<p>Stay Connected with us!</p>
+												<p>Join the DFDC Community</p>
+											</div>
+											<div className='d-flex align-items-center justify-content-center' style={{marginTop: "-15px"}}>
+												<p>Be a part of Fashion’s Future</p>
 											</div>
 											<div className='d-flex align-items-center justify-content-center' style={{marginBottom: "90px"}}>
-												<a href="https://x.com/mvfwofficial?s=21&t=1GCSt3HPM8WcPENlVpgHfQ" target="_blank" rel="noopener noreferrer">
+												<a href="https://x.com/dfdcxyz" target="_blank" rel="noopener noreferrer">
 													<img src={Twitter} style={{height: "45px", width: "45px"}} alt="Twitter" />
 												</a>
-												<a href="https://www.instagram.com/mvfwofficial?igsh=MW15MW5hem44MTR3dQ==" target="_blank" rel="noopener noreferrer">
+												<a href="https://www.instagram.com/dfdcxyz?igsh=MXZmdmRhMXNudjEwNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer">
 													<img src={Instagram} style={{height: "50px", width: "50px", marginLeft: "10px"}} alt="Instagram" />
 												</a>
 											</div>

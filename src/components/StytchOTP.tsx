@@ -142,9 +142,9 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                   onChange={handleAcceptTermsChange} 
                   style={{marginLeft: "5px"}}
                 />
-                <span style={{ marginLeft: '5px', fontSize: 'x-small' }}>I accept <a href="https://plurality.network/user-terms-of-service" target="_blank" rel="noopener noreferrer">
+                <span style={{ marginLeft: '5px', fontSize: 'x-small' }}>I accept the <a href="https://plurality.network/user-terms-of-service" target="_blank" rel="noopener noreferrer">
                 terms of service
-				        </a> and subscribe to updates</span>
+				        </a> and subscribe to receive updates from the DFDC</span>
               </label>
             </div>
             <br />
