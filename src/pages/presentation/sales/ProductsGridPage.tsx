@@ -143,11 +143,12 @@ const ProductsGridPage = () => {
 	// }, [state])
 
 	useEffect(() => {
-		if (address) {
+		navigate(`/auth-pages/login?isWidget=true`);
+		/*if (address) {
 			checkConnectProfilesOnPageLoad(); 
 		} else {
 			navigate(`/auth-pages/login?isWidget=false`);
-		}
+		}*/
 	}, [address])
 
 	const checkConnectProfilesOnPageLoad = async () => {

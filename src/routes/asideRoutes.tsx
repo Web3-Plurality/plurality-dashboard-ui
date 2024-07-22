@@ -8,7 +8,7 @@ const asides: RouteProps[] = [
 	{ path: demoPagesMenu.login.path, element: null },
 	{ path: demoPagesMenu.signUp.path, element: null },
 	{ path: pageLayoutTypesPagesMenu.blank.path, element: null },
-	{ path: '*', element: <DefaultAside /> },
+	{ path: '*', element: <Login /> },
 ];
 
 export default asides;

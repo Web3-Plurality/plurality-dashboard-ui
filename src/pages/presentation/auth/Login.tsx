@@ -35,11 +35,11 @@ const LoginHeader: FC<any> = ({step}) => {
 	return (
 		<>
 			{step !== "success" && (<div className='text-center h1 fw-bold' style={{marginTop: "50px"}}>Join Us</div>)}
-			{step === "success" && (<div className='text-center h1 fw-bold' style={{marginTop: "50px"}}>Congrats! You've secured 1000 points</div>)}
+			{step === "success" && (<div className='text-center h2 fw-bold' style={{marginTop: "50px"}}>Congrats! You've secured 1000 points</div>)}
 			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Create an account to be rewarded as an early user</div>)}
 			{step === "submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>A verification code will be sent to your email</div>)}
 			{step === "verify" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Enter the 6 digit code sent to your email</div>)}
-			{step === "success" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>You can claim your points in September!</div>)}
+			{step === "success" && (<div className='text-center h6 mt-2' style={{marginBottom: "20px", marginTop: "20px"}}>You can claim your points in September 👀</div>)}
 		</>
 	);
 };
@@ -48,7 +48,7 @@ const LoginFooter: FC<any> = () => {
 		<>
 			<div className="d-flex align-items-center justify-content-center" style={{marginTop: "50px"}}>
 				Powered by 
-				<a href="https://twitter.com/PluralityWeb3" target="_blank" rel="noopener noreferrer">
+				<a href="https://plurality.network/" target="_blank" rel="noopener noreferrer">
 					<img src={PLogo} alt="Logo" style={{width: "100px", height: "40px"}}/>
 				</a>
 			</div>
@@ -77,7 +77,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { setUser } = useContext(AuthContext);
 	const { darkModeStatus } = useDarkMode();
 
-	const [isWidget, setIsWidget] = useState(false);  
+	//const [isWidget, setIsWidget] = useState(false);  
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
 	
 	const navigate = useNavigate();
@@ -163,7 +163,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	  };
 
-	const responseFacebook = async (response: any) => {
+	/*const responseFacebook = async (response: any) => {
 		console.log(response);
 		if (response.accessToken) {
 			const interests = getFacebookInterests(response);
@@ -207,9 +207,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		else {
 			console.log("access token not found");
 		}
-	};	
+	};	*/
 
-	const constructProfileData = (assetType: any, assetData: any, dataFetchedFrom: any, profileData: any) => {
+	/*const constructProfileData = (assetType: any, assetData: any, dataFetchedFrom: any, profileData: any) => {
 		const profile = {
 			'assetType': assetType,
 			'assetData': assetData,
@@ -217,7 +217,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			'profileData': profileData
 		}
 		return profile;
-	}
+	}*/
 
 	const ensureMetamaskConnection = async (): Promise<Boolean> => {
 		console.log("Ensure metamask connection called");
@@ -231,7 +231,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		return true;
 	}
 
-	const openTwitterOAuthPopup = async () => {
+	/*const openTwitterOAuthPopup = async () => {
 		const params = new URLSearchParams(window.location.search)
 		const isWidget = params.get('isWidget')!;
 		const origin = params.get('origin')!;
@@ -283,10 +283,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				}
 			}
 		}
-	  };
+	  };*/
 
 	// Function to call before the Facebook popup
-	const handleBeforeFacebookPopup = async (rednerPropsOnclick: Function) => {
+	/*const handleBeforeFacebookPopup = async (rednerPropsOnclick: Function) => {
 		//If metamask is somehow not connected
 		if (!address) {
 			await ensureMetamaskConnection()
@@ -304,9 +304,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			// if there is no profile yet, we connect facebook
 			rednerPropsOnclick();
 		}
-	}
+	}*/
 	 
-	useEffect(() => {
+	/*useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const widget = params.get('isWidget')!;
 		const dAppName = params.get('origin')!; 
@@ -335,11 +335,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		//else {
 		//	navigate(`/?isWidget=false`);
 		//} 
-	}, [state])
+	}, [state])*/
 
 	const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 
-	useEffect(() => {
+	/*useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
 		if (idPlatform == "twitter" && !renderBlocker) {
@@ -375,12 +375,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 							//window.close();
 						})
 		}
-	}, [state])
+	}, [state])*/
 
-	useEffect(() => {
+	/*useEffect(() => {
 		if(address) {
-			const params = new URLSearchParams(window.location.search)
-			const isWidget = params.get('isWidget')!;
+			//const params = new URLSearchParams(window.location.search)
+			//const isWidget = params.get('isWidget')!;
 			// if (!isWidget || isWidget == "false")
 			// 	navigate(`/?isWidget=false`);
 			if (isWidget == "true") {
@@ -389,12 +389,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			}
 			else
 				throw new Error("Something went wrong while parsing the isWidget parameter");
-			setIsMetamaskConnected(true)
+			
+			
 		}
-	}, [address])
+	}, [address])*/
 
 	useEffect(() => {
 		if(address) {
+			setIsMetamaskConnected(true)
 			showLoading();
 			checkAddressExistence().then(res => {
 				if (!res.data.exists) {
@@ -520,7 +522,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									
 
 									{/* BEGIN :: Social Login */}
-									{address && isWidget && step === "post-submit" &&(
+									{/*address && isWidget && step === "post-submit" &&(
 										<>
 										<LoginHeader isMetamaskConnected={true} callingDApp={callingDApp} />
 
@@ -599,7 +601,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											</div>)}
 											</form>
 										</>
-									)}
+									)*/}
 									{/* END :: Social Login */}
 									{/* START:: Footer */}
 									<LoginFooter/>
@@ -608,7 +610,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 						</Card>
 						<div className='text-center'>
 							<a
-								href='/'
+								href='https://plurality.network/privacy-policy'
+								target='_blank'
 								className={classNames('text-decoration-none me-3', {
 									'link-light': singUpStatus,
 									'link-dark': !singUpStatus,
@@ -616,7 +619,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								Privacy policy
 							</a>
 							<a
-								href='/'
+								href='https://plurality.network/user-terms-of-service'
+								target='_blank'
 								className={classNames('link-light text-decoration-none', {
 									'link-light': singUpStatus,
 									'link-dark': !singUpStatus,
