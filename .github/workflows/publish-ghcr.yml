@@ -2,7 +2,7 @@ name: Semantic Release Docker
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "mvfw" ]
   release:
     types: [created]
   workflow_dispatch:

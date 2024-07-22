@@ -1,5 +1,5 @@
 module.exports = {
-    branches: ['main'],
+    branches: ['mvfw'],
     'plugins': [
       '@semantic-release/commit-analyzer',
       '@semantic-release/release-notes-generator',
@@ -8,15 +8,11 @@ module.exports = {
         '@semantic-release/exec',
         {
           'prepareCmd': `
-            docker build . --file Dockerfile --tag ghcr.io/web3-plurality/plurality-dashboard-ui:latest \\
-            && docker push ghcr.io/web3-plurality/plurality-dashboard-ui:latest \\
-            && docker tag ghcr.io/web3-plurality/plurality-dashboard-ui:latest ghcr.io/web3-plurality/plurality-dashboard-ui:\${nextRelease.version} \\
-            && docker push ghcr.io/web3-plurality/plurality-dashboard-ui:\${nextRelease.version}
+            docker build . --file Dockerfile --tag ghcr.io/web3-plurality/plurality-dashboard-ui:mvfw \\
+            && docker push ghcr.io/web3-plurality/plurality-dashboard-ui:mvfw
            `
         }
-      ],
-      '@semantic-release/git',
-      '@semantic-release/github'
+      ]
     ],
     'git': {
       'assets': ['package.json'],
