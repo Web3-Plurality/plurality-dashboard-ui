@@ -620,8 +620,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</CardBody>
 							</Card>
 							<div className='text-center' style={{
-								marginTop: isIframe ? '10px' : '0',
-								marginLeft: isIframe ? '20px' : '0'
+								marginTop: isIframe ? '10px' : '0'
 							}}>
 								<a
 									href='https://plurality.network/privacy-policy'
