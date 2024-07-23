@@ -43,11 +43,11 @@ const LoginHeader: FC<any> = ({ step }) => {
 		</>
 	);
 };
-const LoginFooter: FC<any> = ({ step }) => {
+const LoginFooter: FC<any> = ({ step, addr }) => {
 	return (
 		<>
 			<div className="d-flex align-items-center justify-content-center" style={{
-				marginTop: step === "pre-submit" ? '80px' : step === "submit" ? '98px' : step === "verify" ? '84.5px' : '80px'
+				marginTop: step === "pre-submit" && !addr ? '80px' : step === "pre-submit" && addr ? '190px' : step === "submit" ? '98px' : step === "verify" ? '84.5px' : '80px'
 			}}>
 				<span style={{
 					marginTop: step === "submit" ? '1px' : '0'
@@ -423,13 +423,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			<Page className='p-0'>
 				{/*{ !renderBlocker && (*/
 					<div className='row h-100 align-items-center justify-content-center'>
-						<div className='col-xl-4 col-lg-6 col-md-8'>
+						<div className='col-xl-5 col-lg-6 col-md-8'>
 							<Card data-tour='login-page' style={{
 								marginBottom: isIframe ? 0 : '3rem',
-								boxShadow: isIframe ? 'none' : '0 1.6rem 3rem rgba(0, 0, 0, 0.1))',
 								minHeight: '593px',
-								// height: "593px",
-								// minWidth: '447pz'
+								minWidth: "447px",
+								maxWidth: !isIframe ? '447px' : 'auto'
 							}}>
 								<CardBody>
 									<div className='text-center mt-5'>
@@ -472,11 +471,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													{address ? "Register" : "Continue with Email"}
 												</Button>
 											</div>
-											{/* {address && (
+											{address && (
 												<div className="d-flex justify-content-center mt-1">
 													<a href="#" onClick={skipEmailRegistration}>Skip</a>
 												</div>
-											)} */}
+											)}
 										</>
 									)}
 									{!address && step === "pre-submit" && (
@@ -616,12 +615,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									)*/}
 									{/* END :: Social Login */}
 									{/* START:: Footer */}
-									<LoginFooter step={step} />
+									<LoginFooter step={step} addr={address} />
 									{/* END :: Footer */}
 								</CardBody>
 							</Card>
 							<div className='text-center' style={{
-								marginTop: isIframe ? '10px' : 0
+								marginTop: isIframe ? '10px' : '0',
+								marginLeft: isIframe ? '20px' : '0'
 							}}>
 								<a
 									href='https://plurality.network/privacy-policy'
