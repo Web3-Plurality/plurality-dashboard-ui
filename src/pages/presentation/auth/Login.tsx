@@ -31,35 +31,39 @@ type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
 // 	callingDApp?: String;
 // }
 
-const LoginHeader: FC<any> = ({step}) => {
+const LoginHeader: FC<any> = ({ step }) => {
 	return (
 		<>
-			{step !== "success" && (<div className='text-center h1 fw-bold' style={{marginTop: "50px"}}>Join Us</div>)}
-			{step === "success" && (<div className='text-center h2 fw-bold' style={{marginTop: "50px"}}>Congrats! You've secured 1000 points</div>)}
-			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Create an account to be rewarded as an early user</div>)}
-			{step === "submit" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>A verification code will be sent to your email</div>)}
-			{step === "verify" && (<div className='text-center h6 mt-2' style={{marginBottom: "50px"}}>Enter the 6 digit code sent to your email</div>)}
-			{step === "success" && (<div className='text-center h6 mt-2' style={{marginBottom: "20px", marginTop: "20px"}}>You can claim your points in September 👀</div>)}
+			{step !== "success" && (<div className='text-center h1 fw-bold' style={{ marginTop: "50px" }}>Join Us</div>)}
+			{step === "success" && (<div className='text-center h2 fw-bold' style={{ marginTop: "50px" }}>Congrats! You've secured 1000 points</div>)}
+			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Create an account to be rewarded as an early user</div>)}
+			{step === "submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>A verification code will be sent to your email</div>)}
+			{step === "verify" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Enter the 6 digit code sent to your email</div>)}
+			{step === "success" && (<div className='text-center h6 mt-2' style={{ marginBottom: "20px", marginTop: "20px" }}>You can claim your points in September 👀</div>)}
 		</>
 	);
 };
-const LoginFooter: FC<any> = () => {
+const LoginFooter: FC<any> = ({ step }) => {
 	return (
 		<>
-			<div className="d-flex align-items-center justify-content-center" style={{marginTop: "50px"}}>
-				Powered by 
+			<div className="d-flex align-items-center justify-content-center" style={{
+				marginTop: step === "pre-submit" ? '80px' : step === "submit" ? '98px' : step === "verify" ? '84.5px' : '80px'
+			}}>
+				<span style={{
+					marginTop: step === "submit" ? '1px' : '0'
+				}}>Powered by</span>
 				<a href="https://plurality.network/" target="_blank" rel="noopener noreferrer">
-					<img src={PLogo} alt="Logo" style={{width: "100px", height: "40px"}}/>
+					<img src={PLogo} alt="Logo" style={{ width: "100px", height: "40px" }} />
 				</a>
-			</div>
+			</div >
 		</>
 	);
 };
-const CenteredImage: FC<any> = ({imageSrc, width, height}) => {
+const CenteredImage: FC<any> = ({ imageSrc, width, height }) => {
 	return (
 		<>
 			<div className='d-flex align-items-center justify-content-center'>
-				<img src={imageSrc} alt="GIF Image"  style={{width: width, height: height}}/>
+				<img src={imageSrc} alt="GIF Image" style={{ width: width, height: height }} />
 			</div>
 		</>
 	);
@@ -79,7 +83,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	//const [isWidget, setIsWidget] = useState(false);  
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
-	
+
 	const navigate = useNavigate();
 
 	// metamask hooks
@@ -123,21 +127,21 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		showLoading();
 		const currentAddress = await checkAddressExistence()
 		// if this guy has already registered this metamask address with an email
-		if (currentAddress.data.exists){
+		if (currentAddress.data.exists) {
 			hideLoading();
 			showSuccess();
 		} else {
 			const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch';
 			axios.post(apiUrl, {
-				data: {email: "", address: address, subscribe: false}
-				})
+				data: { email: "", address: address, subscribe: false }
+			})
 				.then(function (response) {
-				if(response.status === 200) {
-					showSuccess();
-				} 
+					if (response.status === 200) {
+						showSuccess();
+					}
 				})
 				.catch(function (error) {
-				alert("Something goes wrong, please try again!")
+					alert("Something goes wrong, please try again!")
 				})
 			hideLoading();
 		}
@@ -145,23 +149,23 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const checkAddressExistence = () => {
 		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-address'
-		return axios.get(apiUrl,{
-		  params: {
-			  address: address
-		}
+		return axios.get(apiUrl, {
+			params: {
+				address: address
+			}
 		})
-	  }
+	}
 
 	const handleMetamaskConnect = async () => {
-		try {	
-		  if (setUser) setUser("user");
-		  //TODO need to find a way of how to selectivly connect
-		  await ensureMetamaskConnection();
+		try {
+			if (setUser) setUser("user");
+			//TODO need to find a way of how to selectivly connect
+			await ensureMetamaskConnection();
 		} catch (e: any) {
-		  console.error(e);
-		  dispatch({ type: MetamaskActions.SetError, payload: e });
+			console.error(e);
+			dispatch({ type: MetamaskActions.SetError, payload: e });
 		}
-	  };
+	};
 
 	/*const responseFacebook = async (response: any) => {
 		console.log(response);
@@ -222,10 +226,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const ensureMetamaskConnection = async (): Promise<Boolean> => {
 		console.log("Ensure metamask connection called");
 		if (!address || !isConnected) {
-			for (let i=0; i < connectors.length; i++) {
+			for (let i = 0; i < connectors.length; i++) {
 				let connector = connectors[i];
-				console.log("Trying to connect with connector: "+connectors[i].name);
-				connect({ connector});
+				console.log("Trying to connect with connector: " + connectors[i].name);
+				connect({ connector });
 			}
 		}
 		return true;
@@ -305,7 +309,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			rednerPropsOnclick();
 		}
 	}*/
-	 
+
 	/*useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const widget = params.get('isWidget')!;
@@ -395,7 +399,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}, [address])*/
 
 	useEffect(() => {
-		if(address) {
+		if (address) {
 			setIsMetamaskConnected(true)
 			showLoading();
 			checkAddressExistence().then(res => {
@@ -405,9 +409,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					setStep("success");
 				}
 				hideLoading();
-			})		
+			})
 		}
 	}, [address])
+
+	const isIframe = window.location !== window.parent.location
 
 	return (
 		<PageWrapper
@@ -416,35 +422,41 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			className={classNames({ 'bg-dark': singUpStatus, 'bg-light': !singUpStatus })}>
 			<Page className='p-0'>
 				{/*{ !renderBlocker && (*/
-				<div className='row h-100 align-items-center justify-content-center'>
-					<div className='col-xl-4 col-lg-6 col-md-8'>
-						<Card className='shadow-3d-dark' data-tour='login-page'>
-							<CardBody>
-								<div className='text-center mt-5'>
-									<div
-										className={classNames(
-											'text-decoration-none  fw-bold display-2',
-											{
-												'text-dark': !darkModeStatus,
-												'text-light': darkModeStatus,
-											},
-										)}
-										aria-label='Facit'>
-										{/* Here goes logo */}
-										<CenteredImage imageSrc={mvfwImage} width={250} height={80}/>
+					<div className='row h-100 align-items-center justify-content-center'>
+						<div className='col-xl-4 col-lg-6 col-md-8'>
+							<Card data-tour='login-page' style={{
+								marginBottom: isIframe ? 0 : '3rem',
+								boxShadow: isIframe ? 'none' : '0 1.6rem 3rem rgba(0, 0, 0, 0.1))',
+								minHeight: '593px',
+								// height: "593px",
+								// minWidth: '447pz'
+							}}>
+								<CardBody>
+									<div className='text-center mt-5'>
+										<div
+											className={classNames(
+												'text-decoration-none  fw-bold display-2',
+												{
+													'text-dark': !darkModeStatus,
+													'text-light': darkModeStatus,
+												},
+											)}
+											aria-label='Facit'>
+											{/* Here goes logo */}
+											<CenteredImage imageSrc={mvfwImage} width={250} height={80} />
+										</div>
 									</div>
-								</div>
-								<div
-									className={classNames('rounded-3', {
-										'bg-l10-dark': !darkModeStatus,
-										'bg-dark': darkModeStatus,
-									})}>
-								
-								</div>
+									<div
+										className={classNames('rounded-3', {
+											'bg-l10-dark': !darkModeStatus,
+											'bg-dark': darkModeStatus,
+										})}>
+
+									</div>
 
 									{/* BEGIN :: Metamask Login or Google Login */}
-										<LoginHeader step={step} isMetamaskConnected={false} callingDApp={callingDApp}/>
-										{step === "pre-submit" && (
+									<LoginHeader step={step} isMetamaskConnected={false} callingDApp={callingDApp} />
+									{step === "pre-submit" && (
 										<>
 											<div className='col-12'>
 												<Button
@@ -456,18 +468,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													})}
 													icon='Email'
 													onClick={handleEmailOnClick}
-													>
+												>
 													{address ? "Register" : "Continue with Email"}
 												</Button>
 											</div>
-											{address && (
+											{/* {address && (
 												<div className="d-flex justify-content-center mt-1">
 													<a href="#" onClick={skipEmailRegistration}>Skip</a>
-												</div>	
-											)}
+												</div>
+											)} */}
 										</>
-										)}
-										{!address && step === "pre-submit" && (
+									)}
+									{!address && step === "pre-submit" && (
 										<>
 											<div className='col-12 mt-4 text-center text-muted'>
 												OR
@@ -485,41 +497,41 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													Continue with MetaMask
 												</Button>
 											</div>
-										</>	
-										)}
+										</>
+									)}
 									{/* END :: Metamask Login or Email Login */}
 
 									{/* BEGIN :: Stych workflow */}
 									{
 										(step === "submit" || step === "verify") && (
 											<>
-											<StytchOTP showSuccess={showSuccess} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address}/>
+												<StytchOTP showSuccess={showSuccess} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address} />
 											</>
-									)}
+										)}
 									{/* END :: Stych workflow */}
 
 									{/* BEGIN :: Success page */}
 									{
 										(step === "success") && (
 											<>
-											<div className='d-flex align-items-center justify-content-center' style={{marginTop: "70px"}}>
-												<p>Join the DFDC Community</p>
-											</div>
-											<div className='d-flex align-items-center justify-content-center' style={{marginTop: "-15px"}}>
-												<p>Be a part of Fashion’s Future</p>
-											</div>
-											<div className='d-flex align-items-center justify-content-center' style={{marginBottom: "90px"}}>
-												<a href="https://x.com/dfdcxyz" target="_blank" rel="noopener noreferrer">
-													<img src={Twitter} style={{height: "45px", width: "45px"}} alt="Twitter" />
-												</a>
-												<a href="https://www.instagram.com/dfdcxyz?igsh=MXZmdmRhMXNudjEwNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer">
-													<img src={Instagram} style={{height: "50px", width: "50px", marginLeft: "10px"}} alt="Instagram" />
-												</a>
-											</div>
+												<div className='d-flex align-items-center justify-content-center' style={{ marginTop: "70px" }}>
+													<p>Join the DFDC Community</p>
+												</div>
+												<div className='d-flex align-items-center justify-content-center' style={{ marginTop: "-15px" }}>
+													<p>Be a part of Fashion’s Future</p>
+												</div>
+												<div className='d-flex align-items-center justify-content-center' style={{ marginBottom: "90px" }}>
+													<a href="https://x.com/dfdcxyz" target="_blank" rel="noopener noreferrer">
+														<img src={Twitter} style={{ height: "45px", width: "45px" }} alt="Twitter" />
+													</a>
+													<a href="https://www.instagram.com/dfdcxyz?igsh=MXZmdmRhMXNudjEwNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer">
+														<img src={Instagram} style={{ height: "50px", width: "50px", marginLeft: "10px" }} alt="Instagram" />
+													</a>
+												</div>
 											</>
-									)}
+										)}
 									{/* END :: Success page */}
-									
+
 
 									{/* BEGIN :: Social Login */}
 									{/*address && isWidget && step === "post-submit" &&(
@@ -604,32 +616,34 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 									)*/}
 									{/* END :: Social Login */}
 									{/* START:: Footer */}
-									<LoginFooter/>
+									<LoginFooter step={step} />
 									{/* END :: Footer */}
-							</CardBody>
-						</Card>
-						<div className='text-center'>
-							<a
-								href='https://plurality.network/privacy-policy'
-								target='_blank'
-								className={classNames('text-decoration-none me-3', {
-									'link-light': singUpStatus,
-									'link-dark': !singUpStatus,
-								})}>
-								Privacy policy
-							</a>
-							<a
-								href='https://plurality.network/user-terms-of-service'
-								target='_blank'
-								className={classNames('link-light text-decoration-none', {
-									'link-light': singUpStatus,
-									'link-dark': !singUpStatus,
-								})}>
-								Terms of use
-							</a>
+								</CardBody>
+							</Card>
+							<div className='text-center' style={{
+								marginTop: isIframe ? '10px' : 0
+							}}>
+								<a
+									href='https://plurality.network/privacy-policy'
+									target='_blank'
+									className={classNames('text-decoration-none me-3', {
+										'link-light': singUpStatus,
+										'link-dark': !singUpStatus,
+									})}>
+									Privacy policy
+								</a>
+								<a
+									href='https://plurality.network/user-terms-of-service'
+									target='_blank'
+									className={classNames('link-light text-decoration-none', {
+										'link-light': singUpStatus,
+										'link-dark': !singUpStatus,
+									})}>
+									Terms of use
+								</a>
+							</div>
 						</div>
 					</div>
-				</div>
 				/*)}*/}
 			</Page>
 		</PageWrapper>

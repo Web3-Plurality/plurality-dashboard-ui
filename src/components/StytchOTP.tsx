@@ -1,4 +1,4 @@
-import { FC, useState,useContext } from 'react';
+import { FC, useState, useContext } from 'react';
 import { useStytch, useStytchSession, useStytchUser } from '@stytch/react';
 import OtpInput from 'react-otp-input';
 import './otpCss.css'
@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import LoadingContext from '../utils/LoadingContext';
 
 interface ILoginProps {
-	moveBack: any;
+  moveBack: any;
   sendCode: any;
   tryAgain: any;
   showSuccess: any;
@@ -34,20 +34,20 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
   const stytchClient = useStytch();
 
   const formik = useFormik({
-		initialValues: {
-			firstName: '',
-			lastName: '',
-			displayName: '',
-			emailAddress: '',
-			phone: '',
-			currentPassword: '',
-			newPassword: '',
-			confirmPassword: '',
-		},
-		validate,
-		onSubmit: () => {
-		},
-	});
+    initialValues: {
+      firstName: '',
+      lastName: '',
+      displayName: '',
+      emailAddress: '',
+      phone: '',
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+    validate,
+    onSubmit: () => {
+    },
+  });
 
   async function sendPasscode(event: any) {
     event.preventDefault();
@@ -73,7 +73,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
       });
       console.log(response);
       if (response.status_code == 200 && response.session_jwt) {
-        registerInBackend({email: response?.user?.emails[0].email, address: address, subscribe: subscribe});
+        registerInBackend({ email: response?.user?.emails[0].email, address: address, subscribe: subscribe });
       }
     } catch (err: any) {
       alert("Invalid code entered, if this behavior persists, please contact us");
@@ -96,14 +96,14 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     axios.post(apiUrl, {
       data: requestBody
     })
-    .then(function (response) {
-      if(response.status === 200) {
-        showSuccess();
-      } 
-    })
-    .catch(function (error) {
-      alert("Something goes wrong, please try again!")
-    })
+      .then(function (response) {
+        if (response.status === 200) {
+          showSuccess();
+        }
+      })
+      .catch(function (error) {
+        alert("Something goes wrong, please try again!")
+      })
   }
 
   const handleAcceptTermsChange = () => {
@@ -114,9 +114,9 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     <>
       {step === 'submit' && (
         <>
-          <div className="form-wrapper mt-5" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "-25px", marginLeft:"20px", marginRight:"20px"}}>
-            <form className="form" onSubmit={sendPasscode} style={{width: "100%"}}>
-            <FormGroup
+          <div className="form-wrapper mt-5" style={{ display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "-25px", marginLeft: "20px", marginRight: "20px" }}>
+            <form className="form" onSubmit={sendPasscode} style={{ width: "100%" }}>
+              <FormGroup
                 id='emailAddress'
                 label='Email address'
                 isFloating>
@@ -132,76 +132,76 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
                   invalidFeedback={formik.errors.emailAddress}
                   validFeedback='Looks good!'
                 />
-            </FormGroup>
-            <br />
-            <div style={{ marginTop: "-15px"}}>
-              <label className="d-flex justify-content-left">
-                <input 
-                  type="checkbox" 
-                  checked={acceptTerms} 
-                  onChange={handleAcceptTermsChange} 
-                  style={{marginLeft: "5px"}}
-                />
-                <span style={{ marginLeft: '5px', fontSize: 'x-small' }}>I accept the <a href="https://plurality.network/user-terms-of-service" target="_blank" rel="noopener noreferrer">
-                terms of service
-				        </a> and subscribe to receive updates from the DFDC</span>
-              </label>
-            </div>
-            <br />
-            <div className="d-flex justify-content-between">
-              <Button
-                isOutline
-                className="border-light"
-                color={'dark'}
-                style={{ height: "50px", width: "140px"}}
-                onClick={onMoveBack}>
-                Back
-              </Button>
-              <Button
-                isOutline
-                isDisable={!!formik.errors.emailAddress || !formik.values.emailAddress || !acceptTerms}
-                className="border-light customized-button"
-                style={{ height: "50px",  width: "140px"}}
-                onClick={sendPasscode}>
-                Send code
-              </Button>
-            </div>       
+              </FormGroup>
+              <br />
+              <div style={{ marginTop: "-15px" }}>
+                <label className="d-flex justify-content-left">
+                  <input
+                    type="checkbox"
+                    checked={acceptTerms}
+                    onChange={handleAcceptTermsChange}
+                    style={{ marginLeft: "5px" }}
+                  />
+                  <span style={{ marginLeft: '5px', fontSize: 'x-small' }}>I accept the <a href="https://plurality.network/user-terms-of-service" target="_blank" rel="noopener noreferrer">
+                    terms of service
+                  </a> and subscribe to receive updates from the DFDC</span>
+                </label>
+              </div>
+              <br />
+              <div className="d-flex justify-content-between">
+                <Button
+                  isOutline
+                  className="border-light"
+                  color={'dark'}
+                  style={{ height: "50px", width: "140px" }}
+                  onClick={onMoveBack}>
+                  Back
+                </Button>
+                <Button
+                  isOutline
+                  isDisable={!!formik.errors.emailAddress || !formik.values.emailAddress || !acceptTerms}
+                  className="border-light customized-button"
+                  style={{ height: "50px", width: "140px" }}
+                  onClick={sendPasscode}>
+                  Send code
+                </Button>
+              </div>
             </form>
           </div>
         </>
       )}
       {step === 'verify' && (
         <>
-          <div className="form-wrapper" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "50px"}}>
+          <div className="form-wrapper" style={{ display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "30px", marginTop: "50px" }}>
             <form className="form" onSubmit={authenticate}>
-              <div style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "20px", marginTop: "10px"}}>
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "20px", marginTop: "10px" }}>
                 <OtpInput
                   value={code}
                   onChange={setCode}
                   numInputs={6}
                   inputStyle={'customInputStyle'}
                   renderSeparator={<span></span>}
-                  renderInput={(props) => <input {...props} 
+                  renderInput={(props) => <input {...props}
                   />}
                 />
               </div>
-                <div className='d-flex align-items-center justify-content-center' >
+              <div className='d-flex align-items-center justify-content-center' >
                 <Button
                   isOutline
                   className={classNames('py-3', {
                     'border-light': true,
                     'customized-button': true
                   })}
-                  style={{width: "370px"}}
+                  style={{ width: "370px" }}
                   onClick={authenticate}>
                   Verify
                 </Button>
-                </div>
-                <div className='d-flex align-items-center justify-content-center' style={{marginTop: "5px"}}>
-                  <a href="#" className="hyperlink-button" onClick={onTryAgainClick}>
-                    Didn’t get the code? Try again
-                  </a>
-                </div>
+              </div>
+              <div className='d-flex align-items-center justify-content-center' style={{ marginTop: "5px" }}>
+                <a href="#" className="hyperlink-button" onClick={onTryAgainClick}>
+                  Didn’t get the code? Try again
+                </a>
+              </div>
             </form>
           </div>
         </>
