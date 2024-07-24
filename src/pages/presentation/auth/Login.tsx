@@ -1,6 +1,7 @@
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import './login.css'
 import classNames from 'classnames';
 //import { useFormik } from 'formik';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
@@ -21,21 +22,38 @@ import PLogo from '../../../assets/img/new-logo.png';
 import StytchOTP from '../../../components/StytchOTP';
 import Instagram from '../../../assets/instagram.png';
 import Twitter from '../../../assets/twitter.png';
-import mvfwImage from '../../../assets/metaverse-fashion-week-2022.jpg';
+import mvfwImage from '../../../assets/DFDC-logo.png';
 import axios from 'axios';
+import WidgetAppHeader from '../../../layout/Header/WidgetAppHeader';
 
-type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success';
+type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success' | 'settings';
 
 // interface ILoginHeaderProps {
 // 	isMetamaskConnected?: boolean;
 // 	callingDApp?: String;
 // }
 
-const LoginHeader: FC<any> = ({ step }) => {
+const LoginHeader: FC<any> = ({ step, onclick, checked }) => {
 	return (
 		<>
-			{step !== "success" && (<div className='text-center h1 fw-bold' style={{ marginTop: "50px" }}>Join Us</div>)}
-			{step === "success" && (<div className='text-center h2 fw-bold' style={{ marginTop: "50px" }}>Congrats! You've secured 1000 points</div>)}
+			{step !== "success" && step !== "settings" && (<div className='text-center h1 fw-bold' style={{ marginTop: "50px" }}>Join Us</div>)}
+			{step === "settings" && (<div className='text-center h1 fw-bold' style={{ marginTop: "50px" }}>Profile Settings</div>)}
+			{(step === "success" || step === "settings") && (<div id="container">
+				<div id="menu-wrap">
+					<input type="checkbox" className="toggler" />
+					<div className="dots">
+						<div></div>
+					</div>
+					<div className="menu">
+						<div>
+							<ul onClick={onclick}>
+								<li><span>{step === 'success' ? 'Settings' : 'Back'}</span></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>)}
+			{step === "success" && (<div className='text-center h2 fw-bold' style={{ marginTop: "25px" }}>Congrats! You've secured 1000 points</div>)}
 			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Create an account to be rewarded as an early user</div>)}
 			{step === "submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>A verification code will be sent to your email</div>)}
 			{step === "verify" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Enter the 6 digit code sent to your email</div>)}
@@ -89,6 +107,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	// metamask hooks
 	const [state, dispatch] = useContext(MetaMaskContext);
 
+	// Profile settings
+	const [username, setUsername] = useState('');
+	const [profileImage, setProfileImage] = useState(null);
+	const [result, setResult] = useState('');
+
+
+
 	// social logins connection hooks
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
@@ -103,9 +128,34 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
 	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
+	const [step, setStep] = useState<OtpStep>("pre-submit");
+
+	const profile = localStorage.getItem("username")
+
+	useEffect(() => {
+		const getProfile = async () => {
+			showLoading()
+			try {
+				const response = await axios.get('http://localhost:5000/stytch?email=zabeehmayar18@gmail.com');
+				// localStorage.setItem('profilePic', response?.data?.user?.profileImg)
+				localStorage.setItem('username', response?.data?.user?.username)
+				localStorage.setItem('profilePic', 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg')
+
+			} catch (err) {
+				console.log("Error", err)
+			} finally {
+				hideLoading()
+			}
+		}
+
+		if (step === 'success' && !profile) {
+			getProfile()
+		} else if (step === 'pre-submit') {
+			localStorage.clear()
+		}
+	}, [step, profile])
 
 	// Stytch
-	const [step, setStep] = useState<OtpStep>("pre-submit");
 	const moveBack = () => {
 		setStep("pre-submit")
 	}
@@ -122,6 +172,29 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const showSuccess = () => {
 		setStep("success")
 	}
+
+	const ProfileSettings = () => {
+		if (step === 'success') {
+			setStep("settings")
+		} else {
+			setStep("success")
+		}
+		// const toggler = document.getElementsByClassName('toggler');
+	}
+
+	const handleUsernameChange = (event: any) => {
+		setUsername(event.target.value);
+	};
+
+	const handleImageChange = (event: any) => {
+		setProfileImage(event.target.files[0]);
+	};
+
+	const handleSubmit = (event: any) => {
+		event.preventDefault();
+		setResult(`Username: ${username}`);
+		// You can handle the profileImage file here if needed
+	};
 
 	const skipEmailRegistration = async () => {
 		showLoading();
@@ -410,130 +483,221 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				}
 				hideLoading();
 			})
+		} else {
+			localStorage.clear()
 		}
 	}, [address])
 
 	const isIframe = window.location !== window.parent.location
 
 	return (
-		<PageWrapper
-			isProtected={false}
-			title={singUpStatus ? 'Sign Up' : 'Login'}
-			className={classNames({ 'bg-dark': singUpStatus, 'bg-light': !singUpStatus })}>
-			<Page className='p-0'>
-				{/*{ !renderBlocker && (*/
-					<div className='row h-100 align-items-center justify-content-center'>
-						<div className='col-xl-5 col-lg-6 col-md-8'>
-							<Card data-tour='login-page' style={{
-								marginBottom: isIframe ? 0 : '3rem',
-								minHeight: '593px',
-								minWidth: "447px",
-								maxWidth: !isIframe ? '447px' : 'auto'
-							}}>
-								<CardBody>
-									<div className='text-center mt-5'>
-										<div
-											className={classNames(
-												'text-decoration-none  fw-bold display-2',
-												{
-													'text-dark': !darkModeStatus,
-													'text-light': darkModeStatus,
-												},
-											)}
-											aria-label='Facit'>
-											{/* Here goes logo */}
-											<CenteredImage imageSrc={mvfwImage} width={250} height={80} />
+		<>
+			{profile && <WidgetAppHeader />}
+			<PageWrapper
+				isProtected={false}
+				title={singUpStatus ? 'Sign Up' : 'Login'}
+				className={classNames({ 'bg-dark': singUpStatus, 'bg-light': !singUpStatus })}
+			>
+				<Page className='p-0'>
+					{/*{ !renderBlocker && (*/
+						<div className='row h-100 align-items-center justify-content-center'>
+							<div className={`${isIframe ? 'col-xl-4' : 'col-xl-4'} col-lg-6 col-md-8`}>
+								<Card data-tour='login-page' style={{
+									marginBottom: isIframe ? 0 : '3rem',
+									minHeight: '593px',
+									minWidth: "447px",
+									maxWidth: !isIframe ? '447px' : '460px',
+									marginLeft: isIframe ? '-20px' : '0'
+								}}>
+									<CardBody>
+										<div className='text-center'>
+											<div
+												className={classNames(
+													'text-decoration-none  fw-bold display-2',
+													{
+														'text-dark': !darkModeStatus,
+														'text-light': darkModeStatus,
+													},
+												)}
+												aria-label='Facit'>
+												{/* Here goes logo */}
+												<CenteredImage imageSrc={mvfwImage} width={250} height={141} />
+											</div>
 										</div>
-									</div>
-									<div
-										className={classNames('rounded-3', {
-											'bg-l10-dark': !darkModeStatus,
-											'bg-dark': darkModeStatus,
-										})}>
+										<div
+											className={classNames('rounded-3', {
+												'bg-l10-dark': !darkModeStatus,
+												'bg-dark': darkModeStatus,
+											})}>
 
-									</div>
+										</div>
 
-									{/* BEGIN :: Metamask Login or Google Login */}
-									<LoginHeader step={step} isMetamaskConnected={false} callingDApp={callingDApp} />
-									{step === "pre-submit" && (
-										<>
-											<div className='col-12'>
-												<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='Email'
-													onClick={handleEmailOnClick}
-												>
-													{address ? "Register" : "Continue with Email"}
-												</Button>
-											</div>
-											{address && (
-												<div className="d-flex justify-content-center mt-1">
-													<a href="#" onClick={skipEmailRegistration}>Skip</a>
+										{/* BEGIN :: Metamask Login or Google Login */}
+										<LoginHeader step={step} isMetamaskConnected={false} callingDApp={callingDApp} onclick={ProfileSettings} />
+										{step === "pre-submit" && (
+											<>
+												<div className='col-12'>
+													<Button
+														isOutline
+														color={darkModeStatus ? 'light' : 'dark'}
+														className={classNames('w-100 py-3', {
+															'border-light': !darkModeStatus,
+															'border-dark': darkModeStatus,
+														})}
+														icon='Email'
+														onClick={handleEmailOnClick}
+													>
+														{address ? "Register" : "Continue with Email"}
+													</Button>
 												</div>
+												{address && (
+													<div className="d-flex justify-content-center mt-1">
+														<a href="#" onClick={skipEmailRegistration}>Skip</a>
+													</div>
+												)}
+											</>
+										)}
+										{!address && step === "pre-submit" && (
+											<>
+												<div className='col-12 mt-4 text-center text-muted'>
+													OR
+												</div>
+												<div className='col-12 mt-4'>
+													<Button
+														isOutline
+														color={darkModeStatus ? 'light' : 'dark'}
+														className={classNames('w-100 py-3', {
+															'border-light': !darkModeStatus,
+															'border-dark': darkModeStatus,
+														})}
+														icon='CustomMetamask'
+														onClick={handleMetamaskConnect}>
+														Continue with MetaMask
+													</Button>
+												</div>
+											</>
+										)}
+										{/* END :: Metamask Login or Email Login */}
+
+										{/* BEGIN :: Stych workflow */}
+										{
+											(step === "submit" || step === "verify") && (
+												<>
+													<StytchOTP showSuccess={showSuccess} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address} />
+												</>
 											)}
-										</>
-									)}
-									{!address && step === "pre-submit" && (
-										<>
-											<div className='col-12 mt-4 text-center text-muted'>
-												OR
-											</div>
-											<div className='col-12 mt-4'>
-												<Button
-													isOutline
-													color={darkModeStatus ? 'light' : 'dark'}
-													className={classNames('w-100 py-3', {
-														'border-light': !darkModeStatus,
-														'border-dark': darkModeStatus,
-													})}
-													icon='CustomMetamask'
-													onClick={handleMetamaskConnect}>
-													Continue with MetaMask
-												</Button>
-											</div>
-										</>
-									)}
-									{/* END :: Metamask Login or Email Login */}
+										{/* END :: Stych workflow */}
 
-									{/* BEGIN :: Stych workflow */}
-									{
-										(step === "submit" || step === "verify") && (
-											<>
-												<StytchOTP showSuccess={showSuccess} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address} />
-											</>
-										)}
-									{/* END :: Stych workflow */}
+										{/* BEGIN :: Success page */}
+										{
+											(step === "success") && (
+												<>
+													<div className='d-flex align-items-center justify-content-center' style={{ marginTop: "70px" }}>
+														<p>Join the DFDC Community</p>
+													</div>
+													<div className='d-flex align-items-center justify-content-center' style={{ marginTop: "-15px" }}>
+														<p>Be a part of Fashion’s Future</p>
+													</div>
+													<div className='d-flex align-items-center justify-content-center' style={{ marginBottom: "90px" }}>
+														<a href="https://x.com/dfdcxyz" target="_blank" rel="noopener noreferrer">
+															<img src={Twitter} style={{ height: "45px", width: "45px" }} alt="Twitter" />
+														</a>
+														<a href="https://www.instagram.com/dfdcxyz?igsh=MXZmdmRhMXNudjEwNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer">
+															<img src={Instagram} style={{ height: "50px", width: "50px", marginLeft: "10px" }} alt="Instagram" />
+														</a>
+													</div>
+												</>
+											)}
+										{
+											(step === "settings") && (
+												<>
+													{/* <div className="container mt-3">
+													<form onSubmit={handleSubmit}>
+														<div className="form-group">
+															<label htmlFor="username">Username</label>
+															<input
+																type="text"
+																className="form-control"
+																id="username"
+																placeholder="Enter username"
+																value={username}
+																onChange={handleUsernameChange}
+																required
+															/>
+														</div>
+														<div className="form-group mt-3">
+															<label htmlFor="profileImage">Profile Image</label>
+															<input
+																type="file"
+																className="form-control-file"
+																id="profileImage"
+																accept="image/*"
+																onChange={handleImageChange}
+																required
+															/>
+														</div>
+														<button type="submit" className="btn btn-primary mt-3">Submit</button>
+													</form>
+													<div id="result" className="mt-3">
+														{result && <p>{result}</p>}
+													</div>
+												</div> */}
+													<div className="container mt-3">
+														<form onSubmit={handleSubmit}>
+															<div className="form-group">
+																<label htmlFor="username">Username</label>
+																<input
+																	type="text"
+																	className="form-control custom-input"
+																	id="username"
+																	placeholder="Enter username"
+																	value={username}
+																	onChange={handleUsernameChange}
+																	required
+																/>
+															</div>
+															<div className="form-group mt-4">
+																<label htmlFor="profileImage">Profile Image</label>
+																<input
+																	type="file"
+																	className="form-control-file custom-input"
+																	id="profileImage"
+																	accept="image/*"
+																	onChange={handleImageChange}
+																	required
+																/>
+															</div>
+															<div className="text-center mt-4">
+																{/* <button type="submit" className="btn btn-primary mt-3">
+															
+																Submit
+															</button> */}
+																<Button
+																	isOutline
+																	color={darkModeStatus ? 'light' : 'dark'}
+																	className={classNames('w-100 py-3', {
+																		'border-light': !darkModeStatus,
+																		'border-dark': darkModeStatus,
+																	})}
+																	// icon='CustomMetamask'
+																	onClick={() => { }}
+																	isDisable={!username && !profileImage}
+																>
+																	Submit
+																</Button>
+															</div>
+														</form>
+														<div id="result" className="mt-3">
+															{result && <p>{result}</p>}
+														</div>
+													</div>
+												</>
+											)}
+										{/* END :: Success page */}
 
-									{/* BEGIN :: Success page */}
-									{
-										(step === "success") && (
-											<>
-												<div className='d-flex align-items-center justify-content-center' style={{ marginTop: "70px" }}>
-													<p>Join the DFDC Community</p>
-												</div>
-												<div className='d-flex align-items-center justify-content-center' style={{ marginTop: "-15px" }}>
-													<p>Be a part of Fashion’s Future</p>
-												</div>
-												<div className='d-flex align-items-center justify-content-center' style={{ marginBottom: "90px" }}>
-													<a href="https://x.com/dfdcxyz" target="_blank" rel="noopener noreferrer">
-														<img src={Twitter} style={{ height: "45px", width: "45px" }} alt="Twitter" />
-													</a>
-													<a href="https://www.instagram.com/dfdcxyz?igsh=MXZmdmRhMXNudjEwNA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer">
-														<img src={Instagram} style={{ height: "50px", width: "50px", marginLeft: "10px" }} alt="Instagram" />
-													</a>
-												</div>
-											</>
-										)}
-									{/* END :: Success page */}
 
-
-									{/* BEGIN :: Social Login */}
-									{/*address && isWidget && step === "post-submit" &&(
+										{/* BEGIN :: Social Login */}
+										{/*address && isWidget && step === "post-submit" &&(
 										<>
 										<LoginHeader isMetamaskConnected={true} callingDApp={callingDApp} />
 
@@ -613,39 +777,42 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											</form>
 										</>
 									)*/}
-									{/* END :: Social Login */}
-									{/* START:: Footer */}
-									<LoginFooter step={step} addr={address} />
-									{/* END :: Footer */}
-								</CardBody>
-							</Card>
-							<div className='text-center' style={{
-								marginTop: isIframe ? '10px' : '0'
-							}}>
-								<a
-									href='https://plurality.network/privacy-policy'
-									target='_blank'
-									className={classNames('text-decoration-none me-3', {
-										'link-light': singUpStatus,
-										'link-dark': !singUpStatus,
-									})}>
-									Privacy policy
-								</a>
-								<a
-									href='https://plurality.network/user-terms-of-service'
-									target='_blank'
-									className={classNames('link-light text-decoration-none', {
-										'link-light': singUpStatus,
-										'link-dark': !singUpStatus,
-									})}>
-									Terms of use
-								</a>
+										{/* END :: Social Login */}
+										{/* START:: Footer */}
+										<LoginFooter step={step} addr={address} />
+										{/* END :: Footer */}
+									</CardBody>
+								</Card>
+								<div className='text-center' style={{
+									marginTop: isIframe ? '10px' : '0',
+									marginLeft: isIframe ? '-20px' : '0'
+								}}>
+
+									<a
+										href='https://plurality.network/privacy-policy'
+										target='_blank'
+										className={classNames('text-decoration-none me-3', {
+											'link-light': singUpStatus,
+											'link-dark': !singUpStatus,
+										})}>
+										Privacy policy
+									</a>
+									<a
+										href='https://plurality.network/user-terms-of-service'
+										target='_blank'
+										className={classNames('link-light text-decoration-none', {
+											'link-light': singUpStatus,
+											'link-dark': !singUpStatus,
+										})}>
+										Terms of use
+									</a>
+								</div>
 							</div>
 						</div>
-					</div>
 				/*)}*/}
-			</Page>
-		</PageWrapper>
+				</Page>
+			</PageWrapper>
+		</>
 	);
 };
 Login.propTypes = {
