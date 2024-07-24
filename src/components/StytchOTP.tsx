@@ -51,6 +51,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
 
   async function sendPasscode(event: any) {
     event.preventDefault();
+    localStorage.setItem('email', formik.values.emailAddress)
     showLoading();
     try {
       let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress);

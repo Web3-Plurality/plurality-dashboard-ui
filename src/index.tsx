@@ -10,17 +10,20 @@ import { AuthContextProvider } from './contexts/authContext';
 import './i18n';
 import { StytchProvider } from '@stytch/react';
 import { StytchUIClient } from '@stytch/vanilla-js';
+import WidgetAppHeader from './layout/Header/WidgetAppHeader';
 
 const stytch = new StytchUIClient(
-  process.env.REACT_APP_PUBLIC_STYTCH_PUBLIC_TOKEN || ''
+	process.env.REACT_APP_PUBLIC_STYTCH_PUBLIC_TOKEN || ''
 );
+
+
 
 const children = (
 	<AuthContextProvider>
 		<ThemeContextProvider>
 			<StytchProvider stytch={stytch}>
 				<Router>
-						<App />
+					<App />
 				</Router>
 			</StytchProvider>
 		</ThemeContextProvider>
