@@ -256,14 +256,34 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}
 
-	const checkAddressExistence = () => {
-		const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch/check-address`
-		return axios.get(apiUrl, {
-			params: {
-				address
+	const checkAddressExistence = async () => {
+		showLoading();
+		try {
+			const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch/check-address`;
+			const response = await axios.get(apiUrl, {
+				params: { address } // Use params instead of data for GET requests
+			});
+	
+			if (response.status === 200) {
+				console.log("response");
+				console.log(response);
+				localStorage.setItem('user', JSON.stringify(response?.data?.user));
+				localStorage.setItem('username', response?.data?.user?.username);
+				localStorage.setItem('profilePic', response?.data?.user?.profileImg);
+				showSuccess();
+				return response.data; // Return the response data
+			} else {
+				throw new Error('Non-200 response');
 			}
-		})
-	}
+		} catch (error) {
+			alert("Something went wrong, please try again!");
+			console.error("Error checking address existence:", error);
+			return null; // Return null or a suitable value in case of error
+		} finally {
+			hideLoading();
+		}
+	};
+	
 
 	const handleMetamaskConnect = async () => {
 		try {
@@ -541,7 +561,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			setIsMetamaskConnected(true)
 			showLoading();
 			checkAddressExistence().then(res => {
-				if (!res.data.exists) {
+				console.log(res);
+				if (!res.exists) {
 					setStep("pre-submit");
 				} else {
 					setStep("success");
