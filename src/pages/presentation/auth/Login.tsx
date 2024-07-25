@@ -2,6 +2,8 @@ import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import './login.css'
+import { Dropdown, Menu, Button as AntdButton } from 'antd';
+import { EllipsisOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
 //import { useFormik } from 'formik';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
@@ -34,25 +36,37 @@ type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success' | 
 // }
 
 const LoginHeader: FC<any> = ({ step, onclick, checked }) => {
+	const [visible, setVisible] = useState(false);
+	const handleVisibleChange = () => {
+		setVisible((prev) => !prev);
+	};
+
+	useEffect(() => {
+		setVisible(false)
+	}, [step])
+	const menu = (
+		<Menu onClick={onclick}>
+			<Menu.Item key="profileSettings">
+				{step === 'success' ? 'Settings' : 'Back'}
+			</Menu.Item>
+		</Menu>
+	);
 	return (
 		<>
 			{step !== "success" && step !== "settings" && (<div className='text-center h1 fw-bold' style={{ marginTop: "50px" }}>Join Us</div>)}
-			{step === "settings" && (<div className='text-center h1 fw-bold' style={{ marginTop: "50px" }}>Profile Settings</div>)}
-			{(step === "success" || step === "settings") && (<div id="container">
-				<div id="menu-wrap">
-					<input type="checkbox" className="toggler" />
-					<div className="dots">
-						<div></div>
-					</div>
-					<div className="menu">
-						<div>
-							<ul onClick={onclick}>
-								<li><span>{step === 'success' ? 'Settings' : 'Back'}</span></li>
-							</ul>
-						</div>
-					</div>
+			{step === "settings" && (<div className='text-center h1 fw-bold' style={{ marginTop: "25px" }}>Profile Settings</div>)}
+			{(step === "success" || step === "settings") && (
+				<div id="container">
+					<Dropdown
+						overlay={menu}
+						trigger={['click']}
+						visible={visible}
+						onVisibleChange={handleVisibleChange}
+					>
+						<AntdButton shape="circle" icon={<EllipsisOutlined />} />
+					</Dropdown>
 				</div>
-			</div>)}
+			)}
 			{step === "success" && (<div className='text-center h2 fw-bold' style={{ marginTop: "25px" }}>Congrats! You've secured 1000 points</div>)}
 			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Create an account to be rewarded as an early user</div>)}
 			{step === "submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>A verification code will be sent to your email</div>)}
@@ -65,13 +79,23 @@ const LoginFooter: FC<any> = ({ step, addr }) => {
 	return (
 		<>
 			<div className="d-flex align-items-center justify-content-center" style={{
-				marginTop: step === "pre-submit" && !addr ? '80px' : step === "pre-submit" && addr ? '190px' : step === "submit" ? '98px' : step === "verify" ? '84.5px' : '80px'
+				marginTop: step === "pre-submit" && !addr ? '62px'
+					: step === "pre-submit" && addr ? '190px'
+						: step === "submit" ? '80px'
+							: step === "verify" ? '84.5px'
+								: step === "success" ? '10px'
+									: step === "settings" ? '24px'
+										: '80px'
 			}}>
 				<span style={{
 					marginTop: step === "submit" ? '1px' : '0'
 				}}>Powered by</span>
 				<a href="https://plurality.network/" target="_blank" rel="noopener noreferrer">
-					<img src={PLogo} alt="Logo" style={{ width: "100px", height: "40px" }} />
+					<img src={PLogo} alt="Logo" style={{
+						width: "100px",
+						height: "40px",
+						marginTop: step === "settings" ? '1px' : '0'
+					}} />
 				</a>
 			</div >
 		</>
@@ -99,6 +123,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { setUser } = useContext(AuthContext);
 	const { darkModeStatus } = useDarkMode();
 
+	const profile = localStorage.getItem("username")
+	const email = localStorage.getItem("email")
+	const image = localStorage.getItem("profilePic") ?? ''
+
 	//const [isWidget, setIsWidget] = useState(false);  
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
 
@@ -108,9 +136,12 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [state, dispatch] = useContext(MetaMaskContext);
 
 	// Profile settings
-	const [username, setUsername] = useState('');
+	const [username, setUsername] = useState(profile ?? '');
 	const [profileImage, setProfileImage] = useState(null);
 	const [result, setResult] = useState('');
+	const [fileError, setFileError] = useState('')
+	const [toggleImageInput, setToggleImageInput] = useState(false)
+	const [isDisable, setIsDisable] = useState(false);
 
 
 
@@ -130,13 +161,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
 	const [step, setStep] = useState<OtpStep>("pre-submit");
 
-	const profile = localStorage.getItem("username")
 
 	useEffect(() => {
 		const getProfile = async () => {
 			showLoading()
 			try {
-				const response = await axios.get('http://localhost:5000/stytch?email=zabeehmayar18@gmail.com');
+				let apiUrl = ''
+				if (address) {
+					apiUrl = `http://localhost:5000/stytch?address=${address}`
+				} else {
+					apiUrl = `http://localhost:5000/stytch?email=${email}`
+				}
+				const response = await axios.get(apiUrl);
 				// localStorage.setItem('profilePic', response?.data?.user?.profileImg)
 				localStorage.setItem('username', response?.data?.user?.username)
 				localStorage.setItem('profilePic', 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg')
@@ -178,16 +214,37 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			setStep("settings")
 		} else {
 			setStep("success")
+			setToggleImageInput(false)
 		}
 		// const toggler = document.getElementsByClassName('toggler');
 	}
 
+	const clearImage = () => {
+		setProfileImage(null);
+		setFileError('');
+		const imgField = document.getElementById('profileImage') as HTMLInputElement;
+		if (imgField) {
+			imgField.value = ''; // Clear the file input value
+		}
+	};
+
+
 	const handleUsernameChange = (event: any) => {
 		setUsername(event.target.value);
+		setIsDisable(true)
 	};
 
 	const handleImageChange = (event: any) => {
-		setProfileImage(event.target.files[0]);
+		const file = event.target.files[0];
+		if (file && file.size <= 5 * 1024 * 1024) { // Check if file is less than or equal to 5 MB
+			setProfileImage(file);
+			setFileError('');
+			setIsDisable(true)
+		} else {
+			setProfileImage(null);
+			setFileError('File size must be less than 5 MB');
+		}
+
 	};
 
 	const handleSubmit = (event: any) => {
@@ -471,6 +528,23 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [address])*/
 
+	const registerInBackend = (requestBody: any) => {
+		const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch`
+		const formData = new FormData();
+		formData.append('profilePic', profileImage!);
+		formData.append('username', username);
+		axios.post(apiUrl, formData)
+			.then(function (response) {
+				if (response.status === 200) {
+					showSuccess();
+				}
+			})
+			.catch(function (error) {
+				alert("Something goes wrong, please try again!")
+			})
+	}
+
+
 	useEffect(() => {
 		if (address) {
 			setIsMetamaskConnected(true)
@@ -505,6 +579,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								<Card data-tour='login-page' style={{
 									marginBottom: isIframe ? 0 : '3rem',
 									minHeight: '593px',
+									maxHeight: '593px',
 									minWidth: "447px",
 									maxWidth: !isIframe ? '447px' : '460px',
 									marginLeft: isIframe ? '-20px' : '0'
@@ -598,7 +673,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													<div className='d-flex align-items-center justify-content-center' style={{ marginTop: "-15px" }}>
 														<p>Be a part of Fashion’s Future</p>
 													</div>
-													<div className='d-flex align-items-center justify-content-center' style={{ marginBottom: "90px" }}>
+													<div className='d-flex align-items-center justify-content-center' style={{ marginBottom: "70px" }}>
 														<a href="https://x.com/dfdcxyz" target="_blank" rel="noopener noreferrer">
 															<img src={Twitter} style={{ height: "45px", width: "45px" }} alt="Twitter" />
 														</a>
@@ -644,7 +719,65 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 												</div> */}
 													<div className="container mt-3">
 														<form onSubmit={handleSubmit}>
-															<div className="form-group">
+															{
+																(toggleImageInput) && (
+																	<div style={{
+																		display: "flex",
+																		flexDirection: 'column',
+																		justifyContent: "center",
+																		alignItems: 'center'
+																	}}>
+																		<label htmlFor="profileImage">Profile Image</label>
+																		<img src={image} alt='profile-settings' style={{
+																			width: '100px',
+																			height: "100px",
+																		}} />
+																		<span
+																			role='button'
+																			tabIndex={0}
+																			// onClick={() => setToggleImageInput(true)}
+																			style={{
+																				marginTop: "16px",
+																				color: 'blue',
+																				textDecoration: 'underline',
+																				cursor: "pointer"
+																			}}>Change Image</span>
+																	</div>
+																)
+															}
+
+															{
+																(!toggleImageInput) && (
+																	<div className="form-group mt-4">
+																		<label htmlFor="profileImage">Profile Image</label>
+																		<input
+																			type="file"
+																			className="form-control-file custom-input"
+																			id="profileImage"
+																			accept="image/*"
+																			onChange={handleImageChange}
+																			required
+																		/>
+																		<span style={{
+																			color: "red"
+																		}}>{fileError}</span>
+																		{profileImage && <span
+																			role='button'
+																			tabIndex={0}
+																			onClick={clearImage}
+																			onKeyPress={clearImage}
+																			aria-label='clear-iamge'
+																			style={{
+																				float: "right",
+																				marginBottom: '10px',
+																				color: 'blue',
+																				textDecoration: 'underline'
+																			}}
+																		>Clear image</span>}
+																	</div>
+																)
+															}
+															<div className="form-group mt-5">
 																<label htmlFor="username">Username</label>
 																<input
 																	type="text"
@@ -656,17 +789,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 																	required
 																/>
 															</div>
-															<div className="form-group mt-4">
-																<label htmlFor="profileImage">Profile Image</label>
-																<input
-																	type="file"
-																	className="form-control-file custom-input"
-																	id="profileImage"
-																	accept="image/*"
-																	onChange={handleImageChange}
-																	required
-																/>
-															</div>
+
 															<div className="text-center mt-4">
 																{/* <button type="submit" className="btn btn-primary mt-3">
 															
@@ -680,8 +803,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 																		'border-dark': darkModeStatus,
 																	})}
 																	// icon='CustomMetamask'
-																	onClick={() => { }}
-																	isDisable={!username && !profileImage}
+																	onClick={registerInBackend}
+																	isDisable={!isDisable || (!profileImage && username === profile)}
 																>
 																	Submit
 																</Button>

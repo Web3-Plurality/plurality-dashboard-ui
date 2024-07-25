@@ -52,6 +52,7 @@
 		]
 	},
 	"dependencies": {
+		"@ant-design/icons": "^5.4.0",
 		"@babel/plugin-proposal-private-property-in-object": "^7.21.11",
 		"@emotion/react": "^11.11.1",
 		"@hello-pangea/dnd": "^16.3.0",
@@ -73,6 +74,7 @@
 		"@types/node": "^20.5.0",
 		"@types/react": "^18.2.20",
 		"@types/react-dom": "^18.2.7",
+		"antd": "^5.19.3",
 		"apexcharts": "^3.41.1",
 		"classnames": "^2.3.2",
 		"cryptr": "^6.3.0",
