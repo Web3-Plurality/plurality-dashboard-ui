@@ -234,9 +234,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const skipEmailRegistration = async () => {
 		showLoading();
-		const currentAddress = await checkAddressExistence()
+		const currentAddress = await checkAddressExistence();
 		// if this guy has already registered this metamask address with an email
-		if (currentAddress.data.exists) {
+		if (currentAddress.exists) {
 			hideLoading();
 			showSuccess();
 		} else {
@@ -246,6 +246,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			})
 				.then(function (response) {
 					if (response.status === 200) {
+						localStorage.setItem('user', JSON.stringify(response?.data?.user))
+						localStorage.setItem('username', response?.data?.user?.username)
+						localStorage.setItem('profilePic', response?.data?.user?.profileImg)
 						showSuccess();
 					}
 				})
@@ -265,8 +268,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			});
 	
 			if (response.status === 200) {
-				console.log("response");
-				console.log(response);
 				localStorage.setItem('user', JSON.stringify(response?.data?.user));
 				localStorage.setItem('username', response?.data?.user?.username);
 				localStorage.setItem('profilePic', response?.data?.user?.profileImg);
@@ -353,11 +354,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	} */
 
 	const ensureMetamaskConnection = async (): Promise<Boolean> => {
-		console.log('Ensure metamask connection called');
+		//console.log('Ensure metamask connection called');
 		if (!address || !isConnected) {
 			for (let i = 0; i < connectors.length; i += 1) {
 				const web3connector = connectors[i];
-				console.log(`Trying to connect with connector: ${connectors[i].name}`);
+				//console.log(`Trying to connect with connector: ${connectors[i].name}`);
 				connect({ connector: web3connector });
 			}
 		}
