@@ -510,12 +510,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const updateBackend = async () => {
 		showLoading()
 		const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch`
+		const id = JSON.parse(localStorage.getItem("user") ?? '').id
 		const data = {
 			email,
 			address,
 			subscribe: false,
-			username: profile,
+			username: username,
 			profileImg: image,
+			id: id,
 		}
 		const response = await axios.put(apiUrl, data);
 		if (response.status === 200) {
