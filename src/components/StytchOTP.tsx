@@ -100,6 +100,8 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
       .then(function (response) {
         if (response.status === 200) {
           localStorage.setItem('user', JSON.stringify(response?.data?.user))
+          localStorage.setItem('username', response?.data?.user?.username)
+				  localStorage.setItem('profilePic', response?.data?.user?.profileImg)
           showSuccess();
         }
       })

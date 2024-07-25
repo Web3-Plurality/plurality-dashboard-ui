@@ -6,8 +6,8 @@ import { EllipsisOutlined } from '@ant-design/icons'
 
 const WidgetAppHeader = ({ step, onclick }: { step: string, onclick: (key: string) => void }) => {
     const isIframe = window.location !== window.parent.location
-    const profileImg = JSON.parse(localStorage.getItem("user")!)?.profileImg ?? ''
-    const username = JSON.parse(localStorage.getItem("user")!)?.username ?? ''
+    const profileImg = localStorage.getItem("profilePic") ?? ''
+    const username = localStorage.getItem("username") ?? ''
 
     const [visible, setVisible] = useState(false);
     const handleVisibleChange = () => {
