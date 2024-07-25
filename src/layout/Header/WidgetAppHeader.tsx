@@ -4,10 +4,10 @@ import BadgeIcon from './badge-icon.svg'
 import './styles.css'
 import { EllipsisOutlined } from '@ant-design/icons'
 
-const WidgetAppHeader = ({ step, onclick }: { step: string, onclick: () => void }) => {
+const WidgetAppHeader = ({ step, onclick }: { step: string, onclick: (key: string) => void }) => {
     const isIframe = window.location !== window.parent.location
-    const profileImg = localStorage.getItem("profilePic") ?? ''
-    const username = localStorage.getItem("username") ?? ''
+    const profileImg = JSON.parse(localStorage.getItem("user")!)?.profileImg ?? ''
+    const username = JSON.parse(localStorage.getItem("user")!)?.username ?? ''
 
     const [visible, setVisible] = useState(false);
     const handleVisibleChange = () => {
@@ -19,9 +19,12 @@ const WidgetAppHeader = ({ step, onclick }: { step: string, onclick: () => void 
     }, [step])
 
     const menu = (
-        <Menu onClick={onclick}>
+        <Menu onClick={({ key }) => onclick(key)}>
             <Menu.Item key="profileSettings">
                 Settings
+            </Menu.Item>
+            <Menu.Item key="logout">
+                Logout
             </Menu.Item>
         </Menu>
     );
