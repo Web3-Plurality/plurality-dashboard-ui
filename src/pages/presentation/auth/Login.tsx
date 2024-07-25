@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -137,7 +138,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	// Profile settings
 	const [username, setUsername] = useState(profile ?? '');
-	const [profileImage, setProfileImage] = useState(null);
+	const [profileImage, setProfileImage] = useState<string | ArrayBuffer | null>(null);
+	const [filename, setFileName] = useState('')
 	const [result, setResult] = useState('');
 	const [fileError, setFileError] = useState('')
 	const [toggleImageInput, setToggleImageInput] = useState(false)
@@ -215,6 +217,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		} else {
 			setStep("success")
 			setToggleImageInput(false)
+			setFileName('')
+			setFileError('')
+			setProfileImage(null)
 		}
 		// const toggler = document.getElementsByClassName('toggler');
 	}
@@ -222,6 +227,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const clearImage = () => {
 		setProfileImage(null);
 		setFileError('');
+		setFileName('');
 		const imgField = document.getElementById('profileImage') as HTMLInputElement;
 		if (imgField) {
 			imgField.value = ''; // Clear the file input value
@@ -237,9 +243,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const handleImageChange = (event: any) => {
 		const file = event.target.files[0];
 		if (file && file.size <= 5 * 1024 * 1024) { // Check if file is less than or equal to 5 MB
-			setProfileImage(file);
+			const reader = new FileReader();
+			reader.onloadend = function () {
+				setProfileImage(reader.result);
+			}
+			reader.readAsDataURL(file)
 			setFileError('');
-			setIsDisable(true)
+			setIsDisable(true);
+			setFileName(file.name)
 		} else {
 			setProfileImage(null);
 			setFileError('File size must be less than 5 MB');
@@ -528,22 +539,27 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [address])*/
 
-	const registerInBackend = (requestBody: any) => {
+	const registerInBackend = async () => {
+		showLoading()
 		const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch`
-		const formData = new FormData();
-		formData.append('profilePic', profileImage!);
-		formData.append('username', username);
-		axios.post(apiUrl, formData)
-			.then(function (response) {
-				if (response.status === 200) {
-					showSuccess();
-				}
-			})
-			.catch(function (error) {
-				alert("Something goes wrong, please try again!")
-			})
+		const data = {
+			email,
+			address,
+			subscribe: false,
+			username: profile,
+			profileImg: image,
+		}
+		const response = await axios.post(apiUrl, data);
+		if (response.status === 200) {
+			// Local storage values
+			console.log("dataaa", response);
+			hideLoading()
+			showSuccess();
+		} else {
+			alert("Something goes wrong, please try again!")
+			hideLoading()
+		}
 	}
-
 
 	useEffect(() => {
 		if (address) {
@@ -749,7 +765,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 															{
 																(!toggleImageInput) && (
 																	<div className="form-group mt-4">
-																		<label htmlFor="profileImage">Profile Image</label>
+																		<label htmlFor="profileImage" className='neumorphic-label'>Profile Image</label>
 																		<input
 																			type="file"
 																			className="form-control-file custom-input"
@@ -759,21 +775,25 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 																			required
 																		/>
 																		<span style={{
+																			marginLeft: "20px",
+
+																		}}>{filename}</span>
+																		<span style={{
 																			color: "red"
 																		}}>{fileError}</span>
-																		{profileImage && <span
-																			role='button'
+																		{profileImage && <p
 																			tabIndex={0}
 																			onClick={clearImage}
 																			onKeyPress={clearImage}
 																			aria-label='clear-iamge'
 																			style={{
-																				float: "right",
 																				marginBottom: '10px',
 																				color: 'blue',
-																				textDecoration: 'underline'
+																				textAlign: 'right',
+																				textDecoration: 'underline',
+																				cursor: 'pointer'
 																			}}
-																		>Clear image</span>}
+																		>Clear image</p>}
 																	</div>
 																)
 															}

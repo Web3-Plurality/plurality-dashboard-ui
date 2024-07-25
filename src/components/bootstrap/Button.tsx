@@ -18,10 +18,10 @@ import { TIcons } from '../../type/icons-type';
 
 interface IButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
 	children:
-		| ReactElement<IButtonProps>[]
-		| ReactElement<IDropdownProps>[]
-		| JSX.Element
-		| JSX.Element[];
+	| ReactElement<IButtonProps>[]
+	| ReactElement<IDropdownProps>[]
+	| JSX.Element
+	| JSX.Element[];
 	className?: string;
 	isToolbar?: boolean;
 	isVertical?: boolean;
@@ -86,18 +86,18 @@ export interface IButtonProps
 	className?: string;
 	icon?: TIcons;
 	rounded?:
-		| 'default'
-		| 0
-		| 1
-		| 2
-		| 3
-		| 'bottom'
-		| 'top'
-		| 'circle'
-		| 'end'
-		| 'start'
-		| 'pill'
-		| null;
+	| 'default'
+	| 0
+	| 1
+	| 2
+	| 3
+	| 'bottom'
+	| 'top'
+	| 'circle'
+	| 'end'
+	| 'start'
+	| 'pill'
+	| null;
 	size?: 'sm' | null | 'lg';
 	isDisable?: boolean;
 	shadow?: null | 'none' | 'sm' | 'default' | 'lg';
