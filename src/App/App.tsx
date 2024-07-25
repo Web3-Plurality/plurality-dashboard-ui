@@ -83,7 +83,7 @@ const App = () => {
 	});
 
 	const config = createConfig({
-		autoConnect: true,
+		autoConnect: false,
 		publicClient,
 		webSocketPublicClient,
 		connectors: [
