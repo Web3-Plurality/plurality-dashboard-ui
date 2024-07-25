@@ -99,6 +99,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     })
       .then(function (response) {
         if (response.status === 200) {
+          localStorage.setItem('user', JSON.stringify(response?.data?.user))
           showSuccess();
         }
       })

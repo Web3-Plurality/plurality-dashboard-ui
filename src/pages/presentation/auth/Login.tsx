@@ -58,7 +58,7 @@ const LoginFooter: FC<any> = ({ step, addr }) => {
 						: step === "submit" ? '80px'
 							: step === "verify" ? '84.5px'
 								: step === "success" ? '10px'
-									: step === "settings" ? '70px'
+									: step === "settings" ? '32px'
 										: '80px'
 			}}>
 				<span style={{
@@ -130,37 +130,29 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	// wagmi connectors and disconnectors
 	const { connect, connectors } = useConnect();
 	const { address, connector, isConnected } = useAccount();
+	const { disconnectAsync } = useDisconnect();
+
+    async function handleLogout() {
+        try {
+            await disconnectAsync();
+        } catch (err) {
+            console.error(err);
+        }
+        setStep("pre-submit");
+    }
+
+	useEffect(() => {
+		if(!address) {
+			setStep("pre-submit");
+		}
+	}, [address])
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
 	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
 	const [step, setStep] = useState<OtpStep>("pre-submit");
 
-
 	useEffect(() => {
-		const getProfile = async () => {
-			showLoading()
-			try {
-				let apiUrl = ''
-				if (address) {
-					apiUrl = `http://localhost:5000/stytch?address=${address}`
-				} else {
-					apiUrl = `http://localhost:5000/stytch?email=${email}`
-				}
-				const response = await axios.get(apiUrl);
-				localStorage.setItem('username', response?.data?.user?.username)
-				// localStorage.setItem('profilePic', response?.data?.user?.profileImg)
-				localStorage.setItem('profilePic', 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg')
-
-			} catch (err) {
-				console.log("Error", err)
-			} finally {
-				hideLoading()
-			}
-		}
-
-		if (step === 'success' && !profile) {
-			getProfile()
-		} else if (step === 'pre-submit') {
+		if (step === 'pre-submit') {
 			localStorage.clear()
 		}
 	}, [step, profile])
@@ -183,9 +175,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		setStep("success")
 	}
 
-	const ProfileSettings = () => {
-		if (step === 'success') {
+	const ProfileSettings = (key: string) => {
+		if (step === 'success' && key === "profileSettings") {
 			setStep("settings")
+		} else if (key === "logout") {
+			handleLogout();
 		}
 		// const toggler = document.getElementsByClassName('toggler');
 	}
@@ -513,7 +507,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	}, [address]) */
 
-	const registerInBackend = async () => {
+	const updateBackend = async () => {
 		showLoading()
 		const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch`
 		const data = {
@@ -523,12 +517,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			username: profile,
 			profileImg: image,
 		}
-		const response = await axios.post(apiUrl, data);
+		const response = await axios.put(apiUrl, data);
 		if (response.status === 200) {
-			// Local storage values
 			localStorage.setItem('username', response?.data?.user?.username)
-			// localStorage.setItem('profilePic', response?.data?.user?.profileImg)
-			localStorage.setItem('profilePic', 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg')
+			localStorage.setItem('profilePic', response?.data?.user?.profileImg)
+			// Local storage values
+			//localStorage.setItem('username', response?.data?.user?.username)
+			//localStorage.setItem('profilePic', response?.data?.user?.profileImg)
+			//localStorage.setItem('profilePic', 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg')
 
 			hideLoading()
 			showSuccess();
@@ -774,7 +770,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 																		'border-dark': darkModeStatus,
 																	})}
 																	// icon='CustomMetamask'
-																	onClick={registerInBackend}
+																	onClick={updateBackend}
 																	isDisable={!isDisable || (!profileImage && username === profile)}
 																>
 																	Submit
