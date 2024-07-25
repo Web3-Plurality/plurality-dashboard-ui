@@ -55,7 +55,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
     showLoading();
     try {
       let response = await stytchClient.otps.email.loginOrCreate(formik.values.emailAddress);
-      console.log(response);
+      //console.log(response);
       setMethodId(response.method_id);
       sendCode();
     } catch (err: any) {
@@ -72,7 +72,7 @@ const StytchOTP: FC<ILoginProps> = ({ moveBack, sendCode, tryAgain, showSuccess,
       const response = await stytchClient.otps.authenticate(code, methodId, {
         session_duration_minutes: 60,
       });
-      console.log(response);
+      //console.log(response);
       if (response.status_code == 200 && response.session_jwt) {
         registerInBackend({ email: response?.user?.emails[0].email, address: address, subscribe: subscribe });
       }
