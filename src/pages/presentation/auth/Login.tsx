@@ -516,7 +516,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			address,
 			subscribe: false,
 			username: username,
-			profileImg: image,
+			profileImg: profileImage,
 			id: id,
 		}
 		const response = await axios.put(apiUrl, data);
