@@ -31,15 +31,27 @@
     /* z-index: 99; */
 }
 
+.user-info {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Optionally, you can set a fixed or max width */
+    max-width: 70px;
+    /* Adjust as necessary */
+}
+
 .user-detail {
     display: flex;
     align-items: center;
     gap: 16px;
+    justify-content: flex-start;
 }
 
 .icon-box {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 
 .avatar {
