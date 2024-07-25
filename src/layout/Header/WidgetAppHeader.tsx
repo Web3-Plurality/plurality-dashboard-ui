@@ -11,7 +11,7 @@ const WidgetAppHeader = () => {
     return (
         <div className='header-wrapper' style={{
             top: isIframe ? '3%' : '1%',
-            left: isIframe ? '65%' : '90%'
+            left: isIframe ? '70%' : '90%'
         }}>
             <div className='user-detail'>
                 <div className='user-info'>
