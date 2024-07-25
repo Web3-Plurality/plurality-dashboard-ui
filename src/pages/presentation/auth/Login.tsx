@@ -1,12 +1,14 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 import './login.css'
 import { Dropdown, Menu, Button as AntdButton } from 'antd';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { EllipsisOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
-//import { useFormik } from 'formik';
+// import { useFormik } from 'formik';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody } from '../../../components/bootstrap/Card';
@@ -15,18 +17,16 @@ import useDarkMode from '../../../hooks/useDarkMode';
 import AuthContext from '../../../contexts/authContext';
 import { MetaMaskContext, MetamaskActions } from '../../../hooks';
 import { getTwitterID } from '../../../utils/oauth';
-import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
+// import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import { createProfile, AssetType, getProfileData } from '../../../utils/orbis';
 import { getFacebookInterests } from '../../../utils/facebookUserInterest';
 import { getTwitterInterests } from '../../../utils/twitterUserInterest';
 import LoadingContext from '../../../utils/LoadingContext';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import PLogo from '../../../assets/img/new-logo.png';
 import StytchOTP from '../../../components/StytchOTP';
 import Instagram from '../../../assets/instagram.png';
 import Twitter from '../../../assets/twitter.png';
 import mvfwImage from '../../../assets/DFDC-logo.png';
-import axios from 'axios';
 import WidgetAppHeader from '../../../layout/Header/WidgetAppHeader';
 
 type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success' | 'settings';
@@ -36,38 +36,11 @@ type OtpStep = 'pre-submit' | 'submit' | 'verify' | 'post-submit' | 'success' | 
 // 	callingDApp?: String;
 // }
 
-const LoginHeader: FC<any> = ({ step, onclick, checked }) => {
-	const [visible, setVisible] = useState(false);
-	const handleVisibleChange = () => {
-		setVisible((prev) => !prev);
-	};
-
-	useEffect(() => {
-		setVisible(false)
-	}, [step])
-	const menu = (
-		<Menu onClick={onclick}>
-			<Menu.Item key="profileSettings">
-				{step === 'success' ? 'Settings' : 'Back'}
-			</Menu.Item>
-		</Menu>
-	);
+const LoginHeader: FC<any> = ({ step }) => {
 	return (
 		<>
 			{step !== "success" && step !== "settings" && (<div className='text-center h1 fw-bold' style={{ marginTop: "50px" }}>Join Us</div>)}
 			{step === "settings" && (<div className='text-center h1 fw-bold' style={{ marginTop: "25px" }}>Profile Settings</div>)}
-			{(step === "success" || step === "settings") && (
-				<div id="container">
-					<Dropdown
-						overlay={menu}
-						trigger={['click']}
-						visible={visible}
-						onVisibleChange={handleVisibleChange}
-					>
-						<AntdButton shape="circle" icon={<EllipsisOutlined />} />
-					</Dropdown>
-				</div>
-			)}
 			{step === "success" && (<div className='text-center h2 fw-bold' style={{ marginTop: "25px" }}>Congrats! You've secured 1000 points</div>)}
 			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Create an account to be rewarded as an early user</div>)}
 			{step === "submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>A verification code will be sent to your email</div>)}
@@ -81,11 +54,11 @@ const LoginFooter: FC<any> = ({ step, addr }) => {
 		<>
 			<div className="d-flex align-items-center justify-content-center" style={{
 				marginTop: step === "pre-submit" && !addr ? '62px'
-					: step === "pre-submit" && addr ? '190px'
+					: step === "pre-submit" && addr ? '150px'
 						: step === "submit" ? '80px'
 							: step === "verify" ? '84.5px'
 								: step === "success" ? '10px'
-									: step === "settings" ? '24px'
+									: step === "settings" ? '70px'
 										: '80px'
 			}}>
 				<span style={{
@@ -104,17 +77,16 @@ const LoginFooter: FC<any> = ({ step, addr }) => {
 };
 const CenteredImage: FC<any> = ({ imageSrc, width, height }) => {
 	return (
-		<>
-			<div className='d-flex align-items-center justify-content-center'>
-				<img src={imageSrc} alt="GIF Image" style={{ width: width, height: height }} />
-			</div>
-		</>
+		<div className='d-flex align-items-center justify-content-center'>
+			<img src={imageSrc} alt='GIF' style={{ width, height }} />
+		</div>
+
 	);
 };
 
 LoginHeader.defaultProps = {
 	isMetamaskConnected: false,
-	callingDApp: "http://some-dapp.com"
+	callingDApp: 'http://some-dapp.com'
 };
 
 interface ILoginProps {
@@ -128,7 +100,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const email = localStorage.getItem("email")
 	const image = localStorage.getItem("profilePic") ?? ''
 
-	//const [isWidget, setIsWidget] = useState(false);  
+	// const [isWidget, setIsWidget] = useState(false);  
 	const [singUpStatus, setSingUpStatus] = useState<boolean>(!!isSignUp);
 
 	const navigate = useNavigate();
@@ -175,8 +147,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 					apiUrl = `http://localhost:5000/stytch?email=${email}`
 				}
 				const response = await axios.get(apiUrl);
-				// localStorage.setItem('profilePic', response?.data?.user?.profileImg)
 				localStorage.setItem('username', response?.data?.user?.username)
+				// localStorage.setItem('profilePic', response?.data?.user?.profileImg)
 				localStorage.setItem('profilePic', 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg')
 
 			} catch (err) {
@@ -214,14 +186,16 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const ProfileSettings = () => {
 		if (step === 'success') {
 			setStep("settings")
-		} else {
-			setStep("success")
-			setToggleImageInput(false)
-			setFileName('')
-			setFileError('')
-			setProfileImage(null)
 		}
 		// const toggler = document.getElementsByClassName('toggler');
+	}
+
+	const goBack = () => {
+		setStep("success")
+		setToggleImageInput(false)
+		setFileName('')
+		setFileError('')
+		setProfileImage(null)
 	}
 
 	const clearImage = () => {
@@ -272,9 +246,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			hideLoading();
 			showSuccess();
 		} else {
-			const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch';
+			const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch`;
 			axios.post(apiUrl, {
-				data: { email: "", address: address, subscribe: false }
+				data: { email: "", address, subscribe: false }
 			})
 				.then(function (response) {
 					if (response.status === 200) {
@@ -289,18 +263,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	}
 
 	const checkAddressExistence = () => {
-		const apiUrl = process.env.REACT_APP_API_BASE_URL + '/stytch/check-address'
+		const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch/check-address`
 		return axios.get(apiUrl, {
 			params: {
-				address: address
+				address
 			}
 		})
 	}
 
 	const handleMetamaskConnect = async () => {
 		try {
-			if (setUser) setUser("user");
-			//TODO need to find a way of how to selectivly connect
+			if (setUser) setUser('user');
+			// TODO need to find a way of how to selectivly connect
 			await ensureMetamaskConnection();
 		} catch (e: any) {
 			console.error(e);
@@ -308,7 +282,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		}
 	};
 
-	/*const responseFacebook = async (response: any) => {
+	/* const responseFacebook = async (response: any) => {
 		console.log(response);
 		if (response.accessToken) {
 			const interests = getFacebookInterests(response);
@@ -340,7 +314,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			}
 			else
 				console.log("Profile could not be created. Please try again");
-
+	
 			hideLoading();
 			}
 			catch (error) {
@@ -352,9 +326,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		else {
 			console.log("access token not found");
 		}
-	};	*/
+	}; */
 
-	/*const constructProfileData = (assetType: any, assetData: any, dataFetchedFrom: any, profileData: any) => {
+	/* const constructProfileData = (assetType: any, assetData: any, dataFetchedFrom: any, profileData: any) => {
 		const profile = {
 			'assetType': assetType,
 			'assetData': assetData,
@@ -362,21 +336,21 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			'profileData': profileData
 		}
 		return profile;
-	}*/
+	} */
 
 	const ensureMetamaskConnection = async (): Promise<Boolean> => {
-		console.log("Ensure metamask connection called");
+		console.log('Ensure metamask connection called');
 		if (!address || !isConnected) {
-			for (let i = 0; i < connectors.length; i++) {
-				let connector = connectors[i];
-				console.log("Trying to connect with connector: " + connectors[i].name);
-				connect({ connector });
+			for (let i = 0; i < connectors.length; i += 1) {
+				const web3connector = connectors[i];
+				console.log(`Trying to connect with connector: ${connectors[i].name}`);
+				connect({ connector: web3connector });
 			}
 		}
 		return true;
 	}
 
-	/*const openTwitterOAuthPopup = async () => {
+	/* const openTwitterOAuthPopup = async () => {
 		const params = new URLSearchParams(window.location.search)
 		const isWidget = params.get('isWidget')!;
 		const origin = params.get('origin')!;
@@ -384,7 +358,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const apiUrl = process.env.REACT_APP_API_BASE_URL+`/oauth-twitter?apps=${apps}&isWidget=${isWidget}&origin=${origin}`; // Replace with your Twitter API endpoint
 		//TODO: Change it back
 		//const apiUrl = "http://localhost:3000/auth-pages/login?isWidget=true&origin=http://localhost:3001/&id_platform=twitter&username=hirasiddiqui199&display_name=HiraSiddiqui&picture_url=https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"; // Replace with your Twitter API endpoint
-
+	
 		// Define the dimensions for the popup window
 		const popupWidth = 450;
 		const popupHeight = 600;
@@ -392,7 +366,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		//const popupTop = (window.innerHeight - popupHeight) / 2;
 		const popupLeft = 500;
 		const popupTop = 100;
-
+	
 		await ensureMetamaskConnection()
 		
 		// Check if twitter profile already exists at orbis
@@ -428,10 +402,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 				}
 			}
 		}
-	  };*/
+	  }; */
 
 	// Function to call before the Facebook popup
-	/*const handleBeforeFacebookPopup = async (rednerPropsOnclick: Function) => {
+	/* const handleBeforeFacebookPopup = async (rednerPropsOnclick: Function) => {
 		//If metamask is somehow not connected
 		if (!address) {
 			await ensureMetamaskConnection()
@@ -449,15 +423,15 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			// if there is no profile yet, we connect facebook
 			rednerPropsOnclick();
 		}
-	}*/
+	} */
 
-	/*useEffect(() => {
+	/* useEffect(() => {
 		const params = new URLSearchParams(window.location.search)
 		const widget = params.get('isWidget')!;
 		const dAppName = params.get('origin')!; 
 		const idPlatform = params.get('id_platform')!;
 		const apps = params.get('apps')!;
-
+	
 		if (widget == "true") {
 			// if(!idPlatform && !window.opener){
 			// 	navigate(`/?isWidget=false`);
@@ -480,11 +454,11 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		//else {
 		//	navigate(`/?isWidget=false`);
 		//} 
-	}, [state])*/
+	}, [state]) */
 
-	const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
+	// const wait = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 
-	/*useEffect(() => {
+	/* useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
 		const idPlatform = params.get('id_platform')!;
 		if (idPlatform == "twitter" && !renderBlocker) {
@@ -493,7 +467,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const username = params.get('username')!;
 			const displayName = params.get('display_name')!;
 			const profileUrl = params.get('picture_url')!;
-
+	
 			const description = 'some description';
 			const profile = {name: username, displayName: displayName, profileUrl: profileUrl};
 			showLoading();
@@ -520,9 +494,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 							//window.close();
 						})
 		}
-	}, [state])*/
+	}, [state]) */
 
-	/*useEffect(() => {
+	/* useEffect(() => {
 		if(address) {
 			//const params = new URLSearchParams(window.location.search)
 			//const isWidget = params.get('isWidget')!;
@@ -537,7 +511,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			
 			
 		}
-	}, [address])*/
+	}, [address]) */
 
 	const registerInBackend = async () => {
 		showLoading()
@@ -552,7 +526,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		const response = await axios.post(apiUrl, data);
 		if (response.status === 200) {
 			// Local storage values
-			console.log("dataaa", response);
+			localStorage.setItem('username', response?.data?.user?.username)
+			// localStorage.setItem('profilePic', response?.data?.user?.profileImg)
+			localStorage.setItem('profilePic', 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg')
+
 			hideLoading()
 			showSuccess();
 		} else {
@@ -582,14 +559,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	return (
 		<>
-			{profile && <WidgetAppHeader />}
+			{profile && <WidgetAppHeader step={step} onclick={ProfileSettings} />}
 			<PageWrapper
 				isProtected={false}
 				title={singUpStatus ? 'Sign Up' : 'Login'}
 				className={classNames({ 'bg-dark': singUpStatus, 'bg-light': !singUpStatus })}
 			>
 				<Page className='p-0'>
-					{/*{ !renderBlocker && (*/
+					{/* { !renderBlocker && ( */
 						<div className='row h-100 align-items-center justify-content-center'>
 							<div className={`${isIframe ? 'col-xl-4' : 'col-xl-4'} col-lg-6 col-md-8`}>
 								<Card data-tour='login-page' style={{
@@ -619,9 +596,9 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											className={classNames('rounded-3', {
 												'bg-l10-dark': !darkModeStatus,
 												'bg-dark': darkModeStatus,
-											})}>
+											})} />
 
-										</div>
+
 
 										{/* BEGIN :: Metamask Login or Google Login */}
 										<LoginHeader step={step} isMetamaskConnected={false} callingDApp={callingDApp} onclick={ProfileSettings} />
@@ -673,9 +650,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										{/* BEGIN :: Stych workflow */}
 										{
 											(step === "submit" || step === "verify") && (
-												<>
-													<StytchOTP showSuccess={showSuccess} step={step} moveBack={moveBack} sendCode={sendCode} tryAgain={tryAgain} address={address} />
-												</>
+												<StytchOTP
+													showSuccess={showSuccess}
+													step={step}
+													moveBack={moveBack}
+													sendCode={sendCode}
+													tryAgain={tryAgain}
+													address={address} />
 											)}
 										{/* END :: Stych workflow */}
 
@@ -689,7 +670,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 													<div className='d-flex align-items-center justify-content-center' style={{ marginTop: "-15px" }}>
 														<p>Be a part of Fashion’s Future</p>
 													</div>
-													<div className='d-flex align-items-center justify-content-center' style={{ marginBottom: "70px" }}>
+													<div className='d-flex align-items-center justify-content-center' style={{ marginBottom: "100px" }}>
 														<a href="https://x.com/dfdcxyz" target="_blank" rel="noopener noreferrer">
 															<img src={Twitter} style={{ height: "45px", width: "45px" }} alt="Twitter" />
 														</a>
@@ -702,37 +683,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										{
 											(step === "settings") && (
 												<>
-													{/* <div className="container mt-3">
-													<form onSubmit={handleSubmit}>
-														<div className="form-group">
-															<label htmlFor="username">Username</label>
-															<input
-																type="text"
-																className="form-control"
-																id="username"
-																placeholder="Enter username"
-																value={username}
-																onChange={handleUsernameChange}
-																required
-															/>
-														</div>
-														<div className="form-group mt-3">
-															<label htmlFor="profileImage">Profile Image</label>
-															<input
-																type="file"
-																className="form-control-file"
-																id="profileImage"
-																accept="image/*"
-																onChange={handleImageChange}
-																required
-															/>
-														</div>
-														<button type="submit" className="btn btn-primary mt-3">Submit</button>
-													</form>
-													<div id="result" className="mt-3">
-														{result && <p>{result}</p>}
-													</div>
-												</div> */}
+
 													<div className="container mt-3">
 														<form onSubmit={handleSubmit}>
 															{
@@ -743,7 +694,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 																		justifyContent: "center",
 																		alignItems: 'center'
 																	}}>
-																		<label htmlFor="profileImage">Profile Image</label>
+																		<label htmlFor="profileImage">Update Avatar</label>
 																		<img src={image} alt='profile-settings' style={{
 																			width: '100px',
 																			height: "100px",
@@ -764,8 +715,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 															{
 																(!toggleImageInput) && (
-																	<div className="form-group mt-4">
-																		<label htmlFor="profileImage" className='neumorphic-label'>Profile Image</label>
+																	<div className="form-group mt-5">
+																		<label htmlFor="profileImage" className='neumorphic-label'>Update Avatar</label>
 																		<input
 																			type="file"
 																			className="form-control-file custom-input"
@@ -828,6 +779,14 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 																>
 																	Submit
 																</Button>
+																<p
+																	onClick={goBack}
+																	style={{
+																		color: "gray",
+																		cursor: "pointer",
+																		marginTop: "15px",
+																		textDecoration: 'underline'
+																	}}>Back</p>
 															</div>
 														</form>
 														<div id="result" className="mt-3">
@@ -840,7 +799,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 
 										{/* BEGIN :: Social Login */}
-										{/*address && isWidget && step === "post-submit" &&(
+										{/* address && isWidget && step === "post-submit" &&(
 										<>
 										<LoginHeader isMetamaskConnected={true} callingDApp={callingDApp} />
 
@@ -919,7 +878,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 											</div>)}
 											</form>
 										</>
-									)*/}
+									) */}
 										{/* END :: Social Login */}
 										{/* START:: Footer */}
 										<LoginFooter step={step} addr={address} />
@@ -952,7 +911,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 								</div>
 							</div>
 						</div>
-				/*)}*/}
+				/*)} */}
 				</Page>
 			</PageWrapper>
 		</>

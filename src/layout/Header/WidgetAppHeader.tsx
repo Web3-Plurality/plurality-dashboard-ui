@@ -1,40 +1,64 @@
-import './styles.css'
+import { useEffect, useState } from 'react'
+import { Dropdown, Menu, Tooltip } from 'antd'
 import BadgeIcon from './badge-icon.svg'
+import './styles.css'
+import { EllipsisOutlined } from '@ant-design/icons'
 
-const WidgetAppHeader = () => {
+const WidgetAppHeader = ({ step, onclick }: { step: string, onclick: () => void }) => {
     const isIframe = window.location !== window.parent.location
     const profileImg = localStorage.getItem("profilePic") ?? ''
     const username = localStorage.getItem("username") ?? ''
 
-    console.log("p", profileImg)
+    const [visible, setVisible] = useState(false);
+    const handleVisibleChange = () => {
+        setVisible((prev) => !prev);
+    };
+
+    useEffect(() => {
+        setVisible(false)
+    }, [step])
+
+    const menu = (
+        <Menu onClick={onclick}>
+            <Menu.Item key="profileSettings">
+                Settings
+            </Menu.Item>
+        </Menu>
+    );
 
     return (
         <div className='header-wrapper' style={{
             top: isIframe ? '3%' : '1%',
-            left: isIframe ? '70%' : '90%'
+            left: isIframe ? '70%' : '88%'
         }}>
             <div className='user-detail'>
                 <div className='user-info'>
-                    <span>{username}</span>
+                    <Tooltip title={username}>
+                        <span className="username">{username}</span>
+                    </Tooltip>
                     <div className='icon-box'>
-                        <img src={BadgeIcon} />
+                        <span>1000</span>
+                        <img src={BadgeIcon} alt="badge-icon" />
                     </div>
                 </div>
                 <div className='avatar'>
-                    <img src={profileImg} alt='profie-image' style={{
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: "50%"
-                    }} />
+                    <Dropdown
+                        overlay={menu}
+                        trigger={['click']}
+                        visible={visible}
+                        onVisibleChange={handleVisibleChange}
+                    >
+                        <img src={profileImg} alt='profile-image' style={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: "50%",
+                            cursor: "pointer"
+                        }} />
+                    </Dropdown>
                 </div>
-                {/* <Drawer
-                    handleLogout={handleLogout}
-                    handleStepper={handleStepper}
-                    address={metamaskAddress ?? litAddress ?? ''}
-                /> */}
             </div>
         </div>
     )
 }
 
-export default WidgetAppHeader
+export default WidgetAppHeader;
