@@ -117,8 +117,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const [toggleImageInput, setToggleImageInput] = useState(false)
 	const [isDisable, setIsDisable] = useState(false);
 
-
-
 	// social logins connection hooks
 	const [isFacebookConnected, setFacebookConnected] = useState<Boolean>(false);
 	const [isTwitterConnected, setTwitterConnected] = useState<Boolean>(false);
@@ -132,17 +130,18 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { address, connector, isConnected } = useAccount();
 	const { disconnectAsync } = useDisconnect();
 
-    async function handleLogout() {
-        try {
-            await disconnectAsync();
-        } catch (err) {
-            console.error(err);
-        }
-        setStep("pre-submit");
-    }
+	async function handleLogout() {
+		try {
+			await disconnectAsync();
+		} catch (err) {
+			console.error(err);
+		}
+		profile
+		setStep("pre-submit");
+	}
 
 	useEffect(() => {
-		if(!address) {
+		if (!address) {
 			setStep("pre-submit");
 		}
 	}, [address])
@@ -234,29 +233,30 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	const skipEmailRegistration = async () => {
 		showLoading();
-		const currentAddress = await checkAddressExistence();
-		// if this guy has already registered this metamask address with an email
-		if (currentAddress.exists) {
-			hideLoading();
-			showSuccess();
-		} else {
-			const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch`;
-			axios.post(apiUrl, {
-				data: { email: "", address, subscribe: false }
+		// const currentAddress = await checkAddressExistence();
+		// // if this guy has already registered this metamask address with an email
+		// if (currentAddress.exists) {
+		// 	hideLoading();
+		// 	showSuccess();
+		// } else {
+		const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch`;
+		axios.post(apiUrl, {
+			data: { email: "", address, subscribe: false }
+		})
+			.then(function (response) {
+				if (response.status === 200) {
+					console.log("data", response)
+					localStorage.setItem('user', JSON.stringify(response?.data?.user))
+					localStorage.setItem('username', response?.data?.user?.username)
+					localStorage.setItem('profilePic', response?.data?.user?.profileImg)
+					showSuccess();
+				}
 			})
-				.then(function (response) {
-					if (response.status === 200) {
-						localStorage.setItem('user', JSON.stringify(response?.data?.user))
-						localStorage.setItem('username', response?.data?.user?.username)
-						localStorage.setItem('profilePic', response?.data?.user?.profileImg)
-						showSuccess();
-					}
-				})
-				.catch(function (error) {
-					alert("Something goes wrong, please try again!")
-				})
-			hideLoading();
-		}
+			.catch(function (error) {
+				alert("Something goes wrong, please try again!")
+			})
+		hideLoading();
+		// }
 	}
 
 	const checkAddressExistence = async () => {
@@ -266,7 +266,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			const response = await axios.get(apiUrl, {
 				params: { address } // Use params instead of data for GET requests
 			});
-	
+
 			if (response.status === 200) {
 				localStorage.setItem('user', JSON.stringify(response?.data?.user));
 				localStorage.setItem('username', response?.data?.user?.username);
@@ -284,7 +284,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			hideLoading();
 		}
 	};
-	
+
 
 	const handleMetamaskConnect = async () => {
 		try {
@@ -544,13 +544,10 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if (response.status === 200) {
 			localStorage.setItem('username', response?.data?.user?.username)
 			localStorage.setItem('profilePic', response?.data?.user?.profileImg)
-			// Local storage values
-			//localStorage.setItem('username', response?.data?.user?.username)
-			//localStorage.setItem('profilePic', response?.data?.user?.profileImg)
-			//localStorage.setItem('profilePic', 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg')
 
 			hideLoading()
 			showSuccess();
+			clearImage();
 		} else {
 			alert("Something goes wrong, please try again!")
 			hideLoading()
@@ -579,7 +576,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	return (
 		<>
-			{profile && <WidgetAppHeader step={step} onclick={ProfileSettings} />}
+			<WidgetAppHeader step={step} onclick={ProfileSettings} />
 			<PageWrapper
 				isProtected={false}
 				title={singUpStatus ? 'Sign Up' : 'Login'}
