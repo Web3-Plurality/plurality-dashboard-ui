@@ -901,30 +901,34 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										{/* END :: Footer */}
 									</CardBody>
 								</Card>
-								<div className='text-center' style={{
-									marginTop: isIframe ? '10px' : '0',
-									marginLeft: isIframe ? '-20px' : '0'
-								}}>
 
-									<a
-										href='https://plurality.network/privacy-policy'
-										target='_blank'
-										className={classNames('text-decoration-none me-3', {
-											'link-light': singUpStatus,
-											'link-dark': !singUpStatus,
-										})}>
-										Privacy policy
-									</a>
-									<a
-										href='https://plurality.network/user-terms-of-service'
-										target='_blank'
-										className={classNames('link-light text-decoration-none', {
-											'link-light': singUpStatus,
-											'link-dark': !singUpStatus,
-										})}>
-										Terms of use
-									</a>
-								</div>
+								{!isIframe && (
+									<div className='text-center' style={{
+										marginTop: isIframe ? '10px' : '0',
+										marginLeft: isIframe ? '-20px' : '0'
+									}}>
+
+										<a
+											href='https://plurality.network/privacy-policy'
+											target='_blank'
+											className={classNames('text-decoration-none me-3', {
+												'link-light': singUpStatus,
+												'link-dark': !singUpStatus,
+											})}>
+											Privacy policy
+										</a>
+										<a
+											href='https://plurality.network/user-terms-of-service'
+											target='_blank'
+											className={classNames('link-light text-decoration-none', {
+												'link-light': singUpStatus,
+												'link-dark': !singUpStatus,
+											})}>
+											Terms of use
+										</a>
+									</div>
+								)}
+
 							</div>
 						</div>
 				/*)} */}
