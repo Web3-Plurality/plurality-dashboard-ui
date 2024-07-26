@@ -29,38 +29,47 @@ const WidgetAppHeader = ({ step, onclick }: { step: string, onclick: (key: strin
         </Menu>
     );
 
+    const toggleHeader = () => {
+        if (step === "pre-submit" || !username) return false
+        return true
+    }
+
     return (
-        <div className='header-wrapper' style={{
-            top: isIframe ? '3%' : '1%',
-            left: isIframe ? '70%' : '88%'
-        }}>
-            <div className='user-detail'>
-                <div className='user-info'>
-                    <Tooltip title={username}>
-                        <span className="username">{username}</span>
-                    </Tooltip>
-                    <div className='icon-box'>
-                        <span>1000</span>
-                        <img src={BadgeIcon} alt="badge-icon" />
+        <>
+            {toggleHeader() && (
+                <div className='header-wrapper' style={{
+                    top: isIframe ? '3%' : '1%',
+                    left: isIframe ? '70%' : '88%'
+                }}>
+                    <div className='user-detail'>
+                        <div className='user-info'>
+                            <Tooltip title={username}>
+                                <span className="username">{username}</span>
+                            </Tooltip>
+                            <div className='icon-box'>
+                                <span>1000</span>
+                                <img src={BadgeIcon} alt="badge-icon" />
+                            </div>
+                        </div>
+                        <div className='avatar'>
+                            <Dropdown
+                                overlay={menu}
+                                trigger={['click']}
+                                visible={visible}
+                                onVisibleChange={handleVisibleChange}
+                            >
+                                <img src={profileImg} alt='profile-image' style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    borderRadius: "50%",
+                                    cursor: "pointer"
+                                }} />
+                            </Dropdown>
+                        </div>
                     </div>
                 </div>
-                <div className='avatar'>
-                    <Dropdown
-                        overlay={menu}
-                        trigger={['click']}
-                        visible={visible}
-                        onVisibleChange={handleVisibleChange}
-                    >
-                        <img src={profileImg} alt='profile-image' style={{
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: "50%",
-                            cursor: "pointer"
-                        }} />
-                    </Dropdown>
-                </div>
-            </div>
-        </div>
+            )}
+        </>
     )
 }
 
