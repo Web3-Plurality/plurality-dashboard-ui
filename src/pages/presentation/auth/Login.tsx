@@ -579,7 +579,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			<PageWrapper
 				isProtected={false}
 				title={singUpStatus ? 'Sign Up' : 'Login'}
-				className={classNames({ 'bg-dark': singUpStatus, 'bg-light': !singUpStatus })}
+				className={isIframe ? '' : 'bg-light'}
 			>
 				<Page className='p-0'>
 					{/* { !renderBlocker && ( */
