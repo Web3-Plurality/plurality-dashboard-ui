@@ -4,7 +4,8 @@ import BadgeIcon from './badge-icon.svg'
 import './styles.css'
 import { EllipsisOutlined } from '@ant-design/icons'
 
-const WidgetAppHeader = ({ step, onclick }: { step: string, onclick: (key: string) => void }) => {
+
+const WidgetAppHeader = ({ step, setUsername, onclick }: { step: string, setUsername: (val: string) => void, onclick: (key: string) => void }) => {
     const isIframe = window.location !== window.parent.location
     const profileImg = localStorage.getItem("profilePic") ?? ''
     const username = localStorage.getItem("username") ?? ''
@@ -13,6 +14,11 @@ const WidgetAppHeader = ({ step, onclick }: { step: string, onclick: (key: strin
     const handleVisibleChange = () => {
         setVisible((prev) => !prev);
     };
+
+    useEffect(() => {
+        setUsername(username)
+    }, [username])
+
 
     useEffect(() => {
         setVisible(false)

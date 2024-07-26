@@ -575,7 +575,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 
 	return (
 		<>
-			<WidgetAppHeader step={step} onclick={ProfileSettings} />
+			<WidgetAppHeader step={step} onclick={ProfileSettings} setUsername={setUsername} />
 			<PageWrapper
 				isProtected={false}
 				title={singUpStatus ? 'Sign Up' : 'Login'}
