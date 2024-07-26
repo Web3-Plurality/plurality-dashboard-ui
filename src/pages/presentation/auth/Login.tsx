@@ -133,27 +133,48 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	async function handleLogout() {
 		try {
 			await disconnectAsync();
+			localStorage.clear();
 		} catch (err) {
 			console.error(err);
 		}
 		setStep("pre-submit");
 	}
 
-	useEffect(() => {
-		if (!address) {
-			setStep("pre-submit");
-		}
-	}, [address])
+	// useEffect(() => {
+	// 	if (!address) {
+	// 		setStep("pre-submit");
+	// 	}
+	// }, [address])
 
 	const [renderBlocker, setRenderBlocker] = useState(false);
 	const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
 	const [step, setStep] = useState<OtpStep>("pre-submit");
 
 	useEffect(() => {
+		if (profile && profile !== "undefined" && step !== "settings") {
+			setStep("success");
+			return;
+		}
 		if (step === 'pre-submit') {
-			localStorage.clear()
+			localStorage.clear();
 		}
 	}, [step, profile])
+
+	useEffect(() => {
+		if (address) {
+			setIsMetamaskConnected(true)
+			showLoading();
+			checkAddressExistence().then(res => {
+				console.log(res);
+				if (!res.exists) {
+					setStep("pre-submit");
+				} else {
+					setStep("success");
+				}
+				hideLoading();
+			})
+		}
+	}, [address])
 
 	// Stytch
 	const moveBack = () => {
@@ -552,24 +573,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			hideLoading()
 		}
 	}
-
-	useEffect(() => {
-		if (address) {
-			setIsMetamaskConnected(true)
-			showLoading();
-			checkAddressExistence().then(res => {
-				console.log(res);
-				if (!res.exists) {
-					setStep("pre-submit");
-				} else {
-					setStep("success");
-				}
-				hideLoading();
-			})
-		} else {
-			localStorage.clear()
-		}
-	}, [address])
 
 	const isIframe = window.location !== window.parent.location
 
