@@ -579,7 +579,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			<PageWrapper
 				isProtected={false}
 				title={singUpStatus ? 'Sign Up' : 'Login'}
-				className={isIframe ? '' : 'bg-light'}
+				className={classNames({ 'bg-dark': singUpStatus, 'bg-light': !singUpStatus })}
 			>
 				<Page className='p-0'>
 					{/* { !renderBlocker && ( */
@@ -901,7 +901,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										{/* END :: Footer */}
 									</CardBody>
 								</Card>
-
 								{!isIframe && (
 									<div className='text-center' style={{
 										marginTop: isIframe ? '10px' : '0',
@@ -928,7 +927,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 										</a>
 									</div>
 								)}
-
 							</div>
 						</div>
 				/*)} */}
