@@ -136,7 +136,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		} catch (err) {
 			console.error(err);
 		}
-		profile
 		setStep("pre-submit");
 	}
 
