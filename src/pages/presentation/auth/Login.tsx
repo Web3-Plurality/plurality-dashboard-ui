@@ -272,7 +272,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			.then(function (response) {
 				if (response.status === 200) {
 					console.log("data", response)
-					localStorage.setItem('user', JSON.stringify(response?.data?.user))
+					localStorage.setItem('userid', response?.data?.user?.id)
 					localStorage.setItem('username', response?.data?.user?.username)
 					localStorage.setItem('profilePic', response?.data?.user?.profileImg)
 					showSuccess();
@@ -294,7 +294,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 			});
 
 			if (response.status === 200) {
-				localStorage.setItem('user', JSON.stringify(response?.data?.user));
+				localStorage.setItem('userid', response?.data?.user?.id);
 				localStorage.setItem('username', response?.data?.user?.username);
 				localStorage.setItem('profilePic', response?.data?.user?.profileImg);
 				showSuccess();
@@ -557,11 +557,8 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const updateBackend = async () => {
 		showLoading()
 		const apiUrl = `${process.env.REACT_APP_API_BASE_URL}/stytch`
-		const id = JSON.parse(localStorage.getItem("user") ?? '').id
+		const id = localStorage.getItem("userid");
 		const data = {
-			email,
-			address,
-			subscribe: false,
 			username: username,
 			profileImg: profileImage,
 			id: id,
@@ -570,7 +567,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 		if (response.status === 200) {
 			localStorage.setItem('username', response?.data?.user?.username)
 			localStorage.setItem('profilePic', response?.data?.user?.profileImg)
-
 			hideLoading()
 			showSuccess();
 			clearImage();
