@@ -5,7 +5,7 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import './login.css'
 import { Dropdown, Menu, Button as AntdButton } from 'antd';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, ConnectorNotFoundError } from 'wagmi';
 import { EllipsisOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
 // import { useFormik } from 'formik';
@@ -41,7 +41,7 @@ const LoginHeader: FC<any> = ({ step }) => {
 		<>
 			{step !== "success" && step !== "settings" && (<div className='text-center h1 fw-bold' style={{ marginTop: "50px" }}>Join Us</div>)}
 			{step === "settings" && (<div className='text-center h1 fw-bold' style={{ marginTop: "25px" }}>Profile Settings</div>)}
-			{step === "success" && (<div className='text-center h2 fw-bold' style={{ marginTop: "25px" }}>Congrats! You've secured 1000 points</div>)}
+			{step === "success" && (<div className='text-center h2 fw-bold' style={{ marginTop: "25px" }}><div>Congrats!</div>You've secured 1000 points</div>)}
 			{step === "pre-submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Create an account to be rewarded as an early user</div>)}
 			{step === "submit" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>A verification code will be sent to your email</div>)}
 			{step === "verify" && (<div className='text-center h6 mt-2' style={{ marginBottom: "50px" }}>Enter the 6 digit code sent to your email</div>)}
@@ -126,7 +126,13 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { showLoading, hideLoading } = useContext(LoadingContext);
 
 	// wagmi connectors and disconnectors
-	const { connect, connectors } = useConnect();
+	const { connect, connectors } = useConnect({
+        onError(error) {
+			if(error instanceof  ConnectorNotFoundError) {
+				alert("metamask if not available for this device, please continue with email");
+			}
+        },
+    });
 	const { address, connector, isConnected } = useAccount();
 	const { disconnectAsync } = useDisconnect();
 
@@ -746,7 +752,6 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 																		/>
 																		<span style={{
 																			marginLeft: "20px",
-
 																		}}>{filename}</span>
 																		<span style={{
 																			color: "red"
