@@ -129,7 +129,7 @@ const Login: FC<ILoginProps> = ({ isSignUp }) => {
 	const { connect, connectors } = useConnect({
         onError(error) {
 			if(error instanceof  ConnectorNotFoundError) {
-				alert("metamask if not available for this device, please continue with email");
+				alert("MetaMask is not available for this device, please continue with email");
 			}
         },
     });
